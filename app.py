@@ -221,12 +221,46 @@ def eliminar_horario(id_horario):
 
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
-    cursor.execute('DELETE FROM horarios WHERE id = ?', (id_horario,))
-    conexion.commit()
-    conexion.close()
 
-    flash('✅ Horario eliminado correctamente.', 'success')
+    # 1. Obtener fecha_hora del horario que queremos eliminar
+    cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (id_horario,))
+    resultado = cursor.fetchone()
+
+    if resultado:
+        fecha_hora = resultado[0]
+
+        # 2. Buscar citas activas asociadas a esa fecha
+        cursor.execute('SELECT id, nombre, correo FROM citas WHERE fecha_hora = ? AND estado = "activa"', (fecha_hora,))
+        citas_afectadas = cursor.fetchall()
+
+        for cita_id, nombre, correo in citas_afectadas:
+            # 3. Cancelar la cita en la base de datos
+            cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (cita_id,))
+
+            # 4. Enviar correo de cancelación
+            cuerpo = f'''
+Hola {nombre},
+
+Lamentamos informarte que tu cita programada para el {fecha_hora} ha sido cancelada debido a cambios en la disponibilidad del Museo de Embriología.
+
+Te invitamos a agendar una nueva cita desde nuestro sitio web.
+Nos disculpamos por las molestias
+
+Museo de Embriología
+'''
+            enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
+
+        # 5. Eliminar el horario después de cancelar citas
+        cursor.execute('DELETE FROM horarios WHERE id = ?', (id_horario,))
+
+        conexion.commit()
+        flash('✅ Horario eliminado y citas canceladas correctamente.', 'success')
+    else:
+        flash('❌ No se encontró el horario.', 'danger')
+
+    conexion.close()
     return redirect(url_for('dashboard'))
+
 
 @app.route('/eliminar_cita/<int:id_cita>')
 def eliminar_cita(id_cita):
