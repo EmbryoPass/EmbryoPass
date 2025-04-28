@@ -22,17 +22,18 @@
             }
         }
     </style>
-</head>
+</head> 
 <body class="bg-light">
 <div class="text-center my-5">
-    <h6 style="font-family: 'Roboto', sans-serif; font-size: 1rem; margin-bottom: 0.1rem;">Facultad de Medicina y Ciencias Biomédicas</h6>
-    <h6 style="font-family: 'Roboto', sans-serif; font-size: 0.9rem; margin-bottom: 2rem;">Universidad Autónoma de Chihuahua</h6>
+<div class="text-start mb-2">
 
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" style="height: 60px; margin-left: 1cm;"">
+</div>
     <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 0.2rem;">🏛️ Museo de Embriología</h1>
     <h4 style="font-family: 'Roboto', sans-serif; font-size: 1.7rem; margin-top: 0.2rem; margin-bottom: 2rem;">Dra. Dora Virginia Chávez Corral</h4>
 </div>
 
-<h2 class="text-center mb-4">Agendar tu cita</h2>
+<h2 class="text-center mb-4">Agendar cita</h2>
 
 
 
@@ -67,7 +68,8 @@
 
         </div>
         <div class="text-center">
-            <button type="submit" class="btn btn-primary">Agendar Cita</button>
+            <button type="submit" class="btn" style="background-color: #8B4513; color: white;">Agendar Cita</button>
+
         </div>
     </form>
 </div>
