@@ -2,24 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard - Museo de Embriología</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-       /* Ajustes para que se vea bien en celular */
-       @media (max-width: 600px) {
-           h1, h2, h3, h4, h5, h6 {
-               font-size: 110%;
-           }
-           input, select, button {
-               font-size: 110%;
-               padding: 10px;
-           }
-           .container {
-               padding: 10px;
-           }
-       }
-    </style>
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body class="bg-light">
 <div class="container p-4">
@@ -37,23 +23,25 @@
     <table class="table table-striped table-hover shadow-sm">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
+                <!-- Eliminamos la columna ID visualmente -->
                 <th>Nombre</th>
                 <th>Correo</th>
                 <th>Teléfono</th>
                 <th>Fecha y Hora</th>
                 <th>Estado</th>
+                <th>Cancelar</th>
+                <th>Eliminar</th>
             </tr>
         </thead>
         <tbody>
             {% for cita in citas %}
             <tr>
-                <td>{{ cita[0] }}</td>
-                <td>{{ cita[1] }}</td>
-                <td>{{ cita[2] }}</td>
-                <td>{{ cita[3] }}</td>
-                <td>{{ cita[4] }}</td>
-                <td>{{ cita[5] }}</td>
+                <!-- No mostramos el ID en la tabla -->
+                <td>{{ cita[1] }}</td> <!-- Nombre -->
+                <td>{{ cita[2] }}</td> <!-- Correo -->
+                <td>{{ cita[3] }}</td> <!-- Teléfono -->
+                <td>{{ cita[4] }}</td> <!-- Fecha y Hora -->
+                <td>{{ cita[5] }}</td> <!-- Estado -->
                 <td>
                     {% if cita[5] == 'activa' %}
                     <a href="{{ url_for('cancelar_cita', id_cita=cita[0]) }}" class="btn btn-danger btn-sm">Cancelar</a>
@@ -61,60 +49,71 @@
                     <span class="badge bg-secondary">Cancelada</span>
                     {% endif %}
                 </td>
+                <td>
+                    <a href="{{ url_for('eliminar_cita', id_cita=cita[0]) }}" class="btn btn-outline-danger btn-sm">
+                        🗑️ Eliminar
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
-
     </table>
+
     <hr class="my-5">
 
-<h2>Agregar Nuevo Horario Disponible</h2>
+    <h2>Agregar Nuevo Horario Disponible</h2>
+    <form method="POST" action="{{ url_for('agregar_horario') }}" class="card p-4 shadow-sm">
+        <div class="mb-3">
+            <label for="fecha_hora" class="form-label">Fecha y Hora</label>
+            <input type="text" class="form-control" id="fecha_hora" name="fecha_hora" placeholder="Selecciona fecha y hora" required>
+        </div>
+        <div class="mb-3">
+            <label for="disponibles" class="form-label">Número de espacios disponibles</label>
+            <input type="number" class="form-control" id="disponibles" name="disponibles" min="1" max="20" required>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Agregar Horario</button>
+        </div>
+    </form>
 
-<form method="POST" action="{{ url_for('agregar_horario') }}" class="card p-4 shadow-sm">
-    <div class="mb-3">
-        <label for="fecha_hora" class="form-label">Fecha y Hora (Formato: AAAA-MM-DD HH:MM)</label>
-        <input type="text" class="form-control" id="fecha_hora" name="fecha_hora" placeholder="Ejemplo: 2025-05-10 14:00" required>
-    </div>
-    <div class="mb-3">
-        <label for="disponibles" class="form-label">Número de espacios disponibles</label>
-        <input type="number" class="form-control" id="disponibles" name="disponibles" min="1" max="20" required>
-    </div>
-    <div class="text-center">
-        <button type="submit" class="btn btn-success">Agregar Horario</button>
-    </div>
-</form>
+    <hr class="my-5">
 
-  <hr class="my-5">
-
-<h2>Horarios Disponibles</h2>
-
-<table class="table table-striped table-hover shadow-sm">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Fecha y Hora</th>
-            <th>Espacios Disponibles</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for horario in horarios %}
-        <tr>
-            <td>{{ horario[0] }}</td>
-            <td>{{ horario[1] }}</td>
-            <td>{{ horario[2] }}</td>
-            <td>
-                <a href="{{ url_for('eliminar_horario', id_horario=horario[0]) }}" class="btn btn-danger btn-sm">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-  
+    <h2>Horarios Disponibles</h2>
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Espacios Disponibles</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for horario in horarios %}
+            <tr>
+                <td>{{ horario[1] }}</td> <!-- Fecha y Hora -->
+                <td>{{ horario[2] }}</td> <!-- Espacios -->
+                <td>
+                    <a href="{{ url_for('eliminar_horario', id_horario=horario[0]) }}" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <div class="text-center mt-4">
         <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar sesión</a>
     </div>
 </div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr("#fecha_hora", {
+        enableTime: true,
+        dateFormat: "d/m/Y h:i K",
+        time_24hr: false
+    });
+</script>
+
 </body>
 </html>
