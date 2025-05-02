@@ -30,8 +30,6 @@ def enviar_correo(destinatario, asunto, cuerpo):
 def agendar():
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
-
-    # Asegúrate de que la consulta esté trayendo 3 columnas
     cursor.execute('SELECT id, fecha_hora, disponibles FROM horarios WHERE disponibles > 0')
     horarios_crudos = cursor.fetchall()
     horarios = []
@@ -42,7 +40,7 @@ def agendar():
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
         fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-        horarios.append((id, fecha_formateada, disponibles))  # Agregamos el valor 'disponibles' también
+        horarios.append((id, fecha_formateada, disponibles))  # <-- Agregamos también disponibles
 
     conexion.close()
 
