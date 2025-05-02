@@ -26,6 +26,7 @@ def enviar_correo(destinatario, asunto, cuerpo):
     servidor.sendmail(GMAIL_USER, destinatario, texto)
     servidor.quit()
 
+# Página principal para agendar citas
 @app.route('/', methods=['GET', 'POST'])
 def agendar():
     conexion = sqlite3.connect('base_de_datos.db')
@@ -40,7 +41,7 @@ def agendar():
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
         fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-        horarios.append((id, fecha_formateada, disponibles))  # <-- Agregamos también disponibles
+        horarios.append((id, fecha_formateada))
 
     conexion.close()
 
@@ -50,16 +51,29 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
+        # Verificar si ya existe una cita con los mismos datos
         conexion = sqlite3.connect('base_de_datos.db')
         cursor = conexion.cursor()
+        cursor.execute('''
+            SELECT * FROM citas WHERE correo = ? AND fecha_hora = ?
+        ''', (correo, horario_id))
+        cita_existente = cursor.fetchone()
+
+        if cita_existente:
+            flash('❌ Ya tienes una cita agendada para este horario.', 'danger')
+            return redirect(url_for('agendar'))
+
+        # Obtener fecha y hora seleccionada
         cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (horario_id,))
         fecha_hora = cursor.fetchone()[0]
 
+        # Insertar nueva cita
         cursor.execute('''
             INSERT INTO citas (nombre, correo, telefono, fecha_hora)
             VALUES (?, ?, ?, ?)
         ''', (nombre, correo, telefono, fecha_hora))
 
+        # Actualizar disponibilidad
         cursor.execute('''
             UPDATE horarios SET disponibles = disponibles - 1 WHERE id = ?
         ''', (horario_id,))
@@ -67,31 +81,33 @@ def agendar():
         conexion.commit()
         conexion.close()
 
+        # Enviar correo de confirmación
         cuerpo = f'''
-Hola {nombre},
+        Hola {nombre},
 
-Tu cita al Museo de Embriología ha sido agendada exitosamente.
+        Tu cita al Museo de Embriología ha sido agendada exitosamente.
 
-Datos de tu cita:
-- Nombre: {nombre}
-- Correo: {correo}
-- Teléfono: {telefono}
-- Fecha y hora: {fecha_hora}
+        Datos de tu cita:
+        - Nombre: {nombre}
+        - Correo: {correo}
+        - Teléfono: {telefono}
+        - Fecha y hora: {fecha_hora}
 
-Gracias por visitarnos.
-'''
+        Gracias por visitarnos.
+        '''
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
+        # También enviar notificación al museo
         cuerpo_museo = f'''
-Se ha agendado una nueva cita:
+        Se ha agendado una nueva cita:
 
-- Nombre: {nombre}
-- Correo: {correo}
-- Teléfono: {telefono}
-- Fecha y hora: {fecha_hora}
+        - Nombre: {nombre}
+        - Correo: {correo}
+        - Teléfono: {telefono}
+        - Fecha y hora: {fecha_hora}
 
-Por favor verificar el registro en el sistema.
-'''
+        Por favor verificar el registro en el sistema.
+        '''
         enviar_correo('museoembriologia@gmail.com', 'Nueva Cita Agendada - Museo de Embriología', cuerpo_museo)
 
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
