@@ -66,7 +66,7 @@
   {% endif %}
 {% endwith %}
 
-<form method="POST" class="card p-4 shadow">
+<form method="POST" class="card p-4 shadow" id="agendarForm" onsubmit="disableButton()">
   <div class="mb-3">
     <label for="nombre" class="form-label">Nombre completo</label>
     <input type="text" class="form-control" id="nombre" name="nombre" required>
@@ -88,9 +88,18 @@
     </select>
   </div>
   <div class="text-center">
-    <button type="submit" class="btn" style="background-color: #8B4513; color: white;">Agendar cita</button>
+    <button type="submit" id="agendarBtn" class="btn" style="background-color: #8B4513; color: white;">Agendar cita</button>
   </div>
 </form>
+
+<!-- Scripts -->
+<script>
+  function disableButton() {
+    const button = document.getElementById('agendarBtn');
+    button.disabled = true;  // Desactiva el botón
+    button.innerHTML = "Procesando...";  // Cambia el texto del botón
+  }
+</script>
 
 </body>
 </html>
