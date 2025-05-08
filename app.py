@@ -105,7 +105,7 @@ def agendar():
 
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
       <p>
-        <a href="http://localhost:10000/cancelar_usuario/{cita_id}/{token}" 
+        <a href="https://embryopass.onrender.com/cancelar_usuario/{cita_id}/{token}"  
            style="background-color: #d9534f; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
            Cancelar mi cita
         </a>
