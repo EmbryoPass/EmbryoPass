@@ -330,9 +330,5 @@ def cancelar_usuario(id_cita, token):
     conexion.close()
     return redirect(url_for('agendar'))
 
-# ⚠️ Ejecutar automáticamente en el primer arranque de Render
-forzar_recrear_base()
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
