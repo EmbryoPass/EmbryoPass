@@ -330,6 +330,45 @@ def cancelar_usuario(id_cita, token):
     conexion.close()
     return redirect(url_for('agendar'))
 
+def forzar_recrear_base():
+    import os
+    import sqlite3
+
+    db_file = "base_de_datos.db"
+    if os.path.exists(db_file):
+        os.remove(db_file)
+        print("⚠️ base_de_datos.db eliminada")
+
+    conexion = sqlite3.connect(db_file)
+    cursor = conexion.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS horarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fecha_hora TEXT NOT NULL,
+        disponibles INTEGER NOT NULL
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS citas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        correo TEXT NOT NULL,
+        telefono TEXT NOT NULL,
+        fecha_hora TEXT NOT NULL,
+        estado TEXT DEFAULT 'activa',
+        token_cancelacion TEXT
+    )
+    ''')
+
+    conexion.commit()
+    conexion.close()
+    print("✅ base_de_datos.db creada correctamente con todas las columnas")
+
+# ⚠️ Ejecutar automáticamente en el primer arranque de Render
+forzar_recrear_base()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
