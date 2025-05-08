@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 import smtplib
+import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
@@ -69,10 +70,15 @@ def agendar():
         cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (horario_id,))
         fecha_hora = cursor.fetchone()[0]
 
+        token = str(uuid.uuid4())  # genera un token único
+
         cursor.execute('''
-            INSERT INTO citas (nombre, correo, telefono, fecha_hora)
-            VALUES (?, ?, ?, ?)
-        ''', (nombre, correo, telefono, fecha_hora))
+            INSERT INTO citas (nombre, correo, telefono, fecha_hora, token_cancelacion)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (nombre, correo, telefono, fecha_hora, token))
+
+        cita_id = cursor.lastrowid  # obtenemos el ID de la cita recién creada
+
 
         cursor.execute('''
             UPDATE horarios SET disponibles = disponibles - 1 WHERE id = ?
@@ -85,7 +91,7 @@ def agendar():
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
+      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología </h2>
       <p>Hola <strong>{nombre}</strong>,</p>
       <p>Tu cita ha sido agendada exitosamente. Aquí tienes los detalles:</p>
       <ul style="line-height: 1.6;">
@@ -94,11 +100,21 @@ def agendar():
         <li><strong>Teléfono:</strong> {telefono}</li>
         <li><strong>Fecha y hora:</strong> {fecha_hora}</li>
       </ul>
+
       <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+
+      <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
+      <p>
+        <a href="http://localhost:10000/cancelar_usuario/{cita_id}/{token}" 
+           style="background-color: #d9534f; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+           Cancelar mi cita
+        </a>
+      </p>
     </div>
   </body>
 </html>
 """
+
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
@@ -292,6 +308,27 @@ def eliminar_cita(id_cita):
 
     flash('✅ Cita eliminada correctamente.', 'success')
     return redirect(url_for('dashboard'))
+
+@app.route('/cancelar_usuario/<int:id_cita>/<token>')
+def cancelar_usuario(id_cita, token):
+    conexion = sqlite3.connect('base_de_datos.db')
+    cursor = conexion.cursor()
+
+    cursor.execute('SELECT nombre, correo, fecha_hora FROM citas WHERE id = ? AND token_cancelacion = ? AND estado = "activa"', (id_cita, token))
+    cita = cursor.fetchone()
+
+    if cita:
+        nombre, correo, fecha_hora = cita
+        cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (id_cita,))
+        cursor.execute('UPDATE horarios SET disponibles = disponibles + 1 WHERE fecha_hora = ?', (fecha_hora,))
+        conexion.commit()
+
+        flash('✅ Tu cita fue cancelada exitosamente.', 'success')
+    else:
+        flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
+
+    conexion.close()
+    return redirect(url_for('agendar'))
 
 
 if __name__ == '__main__':
