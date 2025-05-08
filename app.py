@@ -12,12 +12,12 @@ app.secret_key = 'secreto123'
 GMAIL_USER = 'museoembriologia@gmail.com'
 GMAIL_PASSWORD = 'qukljqwqdnfjdzgm'
 
-def enviar_correo(destinatario, asunto, cuerpo):
+def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje = MIMEMultipart()
     mensaje['From'] = GMAIL_USER
     mensaje['To'] = destinatario
     mensaje['Subject'] = asunto
-    mensaje.attach(MIMEText(cuerpo, 'plain'))
+    mensaje.attach(MIMEText(cuerpo_html, 'html'))
 
     servidor = smtplib.SMTP('smtp.gmail.com', 587)
     servidor.starttls()
@@ -26,10 +26,13 @@ def enviar_correo(destinatario, asunto, cuerpo):
     servidor.sendmail(GMAIL_USER, destinatario, texto)
     servidor.quit()
 
+
 @app.route('/', methods=['GET', 'POST'])
 def agendar():
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
+
+    # Obtener todos los horarios disponibles
     cursor.execute('SELECT id, fecha_hora, disponibles FROM horarios WHERE disponibles > 0')
     horarios_crudos = cursor.fetchall()
     horarios = []
@@ -50,8 +53,19 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
+        # Reabrimos la conexión para verificar disponibilidad del horario seleccionado
         conexion = sqlite3.connect('base_de_datos.db')
         cursor = conexion.cursor()
+        
+        # Comprobar si hay lugares disponibles para el horario seleccionado
+        cursor.execute('SELECT disponibles FROM horarios WHERE id = ?', (horario_id,))
+        disponibilidad = cursor.fetchone()
+
+        if disponibilidad is None or disponibilidad[0] <= 0:
+            flash('❌ El horario seleccionado ya está lleno. Por favor, elige otro.', 'danger')
+            return redirect(url_for('agendar'))
+
+        # Si hay lugares disponibles, se procede con la creación de la cita
         cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (horario_id,))
         fecha_hora = cursor.fetchone()[0]
 
@@ -67,37 +81,31 @@ def agendar():
         conexion.commit()
         conexion.close()
 
-        cuerpo = f'''
-Hola {nombre},
-
-Tu cita al Museo de Embriología ha sido agendada exitosamente.
-
-Datos de tu cita:
-- Nombre: {nombre}
-- Correo: {correo}
-- Teléfono: {telefono}
-- Fecha y hora: {fecha_hora}
-
-Gracias por visitarnos.
-'''
+        cuerpo = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
+      <p>Hola <strong>{nombre}</strong>,</p>
+      <p>Tu cita ha sido agendada exitosamente. Aquí tienes los detalles:</p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Nombre:</strong> {nombre}</li>
+        <li><strong>Correo:</strong> {correo}</li>
+        <li><strong>Teléfono:</strong> {telefono}</li>
+        <li><strong>Fecha y hora:</strong> {fecha_hora}</li>
+      </ul>
+      <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+    </div>
+  </body>
+</html>
+"""
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
-
-        cuerpo_museo = f'''
-Se ha agendado una nueva cita:
-
-- Nombre: {nombre}
-- Correo: {correo}
-- Teléfono: {telefono}
-- Fecha y hora: {fecha_hora}
-
-Por favor verificar el registro en el sistema.
-'''
-        enviar_correo('museoembriologia@gmail.com', 'Nueva Cita Agendada - Museo de Embriología', cuerpo_museo)
 
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
         return redirect(url_for('agendar'))
 
     return render_template('agendar.html', horarios=horarios)
+
 
 
 ENCARGADO_USER = 'admin'
@@ -177,18 +185,21 @@ def cancelar_cita(id_cita):
         conexion.commit()
 
         # Enviar correo de cancelación
-        cuerpo = f'''
-Hola {nombre},
-
-Lamentamos informarte que tu cita al Museo de Embriología programada para el {fecha_hora} ha sido cancelada debido a un imprevisto.
-
-Por favor agenda una nueva cita en nuestra página.  
-Nos disculpamos por los inconvenientes.
-
-Saludos,
-Museo de Embriología Dra. Dora Virginia Chávez Corral
-'''
+        cuerpo = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
+      <h2 style="color: #d9534f;">Cancelación de Cita</h2>
+      <p>Hola <strong>{nombre}</strong>,</p>
+      <p>Lamentamos informarte que tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
+      <p>Por favor, agenda una nueva cita en nuestra página web. Nos disculpamos por los inconvenientes.</p>
+      <p style="margin-top: 20px;">Atentamente,<br><strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong></p>
+    </div>
+  </body>
+</html>
+"""
         enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
+
 
         flash('✅ Cita cancelada, correo enviado y espacio liberado.', 'success')
 
@@ -238,17 +249,21 @@ def eliminar_horario(id_horario):
             cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (cita_id,))
 
             # 4. Enviar correo de cancelación
-            cuerpo = f'''
-Hola {nombre},
+            cuerpo = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
+      <h2 style="color: #d9534f;">Cancelación de Horario</h2>
+      <p>Hola <strong>{nombre}</strong>,</p>
+      <p>Tu cita programada para el <strong>{fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+      <p>Te invitamos a agendar una nueva cita en nuestro sitio web.</p>
+      <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
+    </div>
+  </body>
+</html>
+"""
+        enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
 
-Lamentamos informarte que tu cita programada para el {fecha_hora} ha sido cancelada debido a cambios en la disponibilidad del Museo de Embriología.
-
-Te invitamos a agendar una nueva cita desde nuestro sitio web.
-Nos disculpamos por las molestias
-
-Museo de Embriología
-'''
-            enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
 
         # 5. Eliminar el horario después de cancelar citas
         cursor.execute('DELETE FROM horarios WHERE id = ?', (id_horario,))
