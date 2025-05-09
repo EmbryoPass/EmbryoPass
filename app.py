@@ -249,7 +249,19 @@ def cancelar_cita(id_cita):
 
     return redirect(url_for('dashboard'))
 
+@app.route('/eliminar_cita/<int:id_cita>')
+def eliminar_cita(id_cita):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
 
+    cita = Cita.query.get(id_cita)
+    if cita:
+        db.session.delete(cita)
+        db.session.commit()
+        flash('✅ Cita eliminada.', 'success')
+    return redirect(url_for('dashboard'))
+    
 @app.route('/eliminar_horario/<int:id_horario>')
 def eliminar_horario(id_horario):
     if 'usuario' not in session:
