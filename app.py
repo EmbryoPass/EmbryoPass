@@ -1,18 +1,41 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 import smtplib
 import uuid
 import pytz
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+import os
 
+# Configuración base
 app = Flask(__name__)
 app.secret_key = 'secreto123'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
+# Configuración de correo
 GMAIL_USER = 'museoembriologia@gmail.com'
 GMAIL_PASSWORD = 'qukljqwqdnfjdzgm'
 
+# MODELOS
+class Horario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_hora = db.Column(db.String(100), nullable=False)
+    disponibles = db.Column(db.Integer, nullable=False)
+
+class Cita(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    correo = db.Column(db.String(100), nullable=False)
+    telefono = db.Column(db.String(20), nullable=False)
+    fecha_hora = db.Column(db.String(100), nullable=False)
+    estado = db.Column(db.String(20), default='activa')
+    asistio = db.Column(db.String(10), nullable=True)
+    token_cancelacion = db.Column(db.String(100), nullable=False)
+
+# Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje = MIMEMultipart()
     mensaje['From'] = GMAIL_USER
@@ -23,91 +46,58 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor = smtplib.SMTP('smtp.gmail.com', 587)
     servidor.starttls()
     servidor.login(GMAIL_USER, GMAIL_PASSWORD)
-    texto = mensaje.as_string()
-    servidor.sendmail(GMAIL_USER, destinatario, texto)
+    servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
     servidor.quit()
 
+# Rutas
 @app.route('/', methods=['GET', 'POST'])
 def agendar():
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
+    zona = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona)
 
-    cursor.execute('SELECT id, fecha_hora, disponibles FROM horarios WHERE disponibles > 0')
-    horarios_crudos = cursor.fetchall()
+    horarios_db = Horario.query.filter(Horario.disponibles > 0).all()
     horarios = []
 
-    zona_chihuahua = pytz.timezone('America/Chihuahua')
-    ahora = datetime.now(zona_chihuahua)
-
-    for id, fecha_hora, disponibles in horarios_crudos:
+    for h in horarios_db:
         try:
-            fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
+            fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
-            fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
-        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
+            fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
 
-        if fecha_objeto >= ahora:
-            fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-            horarios.append((id, fecha_formateada, disponibles))
-
-    conexion.close()
+        if fecha >= ahora:
+            horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles))
 
     if request.method == 'POST':
         nombre = request.form['nombre']
         correo = request.form['correo']
         telefono = request.form['telefono']
         horario_id = request.form['horario']
+        horario = Horario.query.get(horario_id)
 
-        conexion = sqlite3.connect('base_de_datos.db')
-        cursor = conexion.cursor()
-
-        cursor.execute('SELECT disponibles FROM horarios WHERE id = ?', (horario_id,))
-        disponibilidad = cursor.fetchone()
-
-        if disponibilidad is None or disponibilidad[0] <= 0:
-            flash('❌ El horario seleccionado ya está lleno. Por favor, elige otro.', 'danger')
+        if not horario or horario.disponibles <= 0:
+            flash('❌ El horario ya está lleno.', 'danger')
             return redirect(url_for('agendar'))
 
-        cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (horario_id,))
-        fecha_hora = cursor.fetchone()[0]
-
         token = str(uuid.uuid4())
-
-        cursor.execute('''
-            INSERT INTO citas (nombre, correo, telefono, fecha_hora, token_cancelacion)
-            VALUES (?, ?, ?, ?, ?)''', (nombre, correo, telefono, fecha_hora, token))
-
-        cita_id = cursor.lastrowid
-
-        cursor.execute('UPDATE horarios SET disponibles = disponibles - 1 WHERE id = ?', (horario_id,))
-
-        conexion.commit()
-        conexion.close()
+        nueva_cita = Cita(nombre=nombre, correo=correo, telefono=telefono,
+                          fecha_hora=horario.fecha_hora, token_cancelacion=token)
+        horario.disponibles -= 1
+        db.session.add(nueva_cita)
+        db.session.commit()
 
         cuerpo = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología </h2>
-      <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Tu cita ha sido agendada exitosamente. Aquí tienes los detalles:</p>
-      <ul style="line-height: 1.6;">
-        <li><strong>Nombre:</strong> {nombre}</li>
-        <li><strong>Correo:</strong> {correo}</li>
-        <li><strong>Teléfono:</strong> {telefono}</li>
-        <li><strong>Fecha y hora:</strong> {fecha_hora}</li>
-      </ul>
-      <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-      <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
-      <p>
-        <a href="https://embryopass.onrender.com/cancelar_usuario/{cita_id}/{token}"
-           style="background-color: #d9534f; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
-           Cancelar mi cita
-        </a>
-      </p>
-    </div>
-  </body>
-</html>"""
+        <html>
+          <body>
+            <h2>Confirmación de Cita</h2>
+            <p><strong>Nombre:</strong> {nombre}<br>
+               <strong>Correo:</strong> {correo}<br>
+               <strong>Teléfono:</strong> {telefono}<br>
+               <strong>Fecha y hora:</strong> {horario.fecha_hora}</p>
+            <p><a href="https://embryopass.onrender.com/cancelar_usuario/{nueva_cita.id}/{token}">Cancelar mi cita</a></p>
+          </body>
+        </html>
+        """
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
         return redirect(url_for('agendar'))
@@ -122,14 +112,10 @@ def login():
     if request.method == 'POST':
         usuario = request.form['usuario']
         password = request.form['password']
-
         if usuario == ENCARGADO_USER and password == ENCARGADO_PASS:
             session['usuario'] = usuario
             return redirect(url_for('dashboard'))
-        else:
-            flash('❌ Usuario o contraseña incorrectos.', 'danger')
-            return redirect(url_for('login'))
-
+        flash('❌ Usuario o contraseña incorrectos.', 'danger')
     return render_template('login.html')
 
 @app.route('/dashboard')
@@ -138,19 +124,8 @@ def dashboard():
         flash('⚠️ Debes iniciar sesión primero.', 'warning')
         return redirect(url_for('login'))
 
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-
-    zona_chihuahua = pytz.timezone('America/Chihuahua')
-    ahora = datetime.now(zona_chihuahua)
-
-    cursor.execute('SELECT id, nombre, correo, telefono, fecha_hora, estado, asistio FROM citas')
-    citas_crudas = cursor.fetchall()
-
-    citas_futuras = []
-    citas_pasadas = []
-
-    # Obtener filtro de rango desde GET
+    zona = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
 
     if rango == '7':
@@ -160,46 +135,38 @@ def dashboard():
     elif rango == 'mes':
         inicio_rango = ahora.replace(day=1)
     elif rango == 'todo':
-        inicio_rango = datetime.min.replace(tzinfo=zona_chihuahua)
+        inicio_rango = datetime.min.replace(tzinfo=zona)
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    for cita in citas_crudas:
-        id, nombre, correo, telefono, fecha_hora, estado, asistio = cita
+    citas_crudas = Cita.query.all()
+    citas_futuras = []
+    citas_pasadas = []
+
+    for c in citas_crudas:
         try:
-            fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
+            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
-            fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
+            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+        tupla = (c.id, c.nombre, c.correo, c.telefono, c.fecha_hora, c.estado, c.asistio)
 
-        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
-        tupla_completa = (id, nombre, correo, telefono, fecha_hora, estado, asistio)
-
-        if fecha_objeto >= ahora:
-            citas_futuras.append(tupla_completa)
-        elif fecha_objeto >= inicio_rango:
-            citas_pasadas.append(tupla_completa)
-
-    cursor.execute('''
-        SELECT id, fecha_hora, disponibles,
-        (disponibles + (SELECT COUNT(*) FROM citas WHERE horarios.fecha_hora = citas.fecha_hora AND estado = "activa")) AS capacidad
-        FROM horarios
-    ''')
-    horarios_crudos = cursor.fetchall()
+        if fecha >= ahora:
+            citas_futuras.append(tupla)
+        elif fecha >= inicio_rango:
+            citas_pasadas.append(tupla)
 
     horarios = []
-    for id, fecha_hora, disponibles, capacidad in horarios_crudos:
+    for h in Horario.query.all():
         try:
-            fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
+            fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
-            fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
-        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
-        fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-        horarios.append((id, fecha_formateada, disponibles, capacidad))
-
-    conexion.close()
+            fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+        total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
+        horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
     return render_template('dashboard.html', citas=citas_futuras, historial=citas_pasadas, horarios=horarios, rango=rango)
-
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
@@ -207,25 +174,14 @@ def marcar_asistencia(id_cita, estado):
         flash('⚠️ Debes iniciar sesión primero.', 'warning')
         return redirect(url_for('login'))
 
-    if estado not in ['sí', 'no']:
-        flash('❌ Valor inválido para asistencia.', 'danger')
-        return redirect(url_for('dashboard'))
-
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-    cursor.execute('UPDATE citas SET asistio = ? WHERE id = ?', (estado, id_cita))
-    conexion.commit()
-    conexion.close()
-
-    flash('✅ Asistencia registrada correctamente.', 'success')
+    cita = Cita.query.get(id_cita)
+    if cita and estado in ['sí', 'no']:
+        cita.asistio = estado
+        db.session.commit()
+        flash('✅ Asistencia registrada.', 'success')
+    else:
+        flash('❌ Error al actualizar asistencia.', 'danger')
     return redirect(url_for('dashboard'))
-
-
-@app.route('/logout')
-def logout():
-    session.pop('usuario', None)
-    flash('✅ Sesión cerrada correctamente.', 'success')
-    return redirect(url_for('login'))
 
 @app.route('/cancelar_cita/<int:id_cita>')
 def cancelar_cita(id_cita):
@@ -233,44 +189,58 @@ def cancelar_cita(id_cita):
         flash('⚠️ Debes iniciar sesión primero.', 'warning')
         return redirect(url_for('login'))
 
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-
-    # Obtener correo, nombre, fecha y hora de la cita
-    cursor.execute('SELECT nombre, correo, fecha_hora FROM citas WHERE id = ?', (id_cita,))
-    cita = cursor.fetchone()
-
+    cita = Cita.query.get(id_cita)
     if cita:
-        nombre, correo, fecha_hora = cita
+        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
+        cita.estado = "cancelada"
+        if horario:
+            horario.disponibles += 1
+        db.session.commit()
+        flash('✅ Cita cancelada y espacio liberado.', 'success')
+    return redirect(url_for('dashboard'))
 
-        # Cambiar el estado a cancelada
-        cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (id_cita,))
+@app.route('/cancelar_usuario/<int:id_cita>/<token>')
+def cancelar_usuario(id_cita, token):
+    cita = Cita.query.filter_by(id=id_cita, token_cancelacion=token, estado='activa').first()
+    if cita:
+        cita.estado = 'cancelada'
+        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
+        if horario:
+            horario.disponibles += 1
+        db.session.commit()
+        flash('✅ Tu cita fue cancelada.', 'success')
+    else:
+        flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
+    return redirect(url_for('agendar'))
 
-        # Buscar el horario correspondiente y aumentar disponibles en +1
-        cursor.execute('UPDATE horarios SET disponibles = disponibles + 1 WHERE fecha_hora = ?', (fecha_hora,))
+@app.route('/eliminar_cita/<int:id_cita>')
+def eliminar_cita(id_cita):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
 
-        conexion.commit()
+    cita = Cita.query.get(id_cita)
+    if cita:
+        db.session.delete(cita)
+        db.session.commit()
+        flash('✅ Cita eliminada.', 'success')
+    return redirect(url_for('dashboard'))
 
-        # Enviar correo de cancelación
-        cuerpo = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
-      <h2 style="color: #d9534f;">Cancelación de Cita</h2>
-      <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Lamentamos informarte que tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
-      <p>Por favor, agenda una nueva cita en nuestra página web. Nos disculpamos por los inconvenientes.</p>
-      <p style="margin-top: 20px;">Atentamente,<br><strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong></p>
-    </div>
-  </body>
-</html>
-"""
-        enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
+@app.route('/eliminar_horario/<int:id_horario>')
+def eliminar_horario(id_horario):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
 
-
-        flash('✅ Cita cancelada, correo enviado y espacio liberado.', 'success')
-
-    conexion.close()
+    horario = Horario.query.get(id_horario)
+    if horario:
+        citas = Cita.query.filter_by(fecha_hora=horario.fecha_hora, estado='activa').all()
+        for c in citas:
+            c.estado = "cancelada"
+            enviar_correo(c.correo, 'Cancelación de Cita', f'Tu cita para el {c.fecha_hora} ha sido cancelada.')
+        db.session.delete(horario)
+        db.session.commit()
+        flash('✅ Horario eliminado.', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/agregar_horario', methods=['POST'])
@@ -280,103 +250,17 @@ def agregar_horario():
         return redirect(url_for('login'))
 
     fecha_hora = request.form['fecha_hora']
-    disponibles = request.form['disponibles']
-
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-    cursor.execute('INSERT INTO horarios (fecha_hora, disponibles) VALUES (?, ?)', (fecha_hora, disponibles))
-    conexion.commit()
-    conexion.close()
-
-    flash('✅ Nuevo horario agregado correctamente.', 'success')
+    disponibles = int(request.form['disponibles'])
+    db.session.add(Horario(fecha_hora=fecha_hora, disponibles=disponibles))
+    db.session.commit()
+    flash('✅ Horario agregado.', 'success')
     return redirect(url_for('dashboard'))
 
-@app.route('/eliminar_horario/<int:id_horario>')
-def eliminar_horario(id_horario):
-    if 'usuario' not in session:
-        flash('⚠️ Debes iniciar sesión primero.', 'warning')
-        return redirect(url_for('login'))
-
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-
-    # 1. Obtener fecha_hora del horario que queremos eliminar
-    cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (id_horario,))
-    resultado = cursor.fetchone()
-
-    if resultado:
-        fecha_hora = resultado[0]
-
-        # 2. Buscar citas activas asociadas a esa fecha
-        cursor.execute('SELECT id, nombre, correo FROM citas WHERE fecha_hora = ? AND estado = "activa"', (fecha_hora,))
-        citas_afectadas = cursor.fetchall()
-
-        # 3. Cancelar citas activas (si existen) y enviar correos
-        for cita_id, nombre, correo in citas_afectadas:
-            cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (cita_id,))
-            cuerpo = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
-      <h2 style="color: #d9534f;">Cancelación de Horario</h2>
-      <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Tu cita programada para el <strong>{fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-      <p>Te invitamos a agendar una nueva cita en nuestro sitio web.</p>
-      <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
-    </div>
-  </body>
-</html>
-"""
-            enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
-
-        # 4. Eliminar el horario, sin importar si hubo citas asociadas o no
-        cursor.execute('DELETE FROM horarios WHERE id = ?', (id_horario,))
-        conexion.commit()
-        flash('✅ Horario eliminado correctamente.', 'success')
-    else:
-        flash('❌ No se encontró el horario.', 'danger')
-
-    conexion.close()
-    return redirect(url_for('dashboard'))
-
-
-
-@app.route('/eliminar_cita/<int:id_cita>')
-def eliminar_cita(id_cita):
-    if 'usuario' not in session:
-        flash('⚠️ Debes iniciar sesión primero.', 'warning')
-        return redirect(url_for('login'))
-
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-
-    cursor.execute('DELETE FROM citas WHERE id = ?', (id_cita,))
-    conexion.commit()
-    conexion.close()
-
-    flash('✅ Cita eliminada correctamente.', 'success')
-    return redirect(url_for('dashboard'))
-
-@app.route('/cancelar_usuario/<int:id_cita>/<token>')
-def cancelar_usuario(id_cita, token):
-    conexion = sqlite3.connect('base_de_datos.db')
-    cursor = conexion.cursor()
-
-    cursor.execute('SELECT nombre, correo, fecha_hora FROM citas WHERE id = ? AND token_cancelacion = ? AND estado = "activa"', (id_cita, token))
-    cita = cursor.fetchone()
-
-    if cita:
-        nombre, correo, fecha_hora = cita
-        cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (id_cita,))
-        cursor.execute('UPDATE horarios SET disponibles = disponibles + 1 WHERE fecha_hora = ?', (fecha_hora,))
-        conexion.commit()
-
-        flash('✅ Tu cita fue cancelada exitosamente.', 'success')
-    else:
-        flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
-
-    conexion.close()
-    return redirect(url_for('agendar'))
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    flash('✅ Sesión cerrada.', 'success')
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
