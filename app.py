@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import sqlite3
 import smtplib
 import uuid
+import pytz
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
@@ -39,7 +40,8 @@ def agendar():
     horarios_crudos = cursor.fetchall()
     horarios = []
 
-    ahora = datetime.now()
+    zona_chihuahua = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona_chihuahua)
 
     for id, fecha_hora, disponibles in horarios_crudos:
         try:
