@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 import smtplib
@@ -6,8 +5,7 @@ import uuid
 import pytz
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'secreto123'
@@ -29,13 +27,11 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor.sendmail(GMAIL_USER, destinatario, texto)
     servidor.quit()
 
-
 @app.route('/', methods=['GET', 'POST'])
 def agendar():
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
 
-    # Obtener todos los horarios disponibles
     cursor.execute('SELECT id, fecha_hora, disponibles FROM horarios WHERE disponibles > 0')
     horarios_crudos = cursor.fetchall()
     horarios = []
@@ -48,11 +44,11 @@ def agendar():
             fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
-        
+        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
+
         if fecha_objeto >= ahora:
             fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
             horarios.append((id, fecha_formateada, disponibles))
-
 
     conexion.close()
 
@@ -62,11 +58,9 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
-        # Reabrimos la conexión para verificar disponibilidad del horario seleccionado
         conexion = sqlite3.connect('base_de_datos.db')
         cursor = conexion.cursor()
-        
-        # Comprobar si hay lugares disponibles para el horario seleccionado
+
         cursor.execute('SELECT disponibles FROM horarios WHERE id = ?', (horario_id,))
         disponibilidad = cursor.fetchone()
 
@@ -74,23 +68,18 @@ def agendar():
             flash('❌ El horario seleccionado ya está lleno. Por favor, elige otro.', 'danger')
             return redirect(url_for('agendar'))
 
-        # Si hay lugares disponibles, se procede con la creación de la cita
         cursor.execute('SELECT fecha_hora FROM horarios WHERE id = ?', (horario_id,))
         fecha_hora = cursor.fetchone()[0]
 
-        token = str(uuid.uuid4())  # genera un token único
+        token = str(uuid.uuid4())
 
         cursor.execute('''
             INSERT INTO citas (nombre, correo, telefono, fecha_hora, token_cancelacion)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (nombre, correo, telefono, fecha_hora, token))
+            VALUES (?, ?, ?, ?, ?)''', (nombre, correo, telefono, fecha_hora, token))
 
-        cita_id = cursor.lastrowid  # obtenemos el ID de la cita recién creada
+        cita_id = cursor.lastrowid
 
-
-        cursor.execute('''
-            UPDATE horarios SET disponibles = disponibles - 1 WHERE id = ?
-        ''', (horario_id,))
+        cursor.execute('UPDATE horarios SET disponibles = disponibles - 1 WHERE id = ?', (horario_id,))
 
         conexion.commit()
         conexion.close()
@@ -108,29 +97,22 @@ def agendar():
         <li><strong>Teléfono:</strong> {telefono}</li>
         <li><strong>Fecha y hora:</strong> {fecha_hora}</li>
       </ul>
-
       <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
       <p>
-        <a href="https://embryopass.onrender.com/cancelar_usuario/{cita_id}/{token}"  
+        <a href="https://embryopass.onrender.com/cancelar_usuario/{cita_id}/{token}"
            style="background-color: #d9534f; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
            Cancelar mi cita
         </a>
       </p>
     </div>
   </body>
-</html>
-"""
-
+</html>"""
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
-
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
         return redirect(url_for('agendar'))
 
     return render_template('agendar.html', horarios=horarios)
-
-
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
