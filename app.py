@@ -141,14 +141,14 @@ def dashboard():
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
 
-    from datetime import datetime, timedelta
+    zona_chihuahua = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona_chihuahua)
 
     cursor.execute('SELECT id, nombre, correo, telefono, fecha_hora, estado, asistio FROM citas')
     citas_crudas = cursor.fetchall()
 
     citas_futuras = []
     citas_pasadas = []
-    ahora = datetime.now()
 
     # Obtener filtro de rango desde GET
     rango = request.args.get('rango', default='30')
@@ -160,9 +160,9 @@ def dashboard():
     elif rango == 'mes':
         inicio_rango = ahora.replace(day=1)
     elif rango == 'todo':
-        inicio_rango = datetime.min
+        inicio_rango = datetime.min.replace(tzinfo=zona_chihuahua)
     else:
-        inicio_rango = ahora - timedelta(days=30)  # Valor por defecto
+        inicio_rango = ahora - timedelta(days=30)
 
     for cita in citas_crudas:
         id, nombre, correo, telefono, fecha_hora, estado, asistio = cita
@@ -171,6 +171,7 @@ def dashboard():
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
 
+        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
         tupla_completa = (id, nombre, correo, telefono, fecha_hora, estado, asistio)
 
         if fecha_objeto >= ahora:
@@ -191,6 +192,7 @@ def dashboard():
             fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
+        fecha_objeto = zona_chihuahua.localize(fecha_objeto)
         fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
         horarios.append((id, fecha_formateada, disponibles, capacidad))
 
