@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Apr 27 15:10:19 2025
-
-@author: Marce
-"""
-
 services:
   - type: web
     name: museo-embriologia
     env: python
+    region: oregon
+    plan: free
     buildCommand: ""
     startCommand: python app.py
-    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://embryopass_user:qJLKqcQhx4TzqOga9ZkbmIiu866AUfmC@dpg-d0epejmmcj7s7382lq20-a.oregon-postgres.render.com/embryopass
