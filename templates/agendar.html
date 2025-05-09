@@ -80,12 +80,18 @@
     <input type="text" class="form-control" id="telefono" name="telefono" required>
   </div>
   <div class="mb-3">
-    <label for="horario" class="form-label">Selecciona un horario disponible</label>
-    <select class="form-select" id="horario" name="horario" required>
-      {% for id, fecha_hora, disponibles in horarios %}
-           <option value="{{ id }}">{{ fecha_hora }} ({{ disponibles }} lugares)</option>
-      {% endfor %}
-    </select>
+    <label for="horario" class="form-label">Selecciona un horario</label>
+    {% if horarios %}
+  <select class="form-select" id="horario" name="horario" required>
+    {% for id, fecha_hora, disponibles in horarios %}
+         <option value="{{ id }}">{{ fecha_hora }} ({{ disponibles }} lugares)</option>
+    {% endfor %}
+  </select>
+{% else %}
+  <div class="alert alert-warning text-center" role="alert">
+    Por el momento no hay ningún horario disponible.
+  </div>
+{% endif %}
   </div>
   <div class="text-center">
     <button type="submit" id="agendarBtn" class="btn" style="background-color: #8B4513; color: white;">Agendar cita</button>
