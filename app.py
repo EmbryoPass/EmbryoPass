@@ -200,21 +200,6 @@ def marcar_asistencia(id_cita, estado):
         flash('❌ Error al actualizar asistencia.', 'danger')
     return redirect(url_for('dashboard'))
 
-@app.route('/cancelar_cita/<int:id_cita>')
-def cancelar_cita(id_cita):
-    if 'usuario' not in session:
-        flash('⚠️ Debes iniciar sesión primero.', 'warning')
-        return redirect(url_for('login'))
-
-    cita = Cita.query.get(id_cita)
-    if cita:
-        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
-        cita.estado = "cancelada"
-        if horario:
-            horario.disponibles += 1
-        db.session.commit()
-        flash('✅ Cita cancelada y espacio liberado.', 'success')
-    return redirect(url_for('dashboard'))
 
 @app.route('/cancelar_usuario/<int:id_cita>/<token>')
 def cancelar_usuario(id_cita, token):
