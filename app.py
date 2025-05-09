@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 import smtplib
@@ -38,13 +39,18 @@ def agendar():
     horarios_crudos = cursor.fetchall()
     horarios = []
 
+    ahora = datetime.now()
+
     for id, fecha_hora, disponibles in horarios_crudos:
         try:
             fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
-        fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-        horarios.append((id, fecha_formateada, disponibles))  # <-- Agregamos también disponibles
+        
+        if fecha_objeto >= ahora:
+            fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
+            horarios.append((id, fecha_formateada, disponibles))
+
 
     conexion.close()
 
@@ -151,24 +157,83 @@ def dashboard():
     conexion = sqlite3.connect('base_de_datos.db')
     cursor = conexion.cursor()
 
-    cursor.execute('SELECT id, nombre, correo, telefono, fecha_hora, estado FROM citas')
-    citas = cursor.fetchall()
+    from datetime import datetime, timedelta
 
-    cursor.execute('SELECT id, fecha_hora, disponibles FROM horarios')
+    cursor.execute('SELECT id, nombre, correo, telefono, fecha_hora, estado, asistio FROM citas')
+    citas_crudas = cursor.fetchall()
+
+    citas_futuras = []
+    citas_pasadas = []
+    ahora = datetime.now()
+
+    # Obtener filtro de rango desde GET
+    rango = request.args.get('rango', default='30')
+
+    if rango == '7':
+        inicio_rango = ahora - timedelta(days=7)
+    elif rango == '30':
+        inicio_rango = ahora - timedelta(days=30)
+    elif rango == 'mes':
+        inicio_rango = ahora.replace(day=1)
+    elif rango == 'todo':
+        inicio_rango = datetime.min
+    else:
+        inicio_rango = ahora - timedelta(days=30)  # Valor por defecto
+
+    for cita in citas_crudas:
+        id, nombre, correo, telefono, fecha_hora, estado, asistio = cita
+        try:
+            fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
+
+        tupla_completa = (id, nombre, correo, telefono, fecha_hora, estado, asistio)
+
+        if fecha_objeto >= ahora:
+            citas_futuras.append(tupla_completa)
+        elif fecha_objeto >= inicio_rango:
+            citas_pasadas.append(tupla_completa)
+
+    cursor.execute('''
+        SELECT id, fecha_hora, disponibles,
+        (disponibles + (SELECT COUNT(*) FROM citas WHERE horarios.fecha_hora = citas.fecha_hora AND estado = "activa")) AS capacidad
+        FROM horarios
+    ''')
     horarios_crudos = cursor.fetchall()
 
     horarios = []
-    for id, fecha_hora, disponibles in horarios_crudos:
+    for id, fecha_hora, disponibles, capacidad in horarios_crudos:
         try:
             fecha_objeto = datetime.strptime(fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha_objeto = datetime.strptime(fecha_hora, "%Y-%m-%d %H:%M")
         fecha_formateada = fecha_objeto.strftime("%d/%m/%Y %I:%M %p")
-        horarios.append((id, fecha_formateada, disponibles))
+        horarios.append((id, fecha_formateada, disponibles, capacidad))
 
     conexion.close()
 
-    return render_template('dashboard.html', citas=citas, horarios=horarios)
+    return render_template('dashboard.html', citas=citas_futuras, historial=citas_pasadas, horarios=horarios, rango=rango)
+
+
+@app.route('/marcar_asistencia/<int:id_cita>/<estado>')
+def marcar_asistencia(id_cita, estado):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    if estado not in ['sí', 'no']:
+        flash('❌ Valor inválido para asistencia.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    conexion = sqlite3.connect('base_de_datos.db')
+    cursor = conexion.cursor()
+    cursor.execute('UPDATE citas SET asistio = ? WHERE id = ?', (estado, id_cita))
+    conexion.commit()
+    conexion.close()
+
+    flash('✅ Asistencia registrada correctamente.', 'success')
+    return redirect(url_for('dashboard'))
+
 
 @app.route('/logout')
 def logout():
@@ -260,11 +325,9 @@ def eliminar_horario(id_horario):
         cursor.execute('SELECT id, nombre, correo FROM citas WHERE fecha_hora = ? AND estado = "activa"', (fecha_hora,))
         citas_afectadas = cursor.fetchall()
 
+        # 3. Cancelar citas activas (si existen) y enviar correos
         for cita_id, nombre, correo in citas_afectadas:
-            # 3. Cancelar la cita en la base de datos
             cursor.execute('UPDATE citas SET estado = "cancelada" WHERE id = ?', (cita_id,))
-
-            # 4. Enviar correo de cancelación
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -278,19 +341,18 @@ def eliminar_horario(id_horario):
   </body>
 </html>
 """
-        enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
+            enviar_correo(correo, 'Cancelación de Cita - Museo de Embriología', cuerpo)
 
-
-        # 5. Eliminar el horario después de cancelar citas
+        # 4. Eliminar el horario, sin importar si hubo citas asociadas o no
         cursor.execute('DELETE FROM horarios WHERE id = ?', (id_horario,))
-
         conexion.commit()
-        flash('✅ Horario eliminado y citas canceladas correctamente.', 'success')
+        flash('✅ Horario eliminado correctamente.', 'success')
     else:
         flash('❌ No se encontró el horario.', 'danger')
 
     conexion.close()
     return redirect(url_for('dashboard'))
+
 
 
 @app.route('/eliminar_cita/<int:id_cita>')
@@ -329,7 +391,6 @@ def cancelar_usuario(id_cita, token):
 
     conexion.close()
     return redirect(url_for('agendar'))
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
