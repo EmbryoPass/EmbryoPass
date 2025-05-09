@@ -231,10 +231,32 @@ def cancelar_usuario(id_cita, token):
         if horario:
             horario.disponibles += 1
         db.session.commit()
+
+        # ✉️ Notificación al museo
+        cuerpo_admin = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+              <h2 style="color: #d9534f;">🔔 Cancelación de Cita</h2>
+              <p>Un visitante ha cancelado su cita:</p>
+              <ul style="line-height: 1.6;">
+                <li><strong>Nombre:</strong> {cita.nombre}</li>
+                <li><strong>Correo:</strong> {cita.correo}</li>
+                <li><strong>Teléfono:</strong> {cita.telefono}</li>
+                <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
+              </ul>
+              <p style="margin-top: 20px;">Este mensaje es para fines administrativos.</p>
+            </div>
+          </body>
+        </html>
+        """
+        enviar_correo('museoembriologia@gmail.com', '🔔 Cancelación de Cita - Museo de Embriología', cuerpo_admin)
+
         flash('✅ Tu cita fue cancelada correctamente.', 'success')
     else:
         flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
     return redirect(url_for('agendar'))
+
 
 @app.route('/cancelar_cita/<int:id_cita>')
 def cancelar_cita(id_cita):
