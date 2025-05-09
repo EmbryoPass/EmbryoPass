@@ -120,7 +120,7 @@ def agendar():
        # ✉️ Enviar notificación al museo
         enviar_correo(
            GMAIL_USER,
-           '📥 Nueva Cita Agendada',
+           'Nueva Cita Agendada',
            f'''
            <html>
            <body style="font-family: Arial, sans-serif;">
