@@ -52,7 +52,6 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
     servidor.quit()
 
-# Rutas
 @app.route('/', methods=['GET', 'POST'])
 def agendar():
     zona = pytz.timezone('America/Chihuahua')
@@ -76,20 +75,31 @@ def agendar():
         correo = request.form['correo']
         telefono = request.form['telefono']
         horario_id = request.form['horario']
-        horario = Horario.query.get(horario_id)
 
-        if not horario or horario.disponibles <= 0:
-            flash('❌ El horario ya está lleno.', 'danger')
-            return redirect(url_for('agendar'))
+        try:
+            # 🚨 Inicia una transacción atómica
+            with db.session.begin_nested():
+                horario = db.session.query(Horario).with_for_update().get(horario_id)
 
-        token = str(uuid.uuid4())
-        nueva_cita = Cita(nombre=nombre, correo=correo, telefono=telefono,
-                          fecha_hora=horario.fecha_hora, token_cancelacion=token)
-        horario.disponibles -= 1
-        db.session.add(nueva_cita)
-        db.session.commit()
+                if not horario or horario.disponibles <= 0:
+                    flash('❌ El horario ya está lleno.', 'danger')
+                    return redirect(url_for('agendar'))
 
-        cuerpo = f"""
+                token = str(uuid.uuid4())
+                nueva_cita = Cita(
+                    nombre=nombre,
+                    correo=correo,
+                    telefono=telefono,
+                    fecha_hora=horario.fecha_hora,
+                    token_cancelacion=token
+                )
+                horario.disponibles -= 1
+                db.session.add(nueva_cita)
+
+            db.session.commit()  # ✅ Guarda los cambios si todo salió bien
+
+            # ✉️ Correo al usuario
+            cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -113,31 +123,35 @@ def agendar():
     </div>
   </body>
 </html>
-        """
-        enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
-        enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
+            """
+            enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
-       # ✉️ Enviar notificación al museo
-        enviar_correo(
-           GMAIL_USER,
-           'Nueva Cita Agendada',
-           f'''
-           <html>
-           <body style="font-family: Arial, sans-serif;">
-             <h3>🧬 Nueva cita agendada</h3>
-             <ul>
-               <li><strong>Nombre:</strong> {nombre}</li>
-               <li><strong>Correo:</strong> {correo}</li>
-               <li><strong>Teléfono:</strong> {telefono}</li>
-               <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
-             </ul>
-           </body>
-           </html>
-           '''
-        )
+            # ✉️ Notificación al museo
+            enviar_correo(
+               GMAIL_USER,
+               'Nueva Cita Agendada',
+               f'''
+               <html>
+               <body style="font-family: Arial, sans-serif;">
+                 <h3>🧬 Nueva cita agendada</h3>
+                 <ul>
+                   <li><strong>Nombre:</strong> {nombre}</li>
+                   <li><strong>Correo:</strong> {correo}</li>
+                   <li><strong>Teléfono:</strong> {telefono}</li>
+                   <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+                 </ul>
+               </body>
+               </html>
+               '''
+            )
 
-        flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
-        return redirect(url_for('agendar'))
+            flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
+            return redirect(url_for('agendar'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash('❌ Error al agendar cita. Intenta nuevamente.', 'danger')
+            print(f"Error al agendar cita: {e}")
 
     return render_template('agendar.html', horarios=horarios)
 
