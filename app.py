@@ -237,7 +237,7 @@ def cancelar_usuario(id_cita, token):
         <html>
           <body style="font-family: Arial, sans-serif; color: #333;">
             <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-              <h2 style="color: #d9534f;">🔔 Cancelación de Cita</h2>
+              <h2 style="color: #d9534f;">Cancelación de Cita</h2>
               <p>Un visitante ha cancelado su cita:</p>
               <ul style="line-height: 1.6;">
                 <li><strong>Nombre:</strong> {cita.nombre}</li>
@@ -245,7 +245,6 @@ def cancelar_usuario(id_cita, token):
                 <li><strong>Teléfono:</strong> {cita.telefono}</li>
                 <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
               </ul>
-              <p style="margin-top: 20px;">Este mensaje es para fines administrativos.</p>
             </div>
           </body>
         </html>
