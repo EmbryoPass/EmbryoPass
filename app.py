@@ -115,6 +115,27 @@ def agendar():
 </html>
         """
         enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
+        enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
+
+       # ✉️ Enviar notificación al museo
+        enviar_correo(
+           GMAIL_USER,
+           '📥 Nueva Cita Agendada',
+           f'''
+           <html>
+           <body style="font-family: Arial, sans-serif;">
+             <h3>🧬 Nueva cita agendada</h3>
+             <ul>
+               <li><strong>Nombre:</strong> {nombre}</li>
+               <li><strong>Correo:</strong> {correo}</li>
+               <li><strong>Teléfono:</strong> {telefono}</li>
+               <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+             </ul>
+           </body>
+           </html>
+           '''
+        )
+
         flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
         return redirect(url_for('agendar'))
 
@@ -231,18 +252,27 @@ def cancelar_cita(id_cita):
 
         # ✉️ Enviar correo estilizado al usuario
         cuerpo = f"""
-        <html>
-          <body style="font-family: Arial, sans-serif; color: #333;">
-            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
-              <h2 style="color: #d9534f;">Cancelación de Cita</h2>
-              <p>Hola <strong>{cita.nombre}</strong>,</p>
-              <p>Tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{cita.fecha_hora}</strong> ha sido cancelada por el administrador.</p>
-              <p>Te invitamos a agendar una nueva cita.</p>
-              <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
-            </div>
-          </body>
-        </html>
-        """
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
+      <h2 style="color: #d9534f;">Cancelación de Cita</h2>
+      <p>Hola <strong>{cita.nombre}</strong>,</p>
+      <p>Tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{cita.fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
+      <p>Te invitamos a agendar una nueva cita.</p>
+      
+      <p style="text-align: center; margin-top: 20px;">
+        <a href="https://embryopass.onrender.com/" 
+           style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
+           Agendar nueva cita
+        </a>
+      </p>
+
+      <p style="margin-top: 20px;">Gracias por la comprensión.</p>
+    </div>
+  </body>
+</html>
+"""
+
         enviar_correo(cita.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
 
         flash('✅ Cita cancelada, correo enviado y espacio liberado.', 'success')
@@ -274,18 +304,27 @@ def eliminar_horario(id_horario):
         for c in citas:
             c.estado = "cancelada"
             cuerpo = f"""
-            <html>
-              <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
-                  <h2 style="color: #d9534f;">Cancelación de Cita</h2>
-                  <p>Hola <strong>{c.nombre}</strong>,</p>
-                  <p>Tu cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-                  <p>Te invitamos a agendar una nueva cita en nuestro sitio web.</p>
-                  <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
-                </div>
-              </body>
-            </html>
-            """
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
+      <h2 style="color: #d9534f;">Cancelación de Cita</h2>
+      <p>Hola <strong>{c.nombre}</strong>,</p>
+      <p>Tu cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+      <p>Te invitamos a agendar una nueva cita.</p>
+
+      <p style="text-align: center;">
+        <a href="https://embryopass.onrender.com/" 
+           style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
+           Agendar nueva cita
+        </a>
+      </p>
+
+      <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
+    </div>
+  </body>
+</html>
+"""
+
             enviar_correo(c.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
 
         db.session.delete(horario)
