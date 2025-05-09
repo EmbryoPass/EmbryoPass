@@ -249,7 +249,7 @@ def cancelar_usuario(id_cita, token):
           </body>
         </html>
         """
-        enviar_correo('museoembriologia@gmail.com', '🔔 Cancelación de Cita - Museo de Embriología', cuerpo_admin)
+        enviar_correo('museoembriologia@gmail.com', 'Cancelación de Cita - Museo de Embriología', cuerpo_admin)
 
         flash('✅ Tu cita fue cancelada correctamente.', 'success')
     else:
