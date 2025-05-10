@@ -90,7 +90,7 @@ def agendar():
             return redirect(url_for('agendar'))
 
         # ✅ Validar existencia de correo usando API
-        MAILBOXLAYER_API_KEY = 'TU_API_KEY_AQUI'  # <-- aquí pones tu key real
+        MAILBOXLAYER_API_KEY = "3e13c9fc9bdcbe2f72a2f843670f3f4e"
 
         try:
             response = requests.get(f"http://apilayer.net/api/check?access_key={MAILBOXLAYER_API_KEY}&email={correo}&smtp=1&format=1")
