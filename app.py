@@ -77,34 +77,34 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
-        # ✅ Validar teléfono (exactamente 10 dígitos)
+        # ✅ Validar teléfono
         if not telefono.isdigit() or len(telefono) != 10:
-            flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
+            flash('❌ El teléfono debe contener exactamente 10 números.', 'danger')
             return redirect(url_for('agendar'))
 
         # ✅ Validar formato de correo
         import re
         email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if not re.match(email_pattern, correo):
-            flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
+            flash('❌ El correo ingresado no tiene un formato válido. Revisa que tenga un @ y dominio correcto.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ✅ Validar existencia de correo usando API
+        # ✅ Verificación SMTP con MailboxLayer
         MAILBOXLAYER_API_KEY = "3e13c9fc9bdcbe2f72a2f843670f3f4e"
-
         try:
-            response = requests.get(f"http://apilayer.net/api/check?access_key={MAILBOXLAYER_API_KEY}&email={correo}&smtp=1&format=1")
+            import requests
+            response = requests.get(
+                f"http://apilayer.net/api/check?access_key={MAILBOXLAYER_API_KEY}&email={correo}&smtp=1&format=1"
+            )
             data = response.json()
-
             if not data.get('smtp_check', False):
-                flash('❌ El correo electrónico no existe o no pudo verificarse.', 'danger')
+                flash('❌ El correo electrónico no existe o no se pudo verificar. Intenta con otro.', 'danger')
                 return redirect(url_for('agendar'))
         except Exception as e:
             print(f"Error al validar correo: {e}")
-            flash('⚠️ No se pudo validar el correo electrónico. Intenta más tarde.', 'warning')
+            flash('⚠️ No se pudo validar la existencia del correo. La cita se puede agendar, pero revisa bien tu correo.', 'warning')
 
-
-        # ✅ Evitar duplicados (misma persona misma hora)
+        # ✅ Verificar duplicado (mismo correo + mismo horario + activa)
         horario = Horario.query.get(horario_id)
         if not horario:
             flash('❌ El horario seleccionado no existe.', 'danger')
@@ -119,11 +119,10 @@ def agendar():
             flash('❌ Ya tienes una cita activa para este horario.', 'danger')
             return redirect(url_for('agendar'))
 
+        # ✅ Crear cita con bloqueo de concurrencia
         try:
-            # 🚨 Inicia una transacción atómica
             with db.session.begin_nested():
                 horario = db.session.query(Horario).with_for_update().get(horario_id)
-
                 if not horario or horario.disponibles <= 0:
                     flash('❌ El horario ya está lleno.', 'danger')
                     return redirect(url_for('agendar'))
@@ -139,7 +138,7 @@ def agendar():
                 horario.disponibles -= 1
                 db.session.add(nueva_cita)
 
-            db.session.commit()  # ✅ Guarda los cambios si todo salió bien
+            db.session.commit()
 
             # ✉️ Correo al usuario
             cuerpo = f"""
@@ -171,21 +170,21 @@ def agendar():
 
             # ✉️ Notificación al museo
             enviar_correo(
-               GMAIL_USER,
-               'Nueva Cita Agendada',
-               f'''
-               <html>
-               <body style="font-family: Arial, sans-serif;">
-                 <h3>🧬 Nueva cita agendada</h3>
-                 <ul>
-                   <li><strong>Nombre:</strong> {nombre}</li>
-                   <li><strong>Correo:</strong> {correo}</li>
-                   <li><strong>Teléfono:</strong> {telefono}</li>
-                   <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
-                 </ul>
-               </body>
-               </html>
-               '''
+                GMAIL_USER,
+                'Nueva Cita Agendada',
+                f'''
+                <html>
+                <body style="font-family: Arial, sans-serif;">
+                  <h3>🧬 Nueva cita agendada</h3>
+                  <ul>
+                    <li><strong>Nombre:</strong> {nombre}</li>
+                    <li><strong>Correo:</strong> {correo}</li>
+                    <li><strong>Teléfono:</strong> {telefono}</li>
+                    <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+                  </ul>
+                </body>
+                </html>
+                '''
             )
 
             flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
