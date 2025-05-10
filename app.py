@@ -90,6 +90,17 @@ def agendar():
                     flash('❌ El horario ya está lleno.', 'danger')
                     return redirect(url_for('agendar'))
 
+                # ✅ Validar duplicado (misma persona, mismo horario)
+                cita_existente = Cita.query.filter_by(
+                    correo=correo,
+                    fecha_hora=horario.fecha_hora,
+                    estado='activa'
+                ).first()
+
+                if cita_existente:
+                    flash('❌ Ya tienes una cita activa para ese horario.', 'danger')
+                    return redirect(url_for('agendar'))
+
                 token = str(uuid.uuid4())
                 nueva_cita = Cita(
                     nombre=nombre,
@@ -101,7 +112,7 @@ def agendar():
                 horario.disponibles -= 1
                 db.session.add(nueva_cita)
 
-            db.session.commit()  # ✅ Guarda los cambios si todo salió bien
+            db.session.commit()
 
             # ✉️ Correo al usuario
             cuerpo = f"""
@@ -133,21 +144,21 @@ def agendar():
 
             # ✉️ Notificación al museo
             enviar_correo(
-               GMAIL_USER,
-               'Nueva Cita Agendada',
-               f'''
-               <html>
-               <body style="font-family: Arial, sans-serif;">
-                 <h3>🧬 Nueva cita agendada</h3>
-                 <ul>
-                   <li><strong>Nombre:</strong> {nombre}</li>
-                   <li><strong>Correo:</strong> {correo}</li>
-                   <li><strong>Teléfono:</strong> {telefono}</li>
-                   <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
-                 </ul>
-               </body>
-               </html>
-               '''
+                GMAIL_USER,
+                'Nueva Cita Agendada',
+                f'''
+                <html>
+                <body style="font-family: Arial, sans-serif;">
+                    <h3>🧬 Nueva cita agendada</h3>
+                    <ul>
+                        <li><strong>Nombre:</strong> {nombre}</li>
+                        <li><strong>Correo:</strong> {correo}</li>
+                        <li><strong>Teléfono:</strong> {telefono}</li>
+                        <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+                    </ul>
+                </body>
+                </html>
+                '''
             )
 
             flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
