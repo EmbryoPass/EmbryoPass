@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import smtplib
+import requests
 import uuid
 import pytz
 from email.mime.text import MIMEText
@@ -87,6 +88,21 @@ def agendar():
         if not re.match(email_pattern, correo):
             flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
             return redirect(url_for('agendar'))
+
+        # ✅ Validar existencia de correo usando API
+        MAILBOXLAYER_API_KEY = 'TU_API_KEY_AQUI'  # <-- aquí pones tu key real
+
+        try:
+            response = requests.get(f"http://apilayer.net/api/check?access_key={MAILBOXLAYER_API_KEY}&email={correo}&smtp=1&format=1")
+            data = response.json()
+
+            if not data.get('smtp_check', False):
+                flash('❌ El correo electrónico no existe o no pudo verificarse.', 'danger')
+                return redirect(url_for('agendar'))
+        except Exception as e:
+            print(f"Error al validar correo: {e}")
+            flash('⚠️ No se pudo validar el correo electrónico. Intenta más tarde.', 'warning')
+
 
         # ✅ Evitar duplicados (misma persona misma hora)
         horario = Horario.query.get(horario_id)
