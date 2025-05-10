@@ -81,6 +81,13 @@ def agendar():
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('agendar'))
 
+        # ✅ Validar formato de correo
+        import re
+        email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_pattern, correo):
+            flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
+            return redirect(url_for('agendar'))
+
         try:
             # 🚨 Inicia una transacción atómica
             with db.session.begin_nested():
@@ -88,17 +95,6 @@ def agendar():
 
                 if not horario or horario.disponibles <= 0:
                     flash('❌ El horario ya está lleno.', 'danger')
-                    return redirect(url_for('agendar'))
-
-                # ✅ Validar duplicado (misma persona, mismo horario)
-                cita_existente = Cita.query.filter_by(
-                    correo=correo,
-                    fecha_hora=horario.fecha_hora,
-                    estado='activa'
-                ).first()
-
-                if cita_existente:
-                    flash('❌ Ya tienes una cita activa para ese horario.', 'danger')
                     return redirect(url_for('agendar'))
 
                 token = str(uuid.uuid4())
@@ -112,7 +108,7 @@ def agendar():
                 horario.disponibles -= 1
                 db.session.add(nueva_cita)
 
-            db.session.commit()
+            db.session.commit()  # ✅ Guarda los cambios si todo salió bien
 
             # ✉️ Correo al usuario
             cuerpo = f"""
@@ -144,21 +140,21 @@ def agendar():
 
             # ✉️ Notificación al museo
             enviar_correo(
-                GMAIL_USER,
-                'Nueva Cita Agendada',
-                f'''
-                <html>
-                <body style="font-family: Arial, sans-serif;">
-                    <h3>🧬 Nueva cita agendada</h3>
-                    <ul>
-                        <li><strong>Nombre:</strong> {nombre}</li>
-                        <li><strong>Correo:</strong> {correo}</li>
-                        <li><strong>Teléfono:</strong> {telefono}</li>
-                        <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
-                    </ul>
-                </body>
-                </html>
-                '''
+               GMAIL_USER,
+               'Nueva Cita Agendada',
+               f'''
+               <html>
+               <body style="font-family: Arial, sans-serif;">
+                 <h3>🧬 Nueva cita agendada</h3>
+                 <ul>
+                   <li><strong>Nombre:</strong> {nombre}</li>
+                   <li><strong>Correo:</strong> {correo}</li>
+                   <li><strong>Teléfono:</strong> {telefono}</li>
+                   <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+                 </ul>
+               </body>
+               </html>
+               '''
             )
 
             flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
