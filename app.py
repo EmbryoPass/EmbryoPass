@@ -88,6 +88,21 @@ def agendar():
             flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
             return redirect(url_for('agendar'))
 
+        # ✅ Evitar duplicados (misma persona misma hora)
+        horario = Horario.query.get(horario_id)
+        if not horario:
+            flash('❌ El horario seleccionado no existe.', 'danger')
+            return redirect(url_for('agendar'))
+
+        cita_existente = Cita.query.filter_by(
+            correo=correo,
+            fecha_hora=horario.fecha_hora,
+            estado='activa'
+        ).first()
+        if cita_existente:
+            flash('❌ Ya tienes una cita activa para este horario.', 'danger')
+            return redirect(url_for('agendar'))
+
         try:
             # 🚨 Inicia una transacción atómica
             with db.session.begin_nested():
