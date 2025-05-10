@@ -76,6 +76,11 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
+        # ✅ Validar teléfono (exactamente 10 dígitos)
+        if not telefono.isdigit() or len(telefono) != 10:
+            flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
+            return redirect(url_for('agendar'))
+
         try:
             # 🚨 Inicia una transacción atómica
             with db.session.begin_nested():
