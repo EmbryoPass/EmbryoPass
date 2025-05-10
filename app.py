@@ -77,32 +77,10 @@ def agendar():
         telefono = request.form['telefono']
         horario_id = request.form['horario']
 
-        # ✅ Validar teléfono
+        # ✅ Validar teléfono (exactamente 10 dígitos)
         if not telefono.isdigit() or len(telefono) != 10:
-            flash('❌ El teléfono debe contener exactamente 10 números.', 'danger')
+            flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('agendar'))
-
-        # ✅ Validar formato de correo
-        import re
-        email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-        if not re.match(email_pattern, correo):
-            flash('❌ El correo ingresado no tiene un formato válido. Revisa que tenga un @ y dominio correcto.', 'danger')
-            return redirect(url_for('agendar'))
-
-        # ✅ Verificación SMTP con MailboxLayer
-        MAILBOXLAYER_API_KEY = "3e13c9fc9bdcbe2f72a2f843670f3f4e"
-        try:
-            import requests
-            response = requests.get(
-                f"http://apilayer.net/api/check?access_key={MAILBOXLAYER_API_KEY}&email={correo}&smtp=1&format=1"
-            )
-            data = response.json()
-            if not data.get('smtp_check', False):
-                flash('❌ El correo electrónico no existe o no se pudo verificar. Intenta con otro.', 'danger')
-                return redirect(url_for('agendar'))
-        except Exception as e:
-            print(f"Error al validar correo: {e}")
-            flash('⚠️ No se pudo validar la existencia del correo. La cita se puede agendar, pero revisa bien tu correo.', 'warning')
 
         # ✅ Verificar duplicado (mismo correo + mismo horario + activa)
         horario = Horario.query.get(horario_id)
@@ -119,8 +97,8 @@ def agendar():
             flash('❌ Ya tienes una cita activa para este horario.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ✅ Crear cita con bloqueo de concurrencia
         try:
+            # 🚨 Inicia una transacción atómica
             with db.session.begin_nested():
                 horario = db.session.query(Horario).with_for_update().get(horario_id)
                 if not horario or horario.disponibles <= 0:
@@ -196,7 +174,6 @@ def agendar():
             print(f"Error al agendar cita: {e}")
 
     return render_template('agendar.html', horarios=horarios)
-
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
