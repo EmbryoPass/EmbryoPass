@@ -82,27 +82,23 @@ def agendar():
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ✅ Verificar duplicado (mismo correo + mismo horario + activa)
-        horario = Horario.query.get(horario_id)
-        if not horario:
-            flash('❌ El horario seleccionado no existe.', 'danger')
-            return redirect(url_for('agendar'))
-
-        cita_existente = Cita.query.filter_by(
-            correo=correo,
-            fecha_hora=horario.fecha_hora,
-            estado='activa'
-        ).first()
-        if cita_existente:
-            flash('❌ Ya tienes una cita activa para este horario.', 'danger')
-            return redirect(url_for('agendar'))
-
         try:
-            # 🚨 Inicia una transacción atómica
+            # 🚨 Inicia una transacción atómica y bloquea el horario
             with db.session.begin_nested():
                 horario = db.session.query(Horario).with_for_update().get(horario_id)
+
                 if not horario or horario.disponibles <= 0:
                     flash('❌ El horario ya está lleno.', 'danger')
+                    return redirect(url_for('agendar'))
+
+                # 🚨 Checar duplicado dentro del bloqueo
+                cita_existente = Cita.query.filter_by(
+                    correo=correo,
+                    fecha_hora=horario.fecha_hora,
+                    estado='activa'
+                ).first()
+                if cita_existente:
+                    flash('❌ Ya tienes una cita activa para este horario.', 'danger')
                     return redirect(url_for('agendar'))
 
                 token = str(uuid.uuid4())
@@ -116,14 +112,14 @@ def agendar():
                 horario.disponibles -= 1
                 db.session.add(nueva_cita)
 
-            db.session.commit()
+            db.session.commit()  # ✅ Guarda los cambios si todo salió bien
 
             # ✉️ Correo al usuario
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral </h2>
+      <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
       <p>Hola <strong>{nombre}</strong>,</p>
       <p>Tu cita ha sido agendada exitosamente. Aquí tienes los detalles:</p>
       <ul style="line-height: 1.6;">
@@ -174,6 +170,7 @@ def agendar():
             print(f"Error al agendar cita: {e}")
 
     return render_template('agendar.html', horarios=horarios)
+
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
