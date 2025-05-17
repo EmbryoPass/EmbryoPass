@@ -117,6 +117,9 @@
       <div class="col-auto">
         <button type="submit" class="btn btn-outline-primary btn-sm">Aplicar</button>
       </div>
+      <div class="col-auto">
+        <a href="{{ url_for('descargar_historial', rango=rango) }}" class="btn btn-outline-success btn-sm">📥 Descargar historial en Excel</a>
+      </div>
     </form>
 
     <div class="table-responsive">
