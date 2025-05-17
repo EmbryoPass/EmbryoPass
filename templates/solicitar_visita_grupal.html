@@ -90,8 +90,15 @@
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Nivel educativo</label>
-    <input type="text" class="form-control" name="nivel_educativo" required value="{{ request.form.get('nivel_educativo', '') }}">
+    <label class="form-label">Nivel académico</label>
+    <select class="form-select" name="nivel_educativo" required>
+      <option value="" disabled selected>Selecciona una opción</option>
+      <option value="Secundaria" {% if request.form.get('nivel_educativo') == 'Secundaria' %}selected{% endif %}>Secundaria</option>
+      <option value="Bachillerato" {% if request.form.get('nivel_educativo') == 'Bachillerato' %}selected{% endif %}>Bachillerato</option>
+      <option value="Universidad" {% if request.form.get('nivel_educativo') == 'Universidad' %}selected{% endif %}>Universidad</option>
+      <option value="Posgrado" {% if request.form.get('nivel_educativo') == 'Posgrado' %}selected{% endif %}>Posgrado</option>
+      <option value="Otro" {% if request.form.get('nivel_educativo') == 'Otro' %}selected{% endif %}>Otro</option>
+    </select>
   </div>
 
   <div class="mb-3">
