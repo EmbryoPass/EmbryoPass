@@ -38,6 +38,8 @@ class Cita(db.Model):
     estado = db.Column(db.String(20), default='activa')
     asistio = db.Column(db.String(10), nullable=True)
     token_cancelacion = db.Column(db.String(100), nullable=False)
+    edad = db.Column(db.Integer, nullable=True) 
+    sexo = db.Column(db.String(10), nullable=True)
 
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
