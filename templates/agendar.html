@@ -87,6 +87,20 @@
            required value="{{ request.form.get('telefono', '') }}">
   </div>
   <div class="mb-3">
+    <label for="edad" class="form-label">Edad</label>
+    <input type="number" class="form-control" id="edad" name="edad" min="1" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Sexo</label>
+    <select class="form-select" id="sexo" name="sexo" required>
+      <option value="" disabled selected>Selecciona una opción</option>
+      <option value="Mujer">Mujer</option>
+      <option value="Hombre">Hombre</option>
+    </select>
+  </div>
+  
+  <div class="mb-3">
     <label for="horario" class="form-label">Selecciona un horario</label>
     {% if horarios %}
     <select class="form-select" id="horario" name="horario" required>
