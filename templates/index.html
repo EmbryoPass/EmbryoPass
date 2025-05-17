@@ -21,8 +21,30 @@
     }
     .logo {
       display: block;
-      margin: 30px auto 10px auto;
+      margin: 20px auto;
       height: 80px;
+    }
+    h3.option-title {
+      font-size: 1.75rem;
+    }
+    .btn-cafe {
+      background-color: #8B4513;
+      color: white;
+      border: none;
+    }
+    .btn-cafe:hover {
+      background-color: #6e3610;
+      color: white;
+    }
+
+    /* Ajustes para celular */
+    @media (max-width: 576px) {
+      .logo {
+        height: 50px;
+      }
+      h3.option-title {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
@@ -35,15 +57,15 @@
   <div class="row justify-content-center">
     <div class="col-md-5">
       <div class="option-card text-center bg-white shadow-sm">
-        <h3>Agendar cita individual</h3>
-        <a href="{{ url_for('agendar') }}" class="btn btn-primary mt-3">Agendar cita</a>
+        <h3 class="option-title">Agendar cita individual</h3>
+        <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3">Agendar cita</a>
       </div>
     </div>
     <div class="col-md-5">
       <div class="option-card text-center bg-white shadow-sm">
-        <h3>Solicitar visita grupal institucional</h3>
+        <h3 class="option-title">Solicitar visita grupal institucional</h3>
         <p>Para instituciones como bachilleratos o universidades.</p>
-        <a href="{{ url_for('solicitar_visita_grupal') }}" class="btn btn-success mt-3">Solicitar visita</a>
+        <a href="{{ url_for('solicitar_visita_grupal') }}" class="btn btn-cafe mt-3">Solicitar visita</a>
       </div>
     </div>
   </div>
