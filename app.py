@@ -314,6 +314,56 @@ def solicitar_visita_grupal():
 
     return render_template('solicitar_visita_grupal.html')
 
+# Nuevas rutas para el flujo de visitas grupales
+
+@app.route('/aceptar_visita/<int:id>')
+def aceptar_visita(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    visita = VisitaGrupal.query.get(id)
+    if visita:
+        visita.estado = 'aceptada'
+        db.session.commit()
+        flash('✅ Visita marcada como aceptada.', 'success')
+    else:
+        flash('❌ Visita no encontrada.', 'danger')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/rechazar_visita/<int:id>')
+def rechazar_visita(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    visita = VisitaGrupal.query.get(id)
+    if visita:
+        visita.estado = 'rechazada'
+        db.session.commit()
+        flash('✅ Visita marcada como rechazada.', 'success')
+    else:
+        flash('❌ Visita no encontrada.', 'danger')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/asignar_fecha_visita/<int:id>', methods=['POST'])
+def asignar_fecha_visita(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    visita = VisitaGrupal.query.get(id)
+    if visita and visita.estado == 'aceptada':
+        fecha = request.form.get('fecha_confirmada')
+        visita.fecha_confirmada = fecha
+        db.session.commit()
+        flash('📅 Fecha confirmada para la visita grupal.', 'success')
+    else:
+        flash('❌ La visita no existe o no ha sido aceptada aún.', 'danger')
+    return redirect(url_for('dashboard'))
+
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
