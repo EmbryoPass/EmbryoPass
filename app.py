@@ -658,6 +658,11 @@ def logout():
     session.pop('usuario', None)
     flash('✅ Sesión cerrada.', 'success')
     return redirect(url_for('login'))
-        
+
+def inicializar_tablas():
+    with app.app_context():
+        db.create_all()
+
 if __name__ == '__main__':
+    inicializar_tablas()
     app.run(host='0.0.0.0', port=10000)
