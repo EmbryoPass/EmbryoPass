@@ -28,7 +28,6 @@
       font-size: 1.7rem;
       margin-top: 0.2rem;
     }
-    /* Ajustes para celular */
     @media (max-width: 600px) {
       .logo-header {
         position: static;
@@ -47,10 +46,8 @@
 </head>
 <body class="bg-light">
 
-<!-- Logo -->
 <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="logo-header">
 
-<!-- Texto central -->
 <div class="texto-museo">
   <h1 class="titulo-museo">🏛️ Museo de Embriología</h1>
   <h4 class="subtitulo-dra">Dra. Dora Virginia Chávez Corral</h4>
@@ -66,17 +63,18 @@
   {% endif %}
 {% endwith %}
 
-<form method="POST" class="card p-4 shadow" id="agendarForm" onsubmit="disableButton()">
+<form method="POST" class="card p-4 shadow" id="agendarForm" onsubmit="return validarCorreos();">
   <div class="mb-3">
     <label for="nombre" class="form-label">Nombre completo</label>
-    <input type="text" class="form-control" id="nombre" name="nombre" required>
+    <input type="text" class="form-control" id="nombre" name="nombre" required value="{{ request.form.get('nombre', '') }}">
   </div>
   <div class="mb-3">
     <label for="correo" class="form-label">Correo electrónico</label>
-    <input type="email" class="form-control" id="correo" name="correo" required>
+    <input type="email" class="form-control" id="correo" name="correo" required value="{{ request.form.get('correo', '') }}">
+  </div>
   <div class="mb-3">
     <label for="confirmar_correo" class="form-label">Confirmar correo electrónico</label>
-    <input type="email" class="form-control" id="confirmar_correo" name="confirmar_correo" required>
+    <input type="email" class="form-control" id="confirmar_correo" name="confirmar_correo" required value="{{ request.form.get('confirmar_correo', '') }}">
   </div>
   <div class="mb-3">
     <label for="telefono" class="form-label">Teléfono</label>
@@ -86,33 +84,52 @@
            name="telefono" 
            pattern="\d{10}" 
            title="Introduce un número de 10 dígitos"
-           required>
+           required value="{{ request.form.get('telefono', '') }}">
   </div>
   <div class="mb-3">
     <label for="horario" class="form-label">Selecciona un horario</label>
     {% if horarios %}
-  <select class="form-select" id="horario" name="horario" required>
-    {% for id, fecha_hora, disponibles in horarios %}
-         <option value="{{ id }}">{{ fecha_hora }} ({{ disponibles }} lugares)</option>
-    {% endfor %}
-  </select>
-{% else %}
-  <div class="alert alert-warning text-center" role="alert">
-    Por el momento no hay ningún horario disponible.
-  </div>
-{% endif %}
+    <select class="form-select" id="horario" name="horario" required>
+      {% for id, fecha_hora, disponibles in horarios %}
+        <option value="{{ id }}" {% if request.form.get('horario') == id|string %}selected{% endif %}>
+          {{ fecha_hora }} ({{ disponibles }} lugares)
+        </option>
+      {% endfor %}
+    </select>
+    {% else %}
+      <div class="alert alert-warning text-center" role="alert">
+        Por el momento no hay ningún horario disponible.
+      </div>
+    {% endif %}
   </div>
   <div class="text-center">
     <button type="submit" id="agendarBtn" class="btn" style="background-color: #8B4513; color: white;">Agendar cita</button>
   </div>
 </form>
 
-<!-- Scripts -->
 <script>
   function disableButton() {
     const button = document.getElementById('agendarBtn');
-    button.disabled = true;  // Desactiva el botón
-    button.innerHTML = "Procesando...";  // Cambia el texto del botón
+    button.disabled = true;
+    button.innerHTML = "Procesando...";
+  }
+
+  function validarCorreos() {
+    const correo = document.getElementById('correo').value.trim();
+    const confirmar = document.getElementById('confirmar_correo').value.trim();
+
+    if (correo !== confirmar) {
+      alert('❌ Los correos no coinciden. Por favor verifícalos.');
+      return false;
+    }
+
+    if (!correo.includes('@') || !correo.includes('.')) {
+      alert('❌ El correo debe tener un dominio válido (como @gmail.com).');
+      return false;
+    }
+
+    disableButton();
+    return true;
   }
 </script>
 
