@@ -3,3 +3,6 @@ flask_sqlalchemy
 psycopg2-binary
 pytz
 requests
+pandas
+openpyxl
+
