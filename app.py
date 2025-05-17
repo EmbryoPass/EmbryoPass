@@ -54,6 +54,12 @@ def home_redirect():
 def solicitar_visita_grupal():
     return "Aquí irá el formulario para solicitar visita grupal institucional."
 
+@app.route('/solicitar_visita_grupal', methods=['GET', 'POST'])
+def solicitar_visita_grupal():
+    if request.method == 'POST':
+        # Aquí manejas el guardado y envío de correos...
+        pass  # ya agregaremos la lógica completa si aún no la tienes
+    return render_template('solicitar_visita_grupal.html')
 
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
