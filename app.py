@@ -489,6 +489,67 @@ def agregar_horario():
     flash('✅ Horario agregado.', 'success')
     return redirect(url_for('dashboard'))
 
+@app.route('/descargar_historial')
+def descargar_historial():
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    zona = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona)
+    rango = request.args.get('rango', default='30')
+
+    if rango == '7':
+        inicio_rango = ahora - timedelta(days=7)
+    elif rango == '30':
+        inicio_rango = ahora - timedelta(days=30)
+    elif rango == 'mes':
+        inicio_rango = ahora.replace(day=1)
+    elif rango == 'todo':
+        inicio_rango = datetime.min.replace(tzinfo=zona)
+    else:
+        inicio_rango = ahora - timedelta(days=30)
+
+    citas = Cita.query.all()
+    historial = []
+
+    for c in citas:
+        try:
+            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+        if fecha < ahora and fecha >= inicio_rango:
+            historial.append(c)
+
+    data = [{
+        'ID': c.id,
+        'Nombre': c.nombre,
+        'Correo': c.correo,
+        'Teléfono': c.telefono,
+        'Edad': c.edad,
+        'Sexo': c.sexo,
+        'Fecha y Hora': c.fecha_hora,
+        'Estado': c.estado,
+        'Asistió': c.asistio
+    } for c in historial]
+
+    df = pd.DataFrame(data)
+
+    output = pd.ExcelWriter('historial_citas.xlsx', engine='openpyxl')
+    df.to_excel(output, index=False, sheet_name='Historial')
+    output.close()
+
+    with open('historial_citas.xlsx', 'rb') as f:
+        excel_data = f.read()
+
+    response = make_response(excel_data)
+    response.headers['Content-Disposition'] = 'attachment; filename=historial_citas.xlsx'
+    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    return response
+
+
 @app.route('/logout')
 def logout():
     session.pop('usuario', None)
