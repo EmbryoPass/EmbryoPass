@@ -50,11 +50,8 @@ def inicio():
 def home_redirect():
     return redirect(url_for('inicio'))
 
-@app.route('/solicitar_visita_grupal', methods=['GET', 'POST'])
+@app.route('/solicitar-visita-grupal', methods=['GET', 'POST'])
 def solicitar_visita_grupal():
-    if request.method == 'POST':
-        # Aquí manejas el guardado y envío de correos...
-        pass  # ya agregaremos la lógica completa si aún no la tienes
     return render_template('solicitar_visita_grupal.html')
 
 # Función para enviar correos
