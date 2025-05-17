@@ -50,10 +50,6 @@ def inicio():
 def home_redirect():
     return redirect(url_for('inicio'))
 
-@app.route('/solicitar-visita-grupal')
-def solicitar_visita_grupal():
-    return "Aquí irá el formulario para solicitar visita grupal institucional."
-
 @app.route('/solicitar_visita_grupal', methods=['GET', 'POST'])
 def solicitar_visita_grupal():
     if request.method == 'POST':
