@@ -25,6 +25,8 @@
             <thead class="table-dark">
                 <tr>
                     <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
                     <th>Correo</th>
                     <th>Teléfono</th>
                     <th>Fecha y Hora</th>
@@ -36,6 +38,8 @@
                 {% for cita in citas %}
                 <tr>
                     <td>{{ cita[1] }}</td>
+                    <td>{{ cita[7] or '—' }}</td>
+                    <td>{{ cita[8] or '—' }}</td>
                     <td>{{ cita[2] }}</td>
                     <td>{{ cita[3] }}</td>
                     <td>{{ cita[4] }}</td>
@@ -120,6 +124,8 @@
             <thead class="table-secondary">
                 <tr>
                     <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
                     <th>Correo</th>
                     <th>Teléfono</th>
                     <th>Fecha y Hora</th>
@@ -132,6 +138,8 @@
                 {% for cita in historial %}
                 <tr>
                     <td>{{ cita[1] }}</td>
+                    <td>{{ cita[7] or '—' }}</td>
+                    <td>{{ cita[8] or '—' }}</td>
                     <td>{{ cita[2] }}</td>
                     <td>{{ cita[3] }}</td>
                     <td>{{ cita[4] }}</td>
