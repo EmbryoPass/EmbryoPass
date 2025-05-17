@@ -66,36 +66,49 @@
 <form method="POST" class="card p-4 shadow-sm">
   <div class="mb-3">
     <label class="form-label">Nombre del encargado</label>
-    <input type="text" class="form-control" name="nombre_encargado" required>
+    <input type="text" class="form-control" name="nombre_encargado" required value="{{ request.form.get('nombre_encargado', '') }}">
   </div>
+
   <div class="mb-3">
     <label class="form-label">Correo del encargado</label>
-    <input type="email" class="form-control" name="correo_encargado" required>
+    <input type="email" class="form-control" name="correo_encargado" required value="{{ request.form.get('correo_encargado', '') }}">
   </div>
+
+  <div class="mb-3">
+    <label class="form-label">Confirmar correo del encargado</label>
+    <input type="email" class="form-control" name="confirmar_correo_encargado" required value="{{ request.form.get('confirmar_correo_encargado', '') }}">
+  </div>
+
   <div class="mb-3">
     <label class="form-label">Teléfono del encargado</label>
-    <input type="text" class="form-control" name="telefono_encargado" pattern="\d{10}" title="Introduce un número de 10 dígitos" required>
+    <input type="text" class="form-control" name="telefono_encargado" pattern="\d{10}" title="Introduce un número de 10 dígitos" required value="{{ request.form.get('telefono_encargado', '') }}">
   </div>
+
   <div class="mb-3">
     <label class="form-label">Institución</label>
-    <input type="text" class="form-control" name="institucion" required>
+    <input type="text" class="form-control" name="institucion" required value="{{ request.form.get('institucion', '') }}">
   </div>
+
   <div class="mb-3">
     <label class="form-label">Nivel educativo</label>
-    <input type="text" class="form-control" name="nivel_educativo" required>
+    <input type="text" class="form-control" name="nivel_educativo" required value="{{ request.form.get('nivel_educativo', '') }}">
   </div>
+
   <div class="mb-3">
     <label class="form-label">Número estimado de alumnos</label>
-    <input type="number" class="form-control" name="numero_alumnos" min="1" required>
+    <input type="number" class="form-control" name="numero_alumnos" min="1" required value="{{ request.form.get('numero_alumnos', '') }}">
   </div>
+
   <div class="mb-3">
     <label class="form-label">Fechas y horarios propuestos</label>
-    <textarea class="form-control" name="fechas_preferidas" rows="3" required></textarea>
+    <textarea class="form-control" name="fechas_preferidas" rows="3" required>{{ request.form.get('fechas_preferidas', '') }}</textarea>
   </div>
+
   <div class="mb-3">
     <label class="form-label">Comentarios adicionales</label>
-    <textarea class="form-control" name="comentarios" rows="3"></textarea>
+    <textarea class="form-control" name="comentarios" rows="3">{{ request.form.get('comentarios', '') }}</textarea>
   </div>
+
   <div class="text-center">
     <button type="submit" class="btn" style="background-color: #8B4513; color: white;">Enviar solicitud</button>
   </div>
