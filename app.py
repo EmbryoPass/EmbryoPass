@@ -41,6 +41,16 @@ class Cita(db.Model):
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
 
+@app.route('/agregar_columnas_temporales')
+def agregar_columnas_temporales():
+    try:
+        with db.engine.connect() as connection:
+            connection.execute('ALTER TABLE cita ADD COLUMN edad INTEGER')
+            connection.execute('ALTER TABLE cita ADD COLUMN sexo VARCHAR(10)')
+        return "✅ Columnas 'edad' y 'sexo' agregadas correctamente."
+    except Exception as e:
+        return f"❌ Error: {e}"
+
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje = MIMEMultipart()
