@@ -145,6 +145,36 @@
       </table>
     </div>
 
+    <h2 class="mt-5">Estudiantes Registrados en Visitas Grupales</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover shadow-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Edad</th>
+            <th>Sexo</th>
+            <th>Institución</th>
+            <th>Nivel académico</th>
+            <th>Registrado a las</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for estudiante in estudiantes_grupales %}
+          <tr>
+            <td>{{ estudiante.nombre }}</td>
+            <td>{{ estudiante.correo }}</td>
+            <td>{{ estudiante.edad }}</td>
+            <td>{{ estudiante.sexo }}</td>
+            <td>{{ estudiante.visita.institucion }}</td>
+            <td>{{ estudiante.visita.nivel }}</td>
+            <td>{{ estudiante.hora_registro }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
     <h2 class="mt-5">Agregar Nuevo Horario</h2>
     <form method="POST" action="{{ url_for('agregar_horario') }}" class="card p-4 shadow-sm">
         <div class="mb-3">
