@@ -236,15 +236,24 @@ def solicitar_visita_grupal():
         patron_correo = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
-            return redirect(url_for('solicitar_visita_grupal'))
+            return render_template('solicitar_visita_grupal.html')
         if not re.match(patron_correo, correo):
             flash('❌ El correo no tiene un formato válido.', 'danger')
-            return redirect(url_for('solicitar_visita_grupal'))
+            return render_template('solicitar_visita_grupal.html')
 
         # ✅ Validar teléfono
         if not telefono.isdigit() or len(telefono) != 10:
             flash('❌ El teléfono debe contener exactamente 10 dígitos numéricos.', 'danger')
-            return redirect(url_for('solicitar_visita_grupal'))
+            return render_template('solicitar_visita_grupal.html')
+
+        # ✅ Validar número de alumnos
+        try:
+            numero_alumnos = int(numero_alumnos)
+            if numero_alumnos <= 0:
+                raise ValueError
+        except:
+            flash('❌ El número de alumnos debe ser mayor a 0.', 'danger')
+            return render_template('solicitar_visita_grupal.html')
 
         # ✅ Guardar en la base de datos
         nueva_visita = VisitaGrupal(
@@ -300,6 +309,7 @@ def solicitar_visita_grupal():
         return redirect(url_for('inicio'))
 
     return render_template('solicitar_visita_grupal.html')
+
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
