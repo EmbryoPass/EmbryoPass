@@ -478,21 +478,6 @@ def logout():
     session.pop('usuario', None)
     flash('✅ Sesión cerrada.', 'success')
     return redirect(url_for('login'))
-
-@app.route('/agregar_columnas_temporales')
-def agregar_columnas_temporales():
-    if 'usuario' not in session:
-        return 'Acceso no autorizado', 403
-
-    try:
-        with db.engine.connect() as conn:
-            # Agregar columna 'edad' si no existe
-            conn.execute(text("ALTER TABLE cita ADD COLUMN IF NOT EXISTS edad INTEGER"))
-            # Agregar columna 'sexo' si no existe
-            conn.execute(text("ALTER TABLE cita ADD COLUMN IF NOT EXISTS sexo VARCHAR(10)"))
-        return '✅ Columnas "edad" y "sexo" agregadas correctamente.'
-    except Exception as e:
-        return f'❌ Error al agregar columnas: {e}'
         
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
