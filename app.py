@@ -74,8 +74,20 @@ def agendar():
     if request.method == 'POST':
         nombre = request.form['nombre']
         correo = request.form['correo']
+        confirmar_correo = request.form['confirmar_correo']
         telefono = request.form['telefono']
         horario_id = request.form['horario']
+
+        if correo != confirmar_correo:
+            flash('❌ Los correos no coinciden.', 'danger')
+            return redirect(url_for('agendar'))
+
+        # ❌ Si el correo no tiene dominio válido
+        import re
+        patron = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(patron, correo):
+            flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
+            return redirect(url_for('agendar'))
 
         # ✅ Validar teléfono (exactamente 10 dígitos)
         if not telefono.isdigit() or len(telefono) != 10:
