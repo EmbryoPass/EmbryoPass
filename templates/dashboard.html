@@ -86,64 +86,60 @@
     </div>
 
     <h2 class="mt-5">Solicitudes de Visitas Grupales Institucionales</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover shadow-sm">
-        <thead class="table-secondary">
-          <tr>
-            <th>Institución</th>
-            <th>Encargado</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th>Nivel</th>
-            <th>Alumnos</th>
-            <th>Estado</th>
-            <th>Fecha sugerida</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for visita in visitas_grupales %}
-          <tr>
-            <td>{{ visita.institucion }}</td>
-            <td>{{ visita.encargado }}</td>
-            <td>{{ visita.correo }}</td>
-            <td>{{ visita.telefono }}</td>
-            <td>{{ visita.nivel }}</td>
-            <td>{{ visita.numero_alumnos }}</td>
-            <td>
-              {% if visita.estado == 'pendiente' %}
-                <span class="badge bg-warning text-dark">Pendiente</span>
-              {% elif visita.estado == 'aceptada' %}
-                <span class="badge bg-success">Aceptada</span>
-              {% elif visita.estado == 'rechazada' %}
-                <span class="badge bg-danger">Rechazada</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if visita.fecha_confirmada %}
-                {{ visita.fecha_confirmada }}
-              {% else %}
-                <span class="text-muted">No confirmada</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if visita.estado == 'pendiente' %}
-              <div class="d-flex gap-1">
-                <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-success">Aceptar</a>
-                <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-danger">Rechazar</a>
-              </div>
-              {% elif visita.estado == 'aceptada' %}
-              <form method="POST" action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" class="d-flex gap-2 align-items-center">
-                <input type="text" name="fecha_confirmada" class="form-control form-control-sm" placeholder="dd/mm/aaaa hh:mm">
-                <button type="submit" class="btn btn-sm btn-outline-primary">Asignar fecha</button>
-              </form>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<div class="table-responsive">
+  <table class="table table-bordered table-hover shadow-sm">
+    <thead class="table-secondary">
+      <tr>
+        <th>Institución</th>
+        <th>Encargado</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+        <th>Nivel</th>
+        <th>Alumnos</th>
+        <th>Fechas Propuestas</th>
+        <th>Comentarios</th>
+        <th>Estado</th>
+        <th>Fecha Confirmada</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for visita in visitas_grupales %}
+      <tr>
+        <td>{{ visita.institucion }}</td>
+        <td>{{ visita.encargado }}</td>
+        <td>{{ visita.correo }}</td>
+        <td>{{ visita.telefono }}</td>
+        <td>{{ visita.nivel }}</td>
+        <td>{{ visita.numero_alumnos }}</td>
+        <td>{{ visita.fechas_preferidas }}</td>
+        <td>{{ visita.comentarios or '—' }}</td>
+        <td>
+          {% if visita.estado == 'pendiente' %}
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          {% elif visita.estado == 'aceptada' %}
+            <span class="badge bg-success">Aceptada</span>
+          {% elif visita.estado == 'rechazada' %}
+            <span class="badge bg-danger">Rechazada</span>
+          {% endif %}
+        </td>
+        <td>{{ visita.fecha_confirmada or '—' }}</td>
+        <td>
+          {% if visita.estado == 'pendiente' %}
+            <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-success mb-1">Aceptar</a>
+            <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-danger mb-1">Rechazar</a>
+          {% elif visita.estado == 'aceptada' %}
+            <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
+              <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1" required>
+              <button type="submit" class="btn btn-sm btn-primary">Asignar Fecha</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
     <h2 class="mt-5">Estudiantes Registrados en Visitas Grupales</h2>
     <div class="table-responsive">
