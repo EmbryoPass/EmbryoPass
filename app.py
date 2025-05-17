@@ -24,22 +24,6 @@ with app.app_context():
 GMAIL_USER = 'museoembriologia@gmail.com'
 GMAIL_PASSWORD = 'qukljqwqdnfjdzgm'
 
-from sqlalchemy import text
-
-@app.route('/forzar_columnas_cita')
-def forzar_columnas_cita():
-    if 'usuario' not in session:
-        return 'Acceso no autorizado', 403
-
-    try:
-        with db.engine.begin() as conn:
-            conn.execute(text("ALTER TABLE cita ADD COLUMN IF NOT EXISTS edad INTEGER"))
-            conn.execute(text("ALTER TABLE cita ADD COLUMN IF NOT EXISTS sexo VARCHAR(10)"))
-        return '✅ Columnas edad y sexo agregadas correctamente.'
-    except Exception as e:
-        return f'❌ Error: {e}'
-
-
 # MODELOS
 class Horario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,6 +42,13 @@ class Cita(db.Model):
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
 
+@app.route('/inicio')
+def inicio():
+    return render_template('index.html')
+
+@app.route('/')
+def home_redirect():
+    return redirect(url_for('inicio'))
 
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
