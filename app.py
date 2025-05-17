@@ -79,6 +79,8 @@ def agendar():
         confirmar_correo = request.form['confirmar_correo']
         telefono = request.form['telefono']
         horario_id = request.form['horario']
+        edad = request.form['edad']
+        sexo = request.form['sexo']
 
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
@@ -132,6 +134,8 @@ def agendar():
                 telefono=telefono,
                 fecha_hora=horario.fecha_hora,
                 token_cancelacion=token
+                edad=edad,
+                sexo=sexo
             )
             db.session.add(nueva_cita)
             db.session.commit()
