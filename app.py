@@ -38,7 +38,7 @@ class Cita(db.Model):
     estado = db.Column(db.String(20), default='activa')
     asistio = db.Column(db.String(10), nullable=True)
     token_cancelacion = db.Column(db.String(100), nullable=False)
-    edad = db.Column(db.Integer, nullable=True) 
+    edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
 
 # Función para enviar correos
@@ -86,19 +86,17 @@ def agendar():
             flash('❌ Los correos no coinciden.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ❌ Si el correo no tiene dominio válido
+        # Validar formato de correo
         import re
         patron = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if not re.match(patron, correo):
             flash('❌ El correo electrónico no tiene un formato válido.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ✅ Validar teléfono (exactamente 10 dígitos)
         if not telefono.isdigit() or len(telefono) != 10:
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('agendar'))
 
-        # ✅ Evitar duplicados (misma persona, mismo horario y activa)
         horario = Horario.query.get(horario_id)
         if not horario:
             flash('❌ El horario seleccionado no existe.', 'danger')
@@ -114,7 +112,6 @@ def agendar():
             return redirect(url_for('agendar'))
 
         try:
-            # 🚨 Actualizar de forma atómica
             rows_updated = db.session.execute(
                 db.update(Horario)
                 .where(Horario.id == horario_id)
@@ -133,14 +130,13 @@ def agendar():
                 correo=correo,
                 telefono=telefono,
                 fecha_hora=horario.fecha_hora,
-                token_cancelacion=token
+                token_cancelacion=token,
                 edad=edad,
                 sexo=sexo
             )
             db.session.add(nueva_cita)
             db.session.commit()
 
-            # ✉️ Correo al usuario
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -152,6 +148,8 @@ def agendar():
         <li><strong>Nombre:</strong> {nombre}</li>
         <li><strong>Correo:</strong> {correo}</li>
         <li><strong>Teléfono:</strong> {telefono}</li>
+        <li><strong>Edad:</strong> {edad}</li>
+        <li><strong>Sexo:</strong> {sexo}</li>
         <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       </ul>
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
@@ -168,7 +166,6 @@ def agendar():
             """
             enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
-            # ✉️ Notificación al museo
             enviar_correo(
                 GMAIL_USER,
                 'Nueva Cita Agendada',
@@ -180,6 +177,8 @@ def agendar():
                     <li><strong>Nombre:</strong> {nombre}</li>
                     <li><strong>Correo:</strong> {correo}</li>
                     <li><strong>Teléfono:</strong> {telefono}</li>
+                    <li><strong>Edad:</strong> {edad}</li>
+                    <li><strong>Sexo:</strong> {sexo}</li>
                     <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
                   </ul>
                 </body>
@@ -196,7 +195,6 @@ def agendar():
             print(f"Error al agendar cita: {e}")
 
     return render_template('agendar.html', horarios=horarios)
-
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
@@ -243,7 +241,13 @@ def dashboard():
         except ValueError:
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
-        tupla = (c.id, c.nombre, c.correo, c.telefono, c.fecha_hora, c.estado, c.asistio)
+
+        # Añadir edad y sexo a la tupla
+        tupla = (
+            c.id, c.nombre, c.correo, c.telefono,
+            c.fecha_hora, c.estado, c.asistio,
+            c.edad, c.sexo
+        )
 
         if fecha >= ahora:
             citas_futuras.append(tupla)
@@ -260,7 +264,13 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
-    return render_template('dashboard.html', citas=citas_futuras, historial=citas_pasadas, horarios=horarios, rango=rango)
+    return render_template(
+        'dashboard.html',
+        citas=citas_futuras,
+        historial=citas_pasadas,
+        horarios=horarios,
+        rango=rango
+    )
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
@@ -288,7 +298,7 @@ def cancelar_usuario(id_cita, token):
             horario.disponibles += 1
         db.session.commit()
 
-        # ✉️ Notificación al museo
+        # ✉️ Notificación al museo incluyendo edad y sexo
         cuerpo_admin = f"""
         <html>
           <body style="font-family: Arial, sans-serif; color: #333;">
@@ -299,6 +309,8 @@ def cancelar_usuario(id_cita, token):
                 <li><strong>Nombre:</strong> {cita.nombre}</li>
                 <li><strong>Correo:</strong> {cita.correo}</li>
                 <li><strong>Teléfono:</strong> {cita.telefono}</li>
+                <li><strong>Edad:</strong> {cita.edad or '—'}</li>
+                <li><strong>Sexo:</strong> {cita.sexo or '—'}</li>
                 <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
               </ul>
             </div>
@@ -311,7 +323,6 @@ def cancelar_usuario(id_cita, token):
     else:
         flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
     return redirect(url_for('agendar'))
-
 
 @app.route('/cancelar_cita/<int:id_cita>')
 def cancelar_cita(id_cita):
@@ -327,8 +338,8 @@ def cancelar_cita(id_cita):
             horario.disponibles += 1
         db.session.commit()
 
-        # ✉️ Enviar correo estilizado al usuario
-        cuerpo = f"""
+        # ✉️ Correo al usuario
+        cuerpo_usuario = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
@@ -336,25 +347,44 @@ def cancelar_cita(id_cita):
       <p>Hola <strong>{cita.nombre}</strong>,</p>
       <p>Tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{cita.fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
       <p>Te invitamos a agendar una nueva cita.</p>
-      
       <p style="text-align: center; margin-top: 20px;">
         <a href="https://embryopass.onrender.com/" 
            style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
            Agendar nueva cita
         </a>
       </p>
-
       <p style="margin-top: 20px;">Gracias por la comprensión.</p>
     </div>
   </body>
 </html>
 """
+        enviar_correo(cita.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo_usuario)
 
-        enviar_correo(cita.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
+        # ✉️ Notificación al museo
+        cuerpo_admin = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+      <h2 style="color: #d9534f;">Cancelación de Cita desde el Panel</h2>
+      <p>Una cita fue cancelada desde el panel de administración:</p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Nombre:</strong> {cita.nombre}</li>
+        <li><strong>Correo:</strong> {cita.correo}</li>
+        <li><strong>Teléfono:</strong> {cita.telefono}</li>
+        <li><strong>Edad:</strong> {cita.edad or '—'}</li>
+        <li><strong>Sexo:</strong> {cita.sexo or '—'}</li>
+        <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
+      </ul>
+    </div>
+  </body>
+</html>
+"""
+        enviar_correo('museoembriologia@gmail.com', 'Cancelación de Cita - Museo de Embriología', cuerpo_admin)
 
         flash('✅ Cita cancelada, correo enviado y espacio liberado.', 'success')
 
     return redirect(url_for('dashboard'))
+
 
 @app.route('/eliminar_cita/<int:id_cita>')
 def eliminar_cita(id_cita):
@@ -378,8 +408,11 @@ def eliminar_horario(id_horario):
     horario = Horario.query.get(id_horario)
     if horario:
         citas = Cita.query.filter_by(fecha_hora=horario.fecha_hora, estado='activa').all()
+
         for c in citas:
             c.estado = "cancelada"
+
+            # ✉️ Correo al usuario
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -388,21 +421,35 @@ def eliminar_horario(id_horario):
       <p>Hola <strong>{c.nombre}</strong>,</p>
       <p>Tu cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
       <p>Te invitamos a agendar una nueva cita.</p>
-
       <p style="text-align: center;">
         <a href="https://embryopass.onrender.com/" 
            style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
            Agendar nueva cita
         </a>
       </p>
-
       <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
     </div>
   </body>
 </html>
 """
-
             enviar_correo(c.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
+
+        # ✉️ Notificación global al museo
+        cuerpo_admin = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+              <h2 style="color: #d9534f;">Horario Eliminado</h2>
+              <p>El siguiente horario ha sido eliminado y todas sus citas activas han sido canceladas:</p>
+              <ul>
+                <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
+                <li><strong>Total de citas canceladas:</strong> {len(citas)}</li>
+              </ul>
+            </div>
+          </body>
+        </html>
+        """
+        enviar_correo('museoembriologia@gmail.com', 'Horario eliminado - Museo de Embriología', cuerpo_admin)
 
         db.session.delete(horario)
         db.session.commit()
