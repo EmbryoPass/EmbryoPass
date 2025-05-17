@@ -347,7 +347,6 @@ def dashboard():
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        # Añadir edad y sexo a la tupla
         tupla = (
             c.id, c.nombre, c.correo, c.telefono,
             c.fecha_hora, c.estado, c.asistio,
@@ -369,12 +368,15 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
+    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+
     return render_template(
         'dashboard.html',
         citas=citas_futuras,
         historial=citas_pasadas,
         horarios=horarios,
-        rango=rango
+        rango=rango,
+        visitas_grupales=visitas_grupales
     )
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
