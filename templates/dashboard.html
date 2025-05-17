@@ -282,12 +282,23 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Flatpickr para agregar horario
     flatpickr("#fecha_hora", {
         enableTime: true,
         dateFormat: "d/m/Y h:i K",
-        time_24hr: false
+        time_24hr: false,
+        minDate: "today"
     });
 
+    // Flatpickr para todos los inputs que asignan fecha a visitas aceptadas
+    flatpickr("input[name='fecha_confirmada']", {
+        enableTime: true,
+        dateFormat: "d/m/Y h:i K",
+        time_24hr: false,
+        minDate: "today"
+    });
+
+    // Confirmaciones para cancelar o eliminar
     document.addEventListener("DOMContentLoaded", function () {
         const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger');
 
