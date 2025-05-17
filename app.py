@@ -69,7 +69,7 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
     servidor.quit()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/agendar-cita', methods=['GET', 'POST'])
 def agendar():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
