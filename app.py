@@ -42,6 +42,19 @@ class Cita(db.Model):
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
 
+class VisitaGrupal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    encargado = db.Column(db.String(100), nullable=False)  # nombre_encargado en el formulario
+    correo = db.Column(db.String(120), nullable=False)      # correo_encargado
+    telefono = db.Column(db.String(20), nullable=False)     # telefono_encargado
+    institucion = db.Column(db.String(100), nullable=False)
+    nivel = db.Column(db.String(50), nullable=False)        # nivel_educativo
+    numero_alumnos = db.Column(db.Integer, nullable=False)
+    fechas_preferidas = db.Column(db.Text, nullable=False)
+    comentarios = db.Column(db.Text)
+    estado = db.Column(db.String(20), default='pendiente')
+    fecha_confirmada = db.Column(db.String(100), nullable=True)
+
 @app.route('/inicio')
 def inicio():
     return render_template('index.html')
@@ -208,6 +221,89 @@ def agendar():
             print(f"Error al agendar cita: {e}")
 
     return render_template('agendar.html', horarios=horarios)
+
+@app.route('/solicitar-visita-grupal', methods=['GET', 'POST'])
+def solicitar_visita_grupal():
+    if request.method == 'POST':
+        encargado = request.form.get('nombre_encargado')
+        correo = request.form.get('correo_encargado')
+        confirmar_correo = request.form.get('confirmar_correo_encargado')
+        telefono = request.form.get('telefono_encargado')
+        institucion = request.form.get('institucion')
+        nivel = request.form.get('nivel_educativo')
+        numero_alumnos = request.form.get('numero_alumnos')
+        fechas = request.form.get('fechas_preferidas')
+        comentarios = request.form.get('comentarios')
+
+        # ✅ Validar correo
+        import re
+        patron_correo = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if correo != confirmar_correo:
+            flash('❌ Los correos no coinciden.', 'danger')
+            return redirect(url_for('solicitar_visita_grupal'))
+        if not re.match(patron_correo, correo):
+            flash('❌ El correo no tiene un formato válido.', 'danger')
+            return redirect(url_for('solicitar_visita_grupal'))
+
+        # ✅ Validar teléfono
+        if not telefono.isdigit() or len(telefono) != 10:
+            flash('❌ El teléfono debe contener exactamente 10 dígitos numéricos.', 'danger')
+            return redirect(url_for('solicitar_visita_grupal'))
+
+        # ✅ Guardar en la base de datos
+        nueva_visita = VisitaGrupal(
+            encargado=encargado,
+            correo=correo,
+            telefono=telefono,
+            institucion=institucion,
+            nivel=nivel,
+            numero_alumnos=numero_alumnos,
+            fechas_preferidas=fechas,
+            comentarios=comentarios
+        )
+        db.session.add(nueva_visita)
+        db.session.commit()
+
+        # ✅ Correo al museo
+        cuerpo_museo = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif;">
+            <p>🧬 Se ha solicitado una visita grupal externa al museo por parte de <strong>{encargado}</strong>, de la institución <strong>{institucion}</strong>.</p>
+            <p>La Dra. Dora Virginia Chávez Corral se pondrá en contacto para coordinar los detalles.</p>
+            <br>
+            <p><strong>Detalles de la solicitud:</strong></p>
+            <ul>
+              <li><strong>Encargado:</strong> {encargado}</li>
+              <li><strong>Correo:</strong> {correo}</li>
+              <li><strong>Teléfono:</strong> {telefono}</li>
+              <li><strong>Institución:</strong> {institucion}</li>
+              <li><strong>Nivel educativo:</strong> {nivel}</li>
+              <li><strong>Número estimado de alumnos:</strong> {numero_alumnos}</li>
+              <li><strong>Fechas y horarios propuestos:</strong> {fechas}</li>
+              <li><strong>Comentarios adicionales:</strong> {comentarios or 'Ninguno'}</li>
+            </ul>
+          </body>
+        </html>
+        """
+        enviar_correo('museoembriologia@gmail.com', f'Solicitud de visita grupal externa – {institucion}', cuerpo_museo)
+
+        # ✅ Correo al encargado
+        cuerpo_encargado = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif;">
+            <p>Estimado/a <strong>{encargado}</strong>,</p>
+            <p>Hemos recibido tu solicitud de visita grupal para el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+            <p>La Dra. Chávez Corral se pondrá en contacto contigo pronto para coordinar la visita.</p>
+            <p>Gracias por tu interés.</p>
+          </body>
+        </html>
+        """
+        enviar_correo(correo, 'Solicitud recibida - Museo de Embriología', cuerpo_encargado)
+
+        flash('✅ Solicitud enviada correctamente. Revisa tu correo.', 'success')
+        return redirect(url_for('inicio'))
+
+    return render_template('solicitar_visita_grupal.html')
 
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
