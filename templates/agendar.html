@@ -119,12 +119,12 @@
     const confirmar = document.getElementById('confirmar_correo').value.trim();
 
     if (correo !== confirmar) {
-      alert('❌ Los correos no coinciden. Por favor verifícalos.');
+      alert('Los correos no coinciden. Por favor verifícalos.');
       return false;
     }
 
     if (!correo.includes('@') || !correo.includes('.')) {
-      alert('❌ El correo debe tener un dominio válido (como @gmail.com).');
+      alert('El correo debe tener un dominio válido (como @gmail.com).');
       return false;
     }
 
