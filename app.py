@@ -50,6 +50,11 @@ def inicio():
 def home_redirect():
     return redirect(url_for('inicio'))
 
+@app.route('/solicitar-visita-grupal')
+def solicitar_visita_grupal():
+    return "Aquí irá el formulario para solicitar visita grupal institucional."
+
+
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje = MIMEMultipart()
