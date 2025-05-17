@@ -63,7 +63,7 @@
   {% endif %}
 {% endwith %}
 
-<form method="POST" class="card p-4 shadow-sm">
+<form method="POST" class="card p-4 shadow-sm" id="visitaForm" onsubmit="return validarVisitaGrupal();">
   <div class="mb-3">
     <label class="form-label">Nombre del encargado</label>
     <input type="text" class="form-control" name="nombre_encargado" required value="{{ request.form.get('nombre_encargado', '') }}">
@@ -71,12 +71,12 @@
 
   <div class="mb-3">
     <label class="form-label">Correo del encargado</label>
-    <input type="email" class="form-control" name="correo_encargado" required value="{{ request.form.get('correo_encargado', '') }}">
+    <input type="email" class="form-control" name="correo_encargado" id="correo_encargado" required value="{{ request.form.get('correo_encargado', '') }}">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Confirmar correo del encargado</label>
-    <input type="email" class="form-control" name="confirmar_correo_encargado" required value="{{ request.form.get('confirmar_correo_encargado', '') }}">
+    <input type="email" class="form-control" name="confirmar_correo_encargado" id="confirmar_correo_encargado" required value="{{ request.form.get('confirmar_correo_encargado', '') }}">
   </div>
 
   <div class="mb-3">
@@ -110,9 +110,35 @@
   </div>
 
   <div class="text-center">
-    <button type="submit" class="btn" style="background-color: #8B4513; color: white;">Enviar solicitud</button>
+    <button type="submit" id="visitaBtn" class="btn" style="background-color: #8B4513; color: white;">Enviar solicitud</button>
   </div>
 </form>
+
+<script>
+  function disableVisitaButton() {
+    const button = document.getElementById('visitaBtn');
+    button.disabled = true;
+    button.innerText = "Procesando...";
+  }
+
+  function validarVisitaGrupal() {
+    const correo = document.getElementById('correo_encargado').value.trim();
+    const confirmar = document.getElementById('confirmar_correo_encargado').value.trim();
+
+    if (correo !== confirmar) {
+      alert('Los correos no coinciden. Por favor verifícalos.');
+      return false;
+    }
+
+    if (!correo.includes('@') || !correo.includes('.')) {
+      alert('El correo debe tener un dominio válido (como @gmail.com).');
+      return false;
+    }
+
+    disableVisitaButton();
+    return true;
+  }
+</script>
 
 </body>
 </html>
