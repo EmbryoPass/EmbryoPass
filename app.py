@@ -63,10 +63,6 @@ def inicio():
 def home_redirect():
     return redirect(url_for('inicio'))
 
-@app.route('/solicitar-visita-grupal', methods=['GET', 'POST'])
-def solicitar_visita_grupal():
-    return render_template('solicitar_visita_grupal.html')
-
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje = MIMEMultipart()
