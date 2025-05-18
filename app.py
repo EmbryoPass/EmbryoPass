@@ -505,14 +505,19 @@ def dashboard():
 
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
+    # ✅ Agregar estudiantes registrados
+    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+
     return render_template(
         'dashboard.html',
         citas=citas_futuras,
         historial=citas_pasadas,
         horarios=horarios,
         rango=rango,
-        visitas_grupales=visitas_grupales
+        visitas_grupales=visitas_grupales,
+        estudiantes_grupales=estudiantes_grupales  # ✅ Pasar la lista al template
     )
+
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
