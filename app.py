@@ -564,8 +564,12 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
-    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
-    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+        # Aplicar filtro por tipo (individual / grupal / todas)
+    if tipo == 'individual':
+        historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
+    elif tipo == 'grupal':
+        historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
+
 
     return render_template(
         'dashboard.html',
@@ -859,7 +863,6 @@ def agregar_horario():
     db.session.commit()
     flash('✅ Horario agregado.', 'success')
     return redirect(url_for('dashboard'))
-
 @app.route('/descargar_historial')
 def descargar_historial():
     if 'usuario' not in session:
@@ -869,6 +872,7 @@ def descargar_historial():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
+    tipo = request.args.get('tipo', default='todos')
 
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
@@ -881,41 +885,90 @@ def descargar_historial():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    citas = Cita.query.all()
     historial = []
 
-    for c in citas:
+    # Citas individuales
+    for c in Cita.query.all():
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
-        if fecha < ahora and fecha >= inicio_rango:
-            historial.append(c)
 
+        if fecha < ahora and fecha >= inicio_rango:
+            historial.append({
+                'tipo': 'Individual',
+                'id': c.id,
+                'nombre': c.nombre,
+                'correo': c.correo,
+                'telefono': c.telefono,
+                'edad': c.edad,
+                'sexo': c.sexo,
+                'fecha': c.fecha_hora,
+                'estado': c.estado,
+                'asistio': c.asistio,
+                'institucion': c.institucion,
+                'nivel': c.nivel_educativo
+            })
+
+    # Estudiantes de visitas grupales
+    for e in EstudianteGrupal.query.all():
+        try:
+            fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+        except (ValueError, TypeError):
+            continue
+        fecha = zona.localize(fecha)
+
+        if fecha < ahora and fecha >= inicio_rango:
+            historial.append({
+                'tipo': 'Grupal',
+                'id': e.id,
+                'nombre': e.nombre,
+                'correo': e.correo,
+                'telefono': e.telefono,
+                'edad': e.edad,
+                'sexo': e.sexo,
+                'fecha': e.visita.fecha_confirmada,
+                'estado': 'finalizada',
+                'asistio': 'sí',
+                'institucion': e.visita.institucion,
+                'nivel': e.visita.nivel
+            })
+
+    # Aplicar filtro por tipo
+    if tipo == 'individual':
+        historial = [h for h in historial if h['tipo'] == 'Individual']
+    elif tipo == 'grupal':
+        historial = [h for h in historial if h['tipo'] == 'Grupal']
+
+    # Construir DataFrame
     data = [{
-        'ID': c.id,
-        'Nombre': c.nombre,
-        'Correo': c.correo,
-        'Teléfono': c.telefono,
-        'Edad': c.edad,
-        'Sexo': c.sexo,
-        'Fecha y Hora': c.fecha_hora,
-        'Estado': c.estado,
-        'Asistió': c.asistio
-    } for c in historial]
+        'ID': h['id'],
+        'Nombre': h['nombre'],
+        'Correo': h['correo'],
+        'Teléfono': h['telefono'],
+        'Edad': h['edad'],
+        'Sexo': h['sexo'],
+        'Institución': h['institucion'],
+        'Nivel Académico': h['nivel'],
+        'Fecha y Hora': h['fecha'],
+        'Tipo de Cita': h['tipo'],
+        'Estado': h['estado'],
+        'Asistió': h['asistio']
+    } for h in historial]
 
     df = pd.DataFrame(data)
 
-    output = pd.ExcelWriter('historial_citas.xlsx', engine='openpyxl')
-    df.to_excel(output, index=False, sheet_name='Historial')
-    output.close()
+    # Crear archivo con fecha en el nombre
+    fecha_str = ahora.strftime("%Y-%m-%d_%H-%M")
+    nombre_archivo = f"historial_citas_{fecha_str}.xlsx"
+    df.to_excel(nombre_archivo, index=False)
 
-    with open('historial_citas.xlsx', 'rb') as f:
+    with open(nombre_archivo, 'rb') as f:
         excel_data = f.read()
 
     response = make_response(excel_data)
-    response.headers['Content-Disposition'] = 'attachment; filename=historial_citas.xlsx'
+    response.headers['Content-Disposition'] = f'attachment; filename={nombre_archivo}'
     response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     return response
