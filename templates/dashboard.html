@@ -128,6 +128,8 @@
           {% if visita.estado == 'pendiente' %}
             <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-success mb-1">Aceptar</a>
             <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-danger mb-1">Rechazar</a>
+            <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-warning mb-1">Cancelar</a>
+
           {% elif visita.estado == 'aceptada' %}
             <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
               <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1" required>
