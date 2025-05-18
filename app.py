@@ -185,7 +185,7 @@ def agendar():
            Cancelar mi cita
         </a>
       </p>
-      <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+      <p style="margin-top: 20px;">Gracias por el interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
     </div>
   </body>
 </html>
@@ -278,7 +278,6 @@ def solicitar_visita_grupal():
         <html>
           <body style="font-family: Arial, sans-serif;">
             <p>🧬 Se ha solicitado una visita grupal externa al museo por parte de <strong>{encargado}</strong>, de la institución <strong>{institucion}</strong>.</p>
-            <p>La Dra. Dora Virginia Chávez Corral se pondrá en contacto para coordinar los detalles.</p>
             <br>
             <p><strong>Detalles de la solicitud:</strong></p>
             <ul>
@@ -298,15 +297,29 @@ def solicitar_visita_grupal():
 
         # ✅ Correo al encargado
         cuerpo_encargado = f"""
-        <html>
-          <body style="font-family: Arial, sans-serif;">
-            <p>Estimado/a <strong>{encargado}</strong>,</p>
-            <p>Hemos recibido tu solicitud de visita grupal para el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-            <p>La Dra. Chávez Corral se pondrá en contacto contigo pronto para coordinar la visita.</p>
-            <p>Gracias por tu interés.</p>
-          </body>
-        </html>
-        """
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4a90e2;">Solicitud recibida - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
+      <p>Hola <strong>{encargado}</strong>,</p>
+      <p>Hemos recibido su solicitud de visita grupal para el Museo de Embriología  Dra. Dora Virginia Chávez Corral.</p>
+      <p>Nos pondremos en contacto pronto para coordinar la visita.</p>
+      </p>Aquí tienes los detalles:</p>
+      <ul style="line-height: 1.6;">
+        <li><strong>Encargado:</strong> {encargado}</li>
+        <li><strong>Correo:</strong> {correo}</li>
+        <li><strong>Teléfono:</strong> {telefono}</li>
+        <li><strong>Institución:</strong> {institucion}</li>
+        <li><strong>Nivel académico:</strong> {nivel}</li>
+        <li><strong>Alumnos estimados:</strong> {numero_alumnos}</li>
+        <li><strong>Fechas propuestas:</strong> {fechas}</li>
+      </ul>
+      <p style="margin-top: 20px;">Gracias por el interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+    </div>
+  </body>
+</html>
+"""
+
         enviar_correo(correo, 'Solicitud recibida - Museo de Embriología', cuerpo_encargado)
 
         flash('✅ Solicitud enviada correctamente. Revisa tu correo.', 'success')
@@ -480,8 +493,8 @@ def cancelar_usuario(id_cita, token):
                 <li><strong>Nombre:</strong> {cita.nombre}</li>
                 <li><strong>Correo:</strong> {cita.correo}</li>
                 <li><strong>Teléfono:</strong> {cita.telefono}</li>
-                <li><strong>Edad:</strong> {cita.edad or '—'}</li>
-                <li><strong>Sexo:</strong> {cita.sexo or '—'}</li>
+                <li><strong>Edad:</strong> {cita.edad}</li>
+                <li><strong>Sexo:</strong> {cita.sexo}</li>
                 <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
               </ul>
             </div>
@@ -542,8 +555,8 @@ def cancelar_cita(id_cita):
         <li><strong>Nombre:</strong> {cita.nombre}</li>
         <li><strong>Correo:</strong> {cita.correo}</li>
         <li><strong>Teléfono:</strong> {cita.telefono}</li>
-        <li><strong>Edad:</strong> {cita.edad or '—'}</li>
-        <li><strong>Sexo:</strong> {cita.sexo or '—'}</li>
+        <li><strong>Edad:</strong> {cita.edad}</li>
+        <li><strong>Sexo:</strong> {cita.sexo}</li>
         <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
       </ul>
     </div>
