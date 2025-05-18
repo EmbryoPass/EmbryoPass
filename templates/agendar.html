@@ -27,20 +27,22 @@
       z-index: 9999;
     }
 
-    /* Animaciones para el título de sección */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* Typewriter effect */
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
     }
-    @keyframes skewIn {
-      from { opacity: 0; transform: skewX(-20deg) translateX(-30px); }
-      to   { opacity: 1; transform: skewX(0) translateX(0); }
+    @keyframes blink-caret {
+      50% { border-color: transparent; }
     }
     .section-title {
-      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .1em solid #4a3526;
+      width: 0;
       animation:
-        fadeUp   .8s ease-out forwards,
-        skewIn   .7s ease-out forwards .3s;
+        typewriter 1.5s steps(30) forwards,
+        blink-caret .75s step-end infinite;
       font-family: 'Nunito', sans-serif;
       font-size: 1.75rem;
       font-weight: 700;
@@ -54,6 +56,7 @@
       margin: 1.5rem auto;
       height: 80px;
     }
+
     /* Título del sitio */
     .title-text {
       text-align: center;
@@ -132,7 +135,7 @@
       <small>Dra. Dora Virginia Chávez Corral</small>
     </div>
 
-    <!-- Título de sección con animaciones -->
+    <!-- Título de sección con typewriter -->
     <h2 class="section-title">Agendar cita</h2>
 
     <!-- Mensajes flash -->
@@ -175,10 +178,8 @@
       <div class="mb-3 text-start">
         <label for="sexo" class="form-label">Sexo</label>
         <select class="form-select" id="sexo" name="sexo" required>
-          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>
-            Selecciona opción
-          </option>
-          <option value="Mujer"  {% if request.form.get('sexo')=='Mujer'  %}selected{% endif %}>Mujer</option>
+          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona opción</option>
+          <option value="Mujer" {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
           <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
         </select>
       </div>
@@ -191,15 +192,13 @@
       <div class="mb-3 text-start">
         <label for="nivel" class="form-label">Nivel Académico</label>
         <select class="form-select" id="nivel" name="nivel">
-          <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>
-            Selecciona nivel
-          </option>
-          <option value="Primaria"     {% if request.form.get('nivel')=='Primaria'     %}selected{% endif %}>Primaria</option>
-          <option value="Secundaria"   {% if request.form.get('nivel')=='Secundaria'   %}selected{% endif %}>Secundaria</option>
+          <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona nivel</option>
+          <option value="Primaria" {% if request.form.get('nivel')=='Primaria' %}selected{% endif %}>Primaria</option>
+          <option value="Secundaria" {% if request.form.get('nivel')=='Secundaria' %}selected{% endif %}>Secundaria</option>
           <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
-          <option value="Universidad"  {% if request.form.get('nivel')=='Universidad'  %}selected{% endif %}>Universidad</option>
-          <option value="Posgrado"     {% if request.form.get('nivel')=='Posgrado'     %}selected{% endif %}>Posgrado</option>
-          <option value="Otro"         {% if request.form.get('nivel')=='Otro'         %}selected{% endif %}>Otro</option>
+          <option value="Universidad" {% if request.form.get('nivel')=='Universidad' %}selected{% endif %}>Universidad</option>
+          <option value="Posgrado" {% if request.form.get('nivel')=='Posgrado' %}selected{% endif %}>Posgrado</option>
+          <option value="Otro" {% if request.form.get('nivel')=='Otro' %}selected{% endif %}>Otro</option>
         </select>
         <input type="text" class="form-control mt-2" id="nivel_otro" name="nivel_otro"
                placeholder="Especifica nivel" style="display:none;"
@@ -220,13 +219,13 @@
         {% endif %}
       </div>
       <div class="text-center">
-        <button type="submit" id="agendarBtn" class="btn btn-cafe mt-3">Agendar visita</button>
+        <button type="submit" id="agendarBtn" class="btn btn-cafe mt-3">Agendar cita</button>
       </div>
     </form>
   </div>
 
   <script>
-    // Mostrar campo “Otro” nivel
+    // manejo de nivel 'Otro'
     document.getElementById('nivel').addEventListener('change', e => {
       document.getElementById('nivel_otro').style.display =
         e.target.value === 'Otro' ? 'block' : 'none';
