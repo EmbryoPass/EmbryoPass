@@ -121,8 +121,8 @@ def agendar():
         horario_id = request.form['horario']
         edad = request.form['edad']
         sexo = request.form['sexo']
-        institucion = request.form.get('institucion')
-        nivel_educativo = request.form.get('nivel_educativo')
+        institucion = request.form.get('institucion') or None
+        nivel_educativo = request.form.get('nivel') or None
 
 
         if correo != confirmar_correo:
@@ -176,6 +176,8 @@ def agendar():
                 token_cancelacion=token,
                 edad=edad,
                 sexo=sexo
+                institucion=institucion,
+                nivel_educativo=nivel_educativo
             )
             db.session.add(nueva_cita)
             db.session.commit()
