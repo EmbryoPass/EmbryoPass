@@ -23,25 +23,22 @@
       height: 80px;
     }
 
-    /* Contenedor del título siempre centrado en fila */
-    .title-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: nowrap;
+    /* Título centrado */
+    .title-text {
+      text-align: center;
       margin: 2rem 0;
     }
-    .isotipo {
-      height: 60px;
-    }
-    /* Aseguramos h1 y h3 en Nunito */
     h1, h3.option-title {
       font-family: 'Nunito', sans-serif;
       color: #2c2c2c;
     }
     h1 {
       margin: 0;
-      font-size: 2rem;
+      font-size: 2.25rem;      /* Incrementado ligeramente */
+      font-weight: 700;
+    }
+    .title-text small {
+      font-size: 1rem;         /* Subtítulo un poco más grande */
     }
 
     /* Tarjetas de opciones */
@@ -85,11 +82,11 @@
       .main-logo {
         height: 60px;
       }
-      .isotipo {
-        height: 35px;
-      }
       h1 {
-        font-size: 1.5rem;
+        font-size: 1.75rem;   /* Ajuste proporcional en móvil */
+      }
+      .title-text small {
+        font-size: 0.9rem;
       }
       .option-card h3.option-title {
         font-size: 1.25rem;
@@ -102,24 +99,19 @@
 </head>
 <body>
 
-<div class="container text-center"><!-- texto centrado en todo el contenedor -->
+<div class="container text-center pb-5">
 
   <!-- Logo principal centrado arriba -->
   <img src="{{ url_for('static', filename='logo.png') }}"
        alt="Logo Facultad"
        class="main-logo">
 
-  <!-- Título con isotipo a la izquierda y texto centrado -->
-  <div class="title-container">
-    <img src="{{ url_for('static', filename='isotipo.png') }}"
-         alt="Isotipo Museo"
-         class="isotipo me-2">
-    <div><!-- quitamos text-start y confiamos en el contenedor centrado -->
-      <h1 class="mb-1 fw-bold">Museo de Embriología</h1>
-      <small class="text-muted" style="font-family: 'Roboto', sans-serif;">
-        Dra. Dora Virginia Chávez Corral
-      </small>
-    </div>
+  <!-- Título centrado sin isotipo -->
+  <div class="title-text">
+    <h1>Museo de Embriología</h1>
+    <small class="text-muted" style="font-family: 'Roboto', sans-serif;">
+      Dra. Dora Virginia Chávez Corral
+    </small>
   </div>
 
   <!-- Mensajes flash -->
