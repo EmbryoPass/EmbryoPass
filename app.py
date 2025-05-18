@@ -347,7 +347,7 @@ def solicitar_visita_grupal():
         enviar_correo(correo, 'Solicitud recibida - Museo de Embriología', cuerpo_encargado)
 
         flash('✅ Solicitud enviada correctamente. Revisa tu correo.', 'success')
-        return redirect(url_for('inicio'))
+        return redirect(url_for('solicitar_visita'))
 
     return render_template('solicitar_visita_grupal.html')
 
