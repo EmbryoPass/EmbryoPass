@@ -41,6 +41,8 @@ class Cita(db.Model):
     token_cancelacion = db.Column(db.String(100), nullable=False)
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
+    institucion = db.Column(db.String(100), nullable=True) 
+    nivel_educativo = db.Column(db.String(50), nullable=True
 
 class VisitaGrupal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +121,9 @@ def agendar():
         horario_id = request.form['horario']
         edad = request.form['edad']
         sexo = request.form['sexo']
+        institucion = request.form.get('institucion')
+        nivel_educativo = request.form.get('nivel_educativo')
+
 
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
@@ -281,6 +286,8 @@ def solicitar_visita_grupal():
             numero_alumnos=numero_alumnos,
             fechas_preferidas=fechas,
             comentarios=comentarios
+            institucion=institucion,
+            nivel_educativo=nivel_educativo
         )
         db.session.add(nueva_visita)
         db.session.commit()
