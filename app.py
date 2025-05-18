@@ -582,6 +582,22 @@ def eliminar_cita(id_cita):
         db.session.commit()
         flash('✅ Cita eliminada.', 'success')
     return redirect(url_for('dashboard'))
+
+@app.route('/eliminar_visita_grupal/<int:id>')
+def eliminar_visita_grupal(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    visita = VisitaGrupal.query.get(id)
+    if visita:
+        db.session.delete(visita)
+        db.session.commit()
+        flash('✅ Solicitud de visita eliminada.', 'success')
+    else:
+        flash('❌ Visita no encontrada.', 'danger')
+
+    return redirect(url_for('dashboard'))
     
 @app.route('/eliminar_horario/<int:id_horario>')
 def eliminar_horario(id_horario):
