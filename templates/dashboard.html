@@ -176,6 +176,7 @@
             <th>Institución</th>
             <th>Nivel académico</th>
             <th>Fecha y Hora</th>
+            <th>Eliminar</th>
           </tr>
         </thead>
         <tbody>
@@ -188,6 +189,12 @@
             <td>{{ estudiante.visita.institucion }}</td>
             <td>{{ estudiante.visita.nivel }}</td>
             <td>{{ estudiante.visita.fecha_confirmada }}</td>
+            <td>
+              <a href="{{ url_for('eliminar_estudiante_grupal', id=estudiante.id) }}"
+                 class="btn btn-sm btn-outline-danger eliminar-estudiante-btn">
+                 🗑️
+              </a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
