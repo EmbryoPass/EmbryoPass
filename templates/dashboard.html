@@ -218,94 +218,100 @@
 
     <h2 class="mt-5">Historial de Citas Pasadas</h2>
 
-    <form method="get" class="row g-2 align-items-center mb-3">
-      <div class="col-auto">
-        <label for="rango" class="form-label fw-bold mb-0">Filtrar historial:</label>
-      </div>
-      <div class="col-auto">
-        <select name="rango" id="rango" class="form-select form-select-sm">
-          <option value="7" {% if rango == '7' %}selected{% endif %}>Últimos 7 días</option>
-          <option value="30" {% if rango == '30' %}selected{% endif %}>Últimos 30 días</option>
-          <option value="mes" {% if rango == 'mes' %}selected{% endif %}>Este mes</option>
-          <option value="todo" {% if rango == 'todo' %}selected{% endif %}>Todo el historial</option>
-        </select>
-      </div>
-      <div class="col-auto">
-        <button type="submit" class="btn btn-outline-primary btn-sm">Aplicar</button>
-      </div>
-      <div class="col-auto">
-        <a href="{{ url_for('descargar_historial', rango=rango) }}" class="btn btn-outline-success btn-sm">📥 Descargar historial en Excel</a>
-      </div>
-    </form>
+<form method="get" class="row g-2 align-items-center mb-3">
+  <div class="col-auto">
+    <label for="rango" class="form-label fw-bold mb-0">Filtrar por fecha:</label>
+  </div>
+  <div class="col-auto">
+    <select name="rango" id="rango" class="form-select form-select-sm">
+      <option value="7" {% if rango == '7' %}selected{% endif %}>Últimos 7 días</option>
+      <option value="30" {% if rango == '30' %}selected{% endif %}>Últimos 30 días</option>
+      <option value="mes" {% if rango == 'mes' %}selected{% endif %}>Este mes</option>
+      <option value="todo" {% if rango == 'todo' %}selected{% endif %}>Todo el historial</option>
+    </select>
+  </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover shadow-sm">
-            <thead class="table-secondary">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Sexo</th>
-                    <th>Institución</th>
-                    <th>Nivel Académico</th>
-                    <th>Correo</th>
-                    <th>Teléfono</th>
-                    <th>Fecha y Hora</th>
-                    <th>Estado</th>
-                    <th>Asistencia</th>
-                    <th>Eliminar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cita in historial %}
-                <tr>
-                    <td>{{ cita[1] }}</td> <!-- nombre -->
-                    <td>{{ cita[7] or '—' }}</td> <!-- edad -->
-                    <td>{{ cita[8] or '—' }}</td> <!-- sexo -->
-                    <td>{{ cita[9] or '—' }}</td> <!-- institución -->
-                    <td>{{ cita[10] or '—' }}</td> <!-- nivel académico -->
-                    <td>{{ cita[2] }}</td> <!-- correo -->
-                    <td>{{ cita[3] }}</td> <!-- teléfono -->
-                    <td>{{ cita[4] }}</td> <!-- fecha y hora -->
-                    <td>
-                        {% if cita[5] == 'activa' %}
-                            <span class="badge bg-primary">Finalizada</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Cancelada</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if cita[5] == 'cancelada' %}
-                            <span class="text-muted">—</span>
-                        {% else %}
-                            <div class="d-flex flex-column gap-1">
-                                {% if cita[6] == 'sí' %}
-                                    <span class="badge bg-success">✔️ Asistió</span>
-                                {% elif cita[6] == 'no' %}
-                                    <span class="badge bg-danger">❌ No asistió</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Sin registrar</span>
-                                {% endif %}
+  <div class="col-auto">
+    <label for="tipo" class="form-label fw-bold mb-0">Tipo de cita:</label>
+  </div>
+  <div class="col-auto">
+    <select name="tipo" id="tipo" class="form-select form-select-sm">
+      <option value="todas" {% if tipo == 'todas' %}selected{% endif %}>Todas</option>
+      <option value="individual" {% if tipo == 'individual' %}selected{% endif %}>Individual</option>
+      <option value="grupal" {% if tipo == 'grupal' %}selected{% endif %}>Grupal</option>
+    </select>
+  </div>
 
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Modificar
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ url_for('marcar_asistencia', id_cita=cita[0], estado='sí') }}">✔️ Asistió</a></li>
-                                        <li><a class="dropdown-item" href="{{ url_for('marcar_asistencia', id_cita=cita[0], estado='no') }}">❌ No asistió</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('eliminar_cita', id_cita=cita[0]) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-outline-primary btn-sm">Aplicar</button>
+  </div>
+
+  <div class="col-auto">
+    <a href="{{ url_for('descargar_historial', rango=rango, tipo=tipo) }}" class="btn btn-outline-success btn-sm">
+      📥 Descargar historial en Excel
+    </a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-hover shadow-sm">
+    <thead class="table-secondary">
+      <tr>
+        <th>Nombre</th>
+        <th>Edad</th>
+        <th>Sexo</th>
+        <th>Institución</th>
+        <th>Nivel Académico</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+        <th>Fecha y Hora</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Asistencia</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for registro in historial %}
+      <tr>
+        <td>{{ registro.nombre }}</td>
+        <td>{{ registro.edad or '—' }}</td>
+        <td>{{ registro.sexo or '—' }}</td>
+        <td>{{ registro.institucion or '—' }}</td>
+        <td>{{ registro.nivel or '—' }}</td>
+        <td>{{ registro.correo or '—' }}</td>
+        <td>{{ registro.telefono or '—' }}</td>
+        <td>{{ registro.fecha }}</td>
+        <td><span class="badge bg-info text-dark">{{ registro.tipo }}</span></td>
+        <td>
+          {% if registro.estado == 'cancelada' %}
+            <span class="badge bg-secondary">Cancelada</span>
+          {% else %}
+            <span class="badge bg-primary">Finalizada</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if registro.asistio == 'sí' %}
+            <span class="badge bg-success">✔️ Asistió</span>
+          {% elif registro.asistio == 'no' %}
+            <span class="badge bg-danger">❌ No asistió</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Sin registrar</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if registro.tipo == 'Individual' %}
+            <a href="{{ url_for('eliminar_cita', id_cita=registro.id) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
+          {% else %}
+            <a href="{{ url_for('eliminar_estudiante_grupal', id=registro.id) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 
     <div class="text-center mt-4">
         <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar sesión</a>
