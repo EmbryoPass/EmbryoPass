@@ -109,5 +109,14 @@
     <button type="submit" class="btn w-100" id="btnEnviar" style="background-color: #8B4513; color: white;">Registrar asistencia</button>
   </div>
 </form>
+
+<script>
+  document.getElementById('formAsistencia').addEventListener('submit', function () {
+    const boton = document.getElementById('btnEnviar');
+    boton.disabled = true;
+    boton.textContent = "Procesando...";
+  });
+</script>
+
 </body>
 </html>
