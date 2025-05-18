@@ -28,17 +28,29 @@
       text-align: center;
       margin: 2rem 0;
     }
-    h1, h3.option-title {
+
+    /* Estilos para el título sin todo en mayúsculas */
+    .title-text h1 {
       font-family: 'Nunito', sans-serif;
-      color: #2c2c2c;
-    }
-    h1 {
-      margin: 0;
-      font-size: 2.25rem;      /* Incrementado ligeramente */
+      font-size: 2.25rem;
       font-weight: 700;
+      /* text-transform: uppercase;  <-- eliminado */
+      letter-spacing: 0.05em;          /* menor espaciado para texto normal */
+      color: #4a3526;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(0,0,0,0.1);
+      display: inline-block;
+      margin: 0;
     }
     .title-text small {
-      font-size: 1rem;         /* Subtítulo un poco más grande */
+      display: block;
+      margin-top: 0.5rem;
+      font-family: 'Roboto', sans-serif;
+      font-variant: small-caps;
+      letter-spacing: 0.02em;
+      color: #555;
+      font-size: 1rem;
     }
 
     /* Tarjetas de opciones */
@@ -56,6 +68,7 @@
 
     /* Títulos de las tarjetas en negrita y un poco más grandes */
     .option-card h3.option-title {
+      font-family: 'Nunito', sans-serif;
       font-weight: 700;
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
@@ -82,8 +95,8 @@
       .main-logo {
         height: 60px;
       }
-      h1 {
-        font-size: 1.75rem;   /* Ajuste proporcional en móvil */
+      .title-text h1 {
+        font-size: 1.75rem;
       }
       .title-text small {
         font-size: 0.9rem;
@@ -106,12 +119,10 @@
        alt="Logo Facultad"
        class="main-logo">
 
-  <!-- Título centrado sin isotipo -->
+  <!-- Título centrado sin mayúsculas forzadas -->
   <div class="title-text">
     <h1>Museo de Embriología</h1>
-    <small class="text-muted" style="font-family: 'Roboto', sans-serif;">
-      Dra. Dora Virginia Chávez Corral
-    </small>
+    <small>Dra. Dora Virginia Chávez Corral</small>
   </div>
 
   <!-- Mensajes flash -->
