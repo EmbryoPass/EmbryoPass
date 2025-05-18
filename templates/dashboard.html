@@ -292,14 +292,12 @@
         </td>
         <td>
          {% if registro.tipo == 'Individual' %}
-           {% if registro.estado == 'cancelada' %}
-             <span class="badge bg-danger">❌ No asistió</span>
-           {% elif registro.asistio == 'sí' %}
+           {% if registro.asistio == 'sí' %}
              <span class="badge bg-success">✔️ Asistió</span>
            {% elif registro.asistio == 'no' %}
              <span class="badge bg-danger">❌ No asistió</span>
            {% else %}
-    <!-- Mostrar botones para registrar asistencia -->
+             <!-- Mostrar botones para registrar asistencia -->
              <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
                 class="btn btn-success btn-sm">✔️ Asistió</a>
              <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
