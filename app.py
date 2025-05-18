@@ -628,6 +628,54 @@ def eliminar_horario(id_horario):
 
     return redirect(url_for('dashboard'))
 
+@app.route('/cancelar_visita_grupal/<int:id>')
+def cancelar_visita_grupal(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    visita = VisitaGrupal.query.get(id)
+    if visita:
+        visita.estado = 'cancelada'
+        db.session.commit()
+
+        # Enviar correo al encargado notificando la cancelación
+        cuerpo = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #d9534f;">Cancelación de Solicitud de Visita Grupal - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
+              <p>Hola <strong>{visita.encargado}</strong>,</p>
+              <p>Lamentamos informarte que tu solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí tienes los detalles:</p>
+              <ul style="line-height: 1.6;">
+                <li><strong>Encargado:</strong> {visita.encargado}</li>
+                <li><strong>Correo:</strong> {visita.correo}</li>
+                <li><strong>Teléfono:</strong> {visita.telefono}</li>
+                <li><strong>Institución:</strong> {visita.institucion}</li>
+                <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+                <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+                <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
+                <li><strong>Comentarios:</strong> {visita.comentarios or '—'}</li>
+              </ul>
+              <p>Si deseas realizar una nueva solicitud, puedes hacerlo aquí:</p>
+              <p>
+                <a href="https://embryopass.onrender.com/ir-a-visita-grupal"
+                   style="background-color: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                   Solicitar nueva visita
+                </a>
+              </p>
+              <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+            </div>
+          </body>
+        </html>
+        """
+        enviar_correo(visita.correo, 'Cancelación de visita grupal - Museo de Embriología', cuerpo)
+
+        flash('✅ Visita cancelada y notificación enviada.', 'success')
+    else:
+        flash('❌ Visita no encontrada.', 'danger')
+    return redirect(url_for('dashboard'))
+
 
 @app.route('/agregar_horario', methods=['POST'])
 def agregar_horario():
