@@ -15,34 +15,40 @@
       font-family: 'Roboto', sans-serif;
       color: #333;
     }
-    /* Logo principal */
-    .main-logo {
-      display: block;
-      margin: 1.5rem auto 0.5rem;
-      height: 80px;
-    }
-    /* Contenedor del título siempre en fila */
-    .title-container {
+
+    /* Cabecera: isotipo a la izquierda, logo a la derecha */
+    .header-container {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      flex-wrap: nowrap;
-      margin-bottom: 2rem;
+      margin: 2rem 0 1rem;
     }
     .isotipo {
       height: 60px;
     }
-    h1, h3.option-title {
+    .main-logo {
+      height: 60px;
+    }
+
+    /* Texto del título centrado y en negrita */
+    .title-text {
+      text-align: center;
+      flex: 1;
+      margin: 0 1rem;
+    }
+    .title-text h1 {
+      margin: 0;
       font-family: 'Nunito', sans-serif;
+      font-weight: 700;    /* Negrita */
+      font-size: 2rem;
       color: #2c2c2c;
     }
-    h1 {
-      margin: 0;
-      font-size: 2rem;
+    .title-text small {
+      font-family: 'Roboto', sans-serif;
+      color: #555;
     }
-    h3.option-title {
-      font-size: 1.75rem;
-    }
+
+    /* Tarjetas de opciones */
     .option-card {
       border: 1px solid #dee2e6;
       border-radius: 10px;
@@ -54,28 +60,45 @@
     .option-card:hover {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
+    .option-card h3.option-title {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .option-card p {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    /* Botón café */
     .btn-cafe {
       background-color: #8B4513;
       color: white;
       border: none;
       font-family: 'Nunito', sans-serif;
+      font-weight: 700;
     }
     .btn-cafe:hover {
       background-color: #6e3610;
     }
+
     /* Ajustes para móvil */
     @media (max-width: 576px) {
-      .main-logo {
-        height: 60px;
+      .header-container {
+        flex-direction: column;
       }
-      .isotipo {
-        height: 35px;
+      .isotipo, .main-logo {
+        height: 40px;
       }
-      h1 {
+      .title-text h1 {
         font-size: 1.5rem;
       }
-      h3.option-title {
-        font-size: 1rem;
+      .option-card h3.option-title {
+        font-size: 1.25rem;
+      }
+      .option-card p {
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -84,22 +107,18 @@
 
 <div class="container">
 
-  <!-- Logo principal centrado arriba -->
-  <img src="{{ url_for('static', filename='logo.png') }}"
-       alt="Logo Facultad"
-       class="main-logo">
-
-  <!-- Título con isotipo a la izquierda -->
-  <div class="title-container">
+  <!-- Cabecera con isotipo a la izquierda, título en el centro y logo a la derecha -->
+  <div class="header-container">
     <img src="{{ url_for('static', filename='isotipo.png') }}"
          alt="Isotipo Museo"
-         class="isotipo me-2">
-    <div class="text-start">
-      <h1 class="mb-1">Museo de Embriología</h1>
-      <small class="text-muted" style="font-family: 'Roboto', sans-serif;">
-        Dra. Dora Virginia Chávez Corral
-      </small>
+         class="isotipo">
+    <div class="title-text">
+      <h1>Museo de Embriología</h1>
+      <small>Dra. Dora Virginia Chávez Corral</small>
     </div>
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo">
   </div>
 
   <!-- Mensajes flash -->
