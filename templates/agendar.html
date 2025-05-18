@@ -121,7 +121,7 @@
     <select class="form-select" id="horario" name="horario" required>
       {% for id, fecha_hora, disponibles in horarios %}
         <option value="{{ id }}" {% if request.form.get('horario') == id|string %}selected{% endif %}>
-          {{ fecha_hora }} ({{ disponibles }} lugares)
+          {{ fecha_hora }} ({{ disponibles }} lugar{{ 'es' if disponibles != 1 else '' }})
         </option>
       {% endfor %}
     </select>
