@@ -484,9 +484,10 @@ def dashboard():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    # Citas futuras individuales
     citas_crudas = Cita.query.all()
     citas_futuras = []
+    historial_completo = []
+
     for c in citas_crudas:
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
@@ -500,21 +501,9 @@ def dashboard():
             c.edad, c.sexo, c.institucion, c.nivel_educativo
         )
 
-        if fecha >= ahora and c.estado == 'activa':
+        if fecha >= ahora:
             citas_futuras.append(tupla)
-
-    # Historial combinado
-    historial_completo = []
-
-    # Citas individuales pasadas
-    for c in citas_crudas:
-        try:
-            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
-        except ValueError:
-            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
-        fecha = zona.localize(fecha)
-
-        if fecha < ahora and fecha >= inicio_rango:
+        elif fecha < ahora and fecha >= inicio_rango:
             historial_completo.append({
                 'tipo': 'Individual',
                 'id': c.id,
@@ -530,7 +519,6 @@ def dashboard():
                 'nivel': c.nivel_educativo
             })
 
-    # Estudiantes grupales pasados registrados
     for e in EstudianteGrupal.query.all():
         try:
             fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
@@ -549,12 +537,11 @@ def dashboard():
                 'telefono': e.telefono,
                 'fecha_hora': e.visita.fecha_confirmada,
                 'estado': 'finalizada',
-                'asistio': 'sí',  # por registro se asume que asistió
+                'asistio': 'sí',
                 'institucion': e.visita.institucion,
                 'nivel': e.visita.nivel
             })
 
-    # Horarios
     horarios = []
     for h in Horario.query.all():
         try:
@@ -565,17 +552,24 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
-        # Aplicar filtro por tipo (individual / grupal / todas)
     if tipo == 'individual':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
-    # ✅ AGREGAR ESTO antes del return
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
     estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
 
-
+    return render_template(
+        'dashboard.html',
+        citas=citas_futuras,
+        historial_completo=historial_completo,
+        horarios=horarios,
+        rango=rango,
+        tipo_filtro=tipo,
+        visitas_grupales=visitas_grupales,
+        estudiantes_grupales=estudiantes_grupales
+    )
 
     return render_template(
         'dashboard.html',
