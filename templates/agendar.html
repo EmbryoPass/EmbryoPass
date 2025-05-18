@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agendar cita - Museo de Embriología</title>
+  <title>Agendar cita – Museo de Embriología</title>
 
   <!-- Google Fonts: Roboto para body y Nunito para headings -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -109,63 +109,70 @@
 
   <!-- Formulario en card -->
   <form method="POST" id="agendarForm" onsubmit="return validarCorreos();">
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="nombre" class="form-label">Nombre completo</label>
       <input type="text" class="form-control" id="nombre" name="nombre" required
              value="{{ request.form.get('nombre','') }}">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="correo" class="form-label">Correo electrónico</label>
       <input type="email" class="form-control" id="correo" name="correo" required
              value="{{ request.form.get('correo','') }}">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="confirmar_correo" class="form-label">Confirmar correo electrónico</label>
       <input type="email" class="form-control" id="confirmar_correo" name="confirmar_correo" required
              value="{{ request.form.get('confirmar_correo','') }}">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="telefono" class="form-label">Teléfono</label>
       <input type="text" class="form-control" id="telefono" name="telefono" pattern="\d{10}"
              title="Introduce un número de 10 dígitos" required
              value="{{ request.form.get('telefono','') }}">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="edad" class="form-label">Edad</label>
-      <input type="number" class="form-control" id="edad" name="edad" min="1" required>
+      <input type="number" class="form-control" id="edad" name="edad" min="1" required
+             value="{{ request.form.get('edad','') }}">
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="sexo" class="form-label">Sexo</label>
       <select class="form-select" id="sexo" name="sexo" required>
-        <option value="" disabled selected>Selecciona una opción</option>
-        <option value="Mujer">Mujer</option>
-        <option value="Hombre">Hombre</option>
+        <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona una opción</option>
+        <option value="Mujer"  {% if request.form.get('sexo')=='Mujer'  %}selected{% endif %}>Mujer</option>
+        <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
       </select>
     </div>
-    <div class="mb-3">
-      <label for="institucion" class="form-label">Institución (opcional)</label>
+    <div class="mb-3 text-start">
+      <label for="institucion" class="form-label">Institución</label>
       <input type="text" class="form-control" id="institucion" name="institucion"
              placeholder="Ej. UACH, público general"
              value="{{ request.form.get('institucion','') }}">
     </div>
-    <div class="mb-3">
-      <label for="nivel" class="form-label">Nivel Académico (opcional)</label>
-      <input type="text" class="form-control" id="nivel" name="nivel"
-             placeholder="Ej. Secundaria, Preparatoria"
-             value="{{ request.form.get('nivel','') }}">
+    <div class="mb-3 text-start">
+      <label for="nivel" class="form-label">Nivel Académico</label>
+      <select class="form-select" id="nivel" name="nivel">
+        <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona nivel académico</option>
+        <option value="Primaria"     {% if request.form.get('nivel')=='Primaria'     %}selected{% endif %}>Primaria</option>
+        <option value="Secundaria"   {% if request.form.get('nivel')=='Secundaria'   %}selected{% endif %}>Secundaria</option>
+        <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
+        <option value="Universidad"  {% if request.form.get('nivel')=='Universidad'  %}selected{% endif %}>Universidad</option>
+        <option value="Posgrado"     {% if request.form.get('nivel')=='Posgrado'     %}selected{% endif %}>Posgrado</option>
+        <option value="Otro"         {% if request.form.get('nivel')=='Otro'         %}selected{% endif %}>Otro</option>
+      </select>
     </div>
-    <div class="mb-3">
+    <div class="mb-3 text-start">
       <label for="horario" class="form-label">Selecciona un horario</label>
       {% if horarios %}
-      <select class="form-select" id="horario" name="horario" required>
-        {% for id, fecha_hora, disponibles in horarios %}
-          <option value="{{ id }}" {% if request.form.get('horario')==id|string %}selected{% endif %}>
-            {{ fecha_hora }} ({{ disponibles }} lugar{{ 'es' if disponibles!=1 else '' }})
-          </option>
-        {% endfor %}
-      </select>
+        <select class="form-select" id="horario" name="horario" required>
+          {% for id, fecha_hora, disponibles in horarios %}
+            <option value="{{ id }}" {% if request.form.get('horario')==id|string %}selected{% endif %}>
+              {{ fecha_hora }} ({{ disponibles }} lugar{{ 'es' if disponibles!=1 else '' }})
+            </option>
+          {% endfor %}
+        </select>
       {% else %}
-      <div class="alert alert-warning">No hay horarios disponibles.</div>
+        <div class="alert alert-warning text-center">No hay horarios disponibles.</div>
       {% endif %}
     </div>
     <div class="text-center">
