@@ -55,6 +55,18 @@ class VisitaGrupal(db.Model):
     estado = db.Column(db.String(20), default='pendiente')
     fecha_confirmada = db.Column(db.String(100), nullable=True)
 
+class EstudianteGrupal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    correo = db.Column(db.String(120), nullable=False)
+    telefono = db.Column(db.String(20), nullable=True)  
+    edad = db.Column(db.Integer, nullable=True)
+    sexo = db.Column(db.String(10), nullable=True)
+    hora_registro = db.Column(db.String(100), nullable=False)
+    visita_id = db.Column(db.Integer, db.ForeignKey('visita_grupal.id'), nullable=False)
+    visita = db.relationship('VisitaGrupal', backref=db.backref('estudiantes', lazy=True))
+
+
 @app.route('/inicio')
 def inicio():
     return render_template('index.html')
@@ -327,8 +339,53 @@ def solicitar_visita_grupal():
 
     return render_template('solicitar_visita_grupal.html')
 
-# Nuevas rutas para el flujo de visitas grupales
+@app.route('/registrar-asistencia-grupal', methods=['GET', 'POST'])
+def registrar_asistencia_grupal():
+    zona = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona)
 
+    # Filtrar visitas aceptadas y con fecha confirmada válida
+    visitas = []
+    for v in VisitaGrupal.query.filter_by(estado='aceptada').all():
+        if not v.fecha_confirmada:
+            continue
+        try:
+            fecha = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            continue
+        fecha = zona.localize(fecha)
+        if ahora >= (fecha - timedelta(hours=1)) and ahora <= (fecha + timedelta(hours=2)):
+            visitas.append((v.id, v.institucion, v.fecha_confirmada))
+
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        correo = request.form.get('correo')
+        telefono = request.form.get('telefono')  # ✅ Nuevo campo
+        edad = request.form.get('edad')
+        sexo = request.form.get('sexo')
+        visita_id = request.form.get('visita_id')
+
+        if not nombre or not correo or not visita_id:
+            flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
+            return redirect(url_for('registrar_asistencia_grupal'))
+
+        estudiante = EstudianteGrupal(
+            nombre=nombre,
+            correo=correo,
+            telefono=telefono,  # ✅ Aquí también
+            edad=edad,
+            sexo=sexo,
+            visita_id=visita_id,
+            hora_registro=datetime.now(zona).strftime("%d/%m/%Y %I:%M %p")
+        )
+        db.session.add(estudiante)
+        db.session.commit()
+        flash('✅ Asistencia registrada correctamente.', 'success')
+        return redirect(url_for('registrar_asistencia_grupal'))
+
+    return render_template('registrar_asistencia_grupal.html', visitas=visitas)
+
+# Nuevas rutas para el flujo de visitas grupales
 @app.route('/aceptar_visita/<int:id>')
 def aceptar_visita(id):
     if 'usuario' not in session:
