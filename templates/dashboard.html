@@ -295,11 +295,11 @@
           {% elif registro.tipo == 'Individual' %}
             <!-- Siempre ambas opciones para marcar o cambiar asistencia -->
             <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
-               class="btn btn-success btn-sm">✔️ Asistió</a>
+               class="btn btn-success btn-sm">✔Asistió</a>
             <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
-               class="btn btn-danger btn-sm">❌ No asistió</a>
+               class="btn btn-danger btn-sm">No asistió</a>
           {% else %}
-            <span class="badge bg-success">✔️ Asistió</span>
+            <span class="badge bg-success">Asistió</span>
           {% endif %}
         </td>
         <td>
