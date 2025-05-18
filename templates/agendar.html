@@ -136,7 +136,7 @@
     </div>
 
     <!-- Título de sección con typewriter -->
-    <h2 class="section-title">Agendar cita</h2>
+    <h2 class="section-title">Agendar visita</h2>
 
     <!-- Mensajes flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -178,7 +178,7 @@
       <div class="mb-3 text-start">
         <label for="sexo" class="form-label">Sexo</label>
         <select class="form-select" id="sexo" name="sexo" required>
-          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona opción</option>
+          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona una opción</option>
           <option value="Mujer" {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
           <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
         </select>
@@ -192,7 +192,7 @@
       <div class="mb-3 text-start">
         <label for="nivel" class="form-label">Nivel Académico</label>
         <select class="form-select" id="nivel" name="nivel">
-          <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona nivel</option>
+          <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona una opción</option>
           <option value="Primaria" {% if request.form.get('nivel')=='Primaria' %}selected{% endif %}>Primaria</option>
           <option value="Secundaria" {% if request.form.get('nivel')=='Secundaria' %}selected{% endif %}>Secundaria</option>
           <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
@@ -219,7 +219,7 @@
         {% endif %}
       </div>
       <div class="text-center">
-        <button type="submit" id="agendarBtn" class="btn btn-cafe mt-3">Agendar cita</button>
+        <button type="submit" id="agendarBtn" class="btn btn-cafe mt-3">Agendar visita</button>
       </div>
     </form>
   </div>
