@@ -238,6 +238,8 @@
                     <th>Nombre</th>
                     <th>Edad</th>
                     <th>Sexo</th>
+                    <th>Institución</th>
+                    <th>Nivel Académico</th>
                     <th>Correo</th>
                     <th>Teléfono</th>
                     <th>Fecha y Hora</th>
@@ -249,12 +251,14 @@
             <tbody>
                 {% for cita in historial %}
                 <tr>
-                    <td>{{ cita[1] }}</td>
-                    <td>{{ cita[7] or '—' }}</td>
-                    <td>{{ cita[8] or '—' }}</td>
-                    <td>{{ cita[2] }}</td>
-                    <td>{{ cita[3] }}</td>
-                    <td>{{ cita[4] }}</td>
+                    <td>{{ cita[1] }}</td> <!-- nombre -->
+                    <td>{{ cita[7] or '—' }}</td> <!-- edad -->
+                    <td>{{ cita[8] or '—' }}</td> <!-- sexo -->
+                    <td>{{ cita[9] or '—' }}</td> <!-- institución -->
+                    <td>{{ cita[10] or '—' }}</td> <!-- nivel académico -->
+                    <td>{{ cita[2] }}</td> <!-- correo -->
+                    <td>{{ cita[3] }}</td> <!-- teléfono -->
+                    <td>{{ cita[4] }}</td> <!-- fecha y hora -->
                     <td>
                         {% if cita[5] == 'activa' %}
                             <span class="badge bg-primary">Finalizada</span>
