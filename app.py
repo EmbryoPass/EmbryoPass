@@ -536,29 +536,20 @@ def dashboard():
                 'nivel':      c.nivel_educativo
             })
 
-    # Procesar estudiantes de visitas grupales
-    for e in EstudianteGrupal.query.all():
+    # Procesar estudiantes de visitas grupales: solo incluir si visita aún no pasó
+    estudiantes_grupales = []
+    for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
+        if not e.visita.fecha_confirmada:
+            continue
         try:
             fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
         except (ValueError, TypeError):
             continue
         fecha = zona.localize(fecha)
 
-        if fecha < ahora and fecha >= inicio_rango:
-            historial_completo.append({
-                'tipo':       'Grupal',
-                'id':         e.id,
-                'nombre':     e.nombre,
-                'edad':       e.edad,
-                'sexo':       e.sexo,
-                'correo':     e.correo,
-                'telefono':   e.telefono,
-                'fecha_hora': e.visita.fecha_confirmada,
-                'estado':     'finalizada',
-                'asistio':    'sí',
-                'institucion':e.visita.institucion,
-                'nivel':      e.visita.nivel
-            })
+        # Solo agregamos si la fecha de la visita NO ha pasado
+        if fecha >= ahora:
+            estudiantes_grupales.append(e)
 
     # Construir lista de horarios
     horarios = []
@@ -577,9 +568,8 @@ def dashboard():
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
-    # Cargar visitas grupales y estudiantes para el template
+    # Cargar visitas grupales para el template
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
-    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
 
     return render_template(
         'dashboard.html',
@@ -591,7 +581,6 @@ def dashboard():
         visitas_grupales=visitas_grupales,
         estudiantes_grupales=estudiantes_grupales
     )
-
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
