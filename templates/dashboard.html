@@ -39,52 +39,27 @@
             <tbody>
               {% for cita in citas %}
               <tr>
-                <td>{{ cita[1] }}</td>
-                <td>{{ cita[7] or '—' }}</td>
-                <td>{{ cita[8] or '—' }}</td>
-                <td>{{ cita[9] or '—' }}</td>
-                <td>{{ cita[10] or '—' }}</td>
-                <td>{{ cita[2] }}</td>
-                <td>{{ cita[3] }}</td>
-                <td>{{ cita[4] }}</td>
+                <td>{{ cita[1] }}</td> <!-- nombre -->
+                <td>{{ cita[7] or '—' }}</td> <!-- edad -->
+                <td>{{ cita[8] or '—' }}</td> <!-- sexo -->
+                <td>{{ cita[9] or '—' }}</td> <!-- institución -->
+                <td>{{ cita[10] or '—' }}</td> <!-- nivel educativo -->
+                <td>{{ cita[2] }}</td> <!-- correo -->
+                <td>{{ cita[3] }}</td> <!-- teléfono -->
+                <td>{{ cita[4] }}</td> <!-- fecha y hora -->
                 <td>
-                  {% if cita[5] == 'activa' %}
-                    <span class="badge bg-primary">Finalizada</span>
-                  {% else %}
-                    <span class="badge bg-secondary">Cancelada</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if cita[5] == 'cancelada' %}
-                    <span class="text-muted">—</span>
-                  {% else %}
-                    <div class="d-flex flex-column gap-1">
-                      {% if cita[6] == 'sí' %}
-                        <span class="badge bg-success">✔️ Asistió</span>
-                      {% elif cita[6] == 'no' %}
-                        <span class="badge bg-danger">❌ No asistió</span>
-                      {% else %}
-                        <span class="badge bg-warning text-dark">Sin registrar</span>
-                      {% endif %}
-
-                      <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Modificar
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="{{ url_for('marcar_asistencia', id_cita=cita[0], estado='sí') }}">✔️ Asistió</a></li>
-                          <li><a class="dropdown-item" href="{{ url_for('marcar_asistencia', id_cita=cita[0], estado='no') }}">❌ No asistió</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  {% endif %}
-                </td>
-                <td>
-                  <a href="{{ url_for('eliminar_cita', id_cita=cita[0]) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
+                   {% if cita[5] == 'activa' %}
+                     <a href="{{ url_for('cancelar_cita', id_cita=cita[0]) }}" class="btn btn-danger btn-sm">Cancelar</a>
+                   {% else %}
+                     <span class="badge bg-secondary">Cancelada</span>
+                   {% endif %}
+                 </td>
+                 <td>
+                   <a href="{{ url_for('eliminar_cita', id_cita=cita[0]) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
+                 </td>
+               </tr>
+               {% endfor %}
+             </tbody>
         </table>
     </div>
 
