@@ -785,6 +785,20 @@ def cancelar_visita_grupal(id):
         flash('❌ Visita no encontrada.', 'danger')
     return redirect(url_for('dashboard'))
 
+@app.route('/eliminar_estudiante_grupal/<int:id>')
+def eliminar_estudiante_grupal(id):
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    estudiante = EstudianteGrupal.query.get(id)
+    if estudiante:
+        db.session.delete(estudiante)
+        db.session.commit()
+        flash('✅ Estudiante eliminado correctamente.', 'success')
+    else:
+        flash('❌ Estudiante no encontrado.', 'danger')
+    return redirect(url_for('dashboard'))
 
 @app.route('/agregar_horario', methods=['POST'])
 def agregar_horario():
