@@ -17,11 +17,49 @@
       color: #333;
       min-height: 100vh;
     }
+
+    /* Progress bar at top */
+    #progressBar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 0;
+      height: 3px;
+      background: #8B4513;
+      transition: width .4s ease;
+      z-index: 9999;
+    }
+
+    /* Typewriter effect for section title */
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes blink-caret {
+      50% { border-color: transparent; }
+    }
+    .section-title {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .1em solid #4a3526;
+      width: 0;
+      animation:
+        typewriter 1.5s steps(30) forwards,
+        blink-caret .75s step-end infinite;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Logo principal centrado */
     .main-logo {
       display: block;
       margin: 1.5rem auto;
       height: 60px;
     }
+
+    /* Título del sitio */
     .title-text {
       text-align: center;
       margin: 2rem 0;
@@ -46,13 +84,8 @@
       color: #555;
       font-size: 1rem;
     }
-    .section-title {
-      font-family: 'Nunito', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
+
+    /* Card de formulario */
     #visitaForm {
       max-width: 600px;
       margin: auto;
@@ -61,21 +94,29 @@
       padding: 2rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    #visitaForm .form-label,
-    #visitaForm .form-select,
-    #visitaForm .form-control {
-      font-family: 'Roboto', sans-serif;
+    /* Focus effect on inputs/selects */
+    #visitaForm .form-control:focus,
+    #visitaForm .form-select:focus {
+      border-color: #8B4513;
+      box-shadow: 0 0 0 .2rem rgba(139,69,19,0.25);
+      transition: border-color .2s, box-shadow .2s;
     }
+
+    /* Button micro-interaction */
     .btn-cafe {
       background-color: #8B4513;
       color: white;
       border: none;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
+      transition: transform .15s ease, box-shadow .15s ease;
     }
     .btn-cafe:hover {
       background-color: #6e3610;
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
+
     @media (max-width: 576px) {
       .main-logo { height: 50px; }
       .title-text h1 { font-size: 1.75rem; }
@@ -87,21 +128,25 @@
 </head>
 <body>
 
+  <!-- progress bar -->
+  <div id="progressBar"></div>
+
   <div class="container text-center pb-5">
+    <!-- Logo -->
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo">
 
-    <!-- Logo principal -->
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="main-logo">
-
-    <!-- Título del sitio -->
+    <!-- Site title -->
     <div class="title-text">
       <h1>Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral</small>
     </div>
 
-    <!-- Título de sección -->
+    <!-- Section title with typewriter -->
     <h2 class="section-title">Solicitar visita grupal institucional</h2>
 
-    <!-- Mensajes flash -->
+    <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -110,7 +155,7 @@
       {% endif %}
     {% endwith %}
 
-    <!-- Formulario -->
+    <!-- Form -->
     <form method="POST" id="visitaForm" onsubmit="return validarVisitaGrupal();">
       <div class="mb-3 text-start">
         <label class="form-label" for="nombre_encargado">Nombre del encargado</label>
@@ -147,12 +192,12 @@
         <label class="form-label" for="nivel_educativo">Nivel académico</label>
         <select class="form-select" id="nivel_educativo" name="nivel_educativo" required>
           <option value="" disabled selected>Selecciona una opción</option>
-          <option value="Primaria"    {% if request.form.get('nivel_educativo')=='Primaria'    %}selected{% endif %}>Primaria</option>
-          <option value="Secundaria"  {% if request.form.get('nivel_educativo')=='Secundaria'  %}selected{% endif %}>Secundaria</option>
-          <option value="Bachillerato"{% if request.form.get('nivel_educativo')=='Bachillerato'%}selected{% endif %}>Bachillerato</option>
-          <option value="Universidad" {% if request.form.get('nivel_educativo')=='Universidad' %}selected{% endif %}>Universidad</option>
-          <option value="Posgrado"    {% if request.form.get('nivel_educativo')=='Posgrado'    %}selected{% endif %}>Posgrado</option>
-          <option value="Otro"        {% if request.form.get('nivel_educativo')=='Otro'        %}selected{% endif %}>Otro</option>
+          <option value="Primaria"     {% if request.form.get('nivel_educativo')=='Primaria'     %}selected{% endif %}>Primaria</option>
+          <option value="Secundaria"   {% if request.form.get('nivel_educativo')=='Secundaria'   %}selected{% endif %}>Secundaria</option>
+          <option value="Bachillerato" {% if request.form.get('nivel_educativo')=='Bachillerato' %}selected{% endif %}>Bachillerato</option>
+          <option value="Universidad"  {% if request.form.get('nivel_educativo')=='Universidad'  %}selected{% endif %}>Universidad</option>
+          <option value="Posgrado"     {% if request.form.get('nivel_educativo')=='Posgrado'     %}selected{% endif %}>Posgrado</option>
+          <option value="Otro"         {% if request.form.get('nivel_educativo')=='Otro'         %}selected{% endif %}>Otro</option>
         </select>
       </div>
 
@@ -181,10 +226,12 @@
 
   <script>
     function disableVisitaButton() {
-      const button = document.getElementById('visitaBtn');
-      button.disabled = true;
-      button.innerText = "Procesando...";
+      document.getElementById('progressBar').style.width = '100%';
+      const btn = document.getElementById('visitaBtn');
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
     }
+
     function validarVisitaGrupal() {
       const correo = document.getElementById('correo_encargado').value.trim();
       const confirmar = document.getElementById('confirmar_correo_encargado').value.trim();
@@ -198,4 +245,4 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html
+</html>
