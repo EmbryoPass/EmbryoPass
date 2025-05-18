@@ -571,17 +571,6 @@ def dashboard():
         estudiantes_grupales=estudiantes_grupales
     )
 
-    return render_template(
-        'dashboard.html',
-        citas=citas_futuras,
-        historial_completo=historial_completo,
-        horarios=horarios,
-        rango=rango,
-        tipo_filtro=tipo,
-        visitas_grupales=visitas_grupales,
-        estudiantes_grupales=estudiantes_grupales
-    )
-
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
