@@ -570,6 +570,11 @@ def dashboard():
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
+    # ✅ AGREGAR ESTO antes del return
+    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+
+
 
     return render_template(
         'dashboard.html',
