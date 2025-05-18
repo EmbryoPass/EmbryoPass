@@ -24,6 +24,21 @@
       margin: 20px auto;
       height: 80px;
     }
+
+    /* Contenedor del título siempre en fila */
+    .title-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Tamaño del isotipo junto al título */
+    .isotipo {
+      height: 60px;
+    }
+
     h3.option-title {
       font-size: 1.75rem;
     }
@@ -42,6 +57,15 @@
       .logo {
         height: 50px;
       }
+      .isotipo {
+        height: 35px;
+      }
+      .title-container h1 {
+        font-size: 1.25rem;
+      }
+      .title-container small {
+        font-size: 0.75rem;
+      }
       h3.option-title {
         font-size: 1rem;
       }
@@ -51,8 +75,19 @@
 <body>
 
 <div class="container">
-  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
-  <h1 class="text-center mb-4">Museo de Embriología<br><small class="text-muted">Dra. Dora Virginia Chávez Corral</small></h1>
+  <!-- Logo de la facultad -->
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="logo">
+
+  <!-- Título con isotipo SIEMPRE a la izquierda -->
+  <div class="title-container">
+    <img src="{{ url_for('static', filename='isotipo.png') }}"
+         alt="Isotipo Museo de Embriología"
+         class="isotipo me-2">
+    <div class="text-start">
+      <h1 class="mb-0">Museo de Embriología</h1>
+      <small class="text-muted">Dra. Dora Virginia Chávez Corral</small>
+    </div>
+  </div>
 
   <!-- Bloque para mostrar mensajes flash -->
   {% with messages = get_flashed_messages(with_categories=true) %}
