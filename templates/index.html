@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museo de Embriología</title>
 
-  <!-- Google Fonts: Roboto para el body y Nunito para los headings -->
+  <!-- Google Fonts: Roboto y Nunito -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -14,6 +14,16 @@
       background-color: #fdf9f3;
       font-family: 'Roboto', sans-serif;
       color: #333;
+    }
+
+    /* Keyframes para fade-in + slide-up */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+    .fade-in {
+      opacity: 0;                   /* arranca invisible */
+      animation: fadeSlideIn .8s ease-out forwards;
     }
 
     /* Logo principal */
@@ -28,25 +38,20 @@
       text-align: center;
       margin: 2rem 0;
     }
-
-    /* Estilos para el título sin todo en mayúsculas */
     .title-text h1 {
       font-family: 'Nunito', sans-serif;
       font-size: 2.25rem;
       font-weight: 700;
-      /* text-transform: uppercase;  <-- eliminado */
-      letter-spacing: 0.05em;          /* menor espaciado para texto normal */
+      letter-spacing: 0.05em;
       color: #4a3526;
       text-shadow: 0 1px 3px rgba(0,0,0,0.1);
       padding-bottom: 0.5rem;
       border-bottom: 2px solid rgba(0,0,0,0.1);
       display: inline-block;
-      margin: 0;
     }
     .title-text small {
       display: block;
       margin-top: 0.5rem;
-      font-family: 'Roboto', sans-serif;
       font-variant: small-caps;
       letter-spacing: 0.02em;
       color: #555;
@@ -65,15 +70,12 @@
     .option-card:hover {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
-
-    /* Títulos de las tarjetas en negrita y un poco más grandes */
     .option-card h3.option-title {
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
     }
-    /* Descripciones más pequeñas */
     .option-card p {
       font-size: 0.9rem;
       color: #555;
@@ -90,78 +92,58 @@
       background-color: #6e3610;
     }
 
-    /* Ajustes para móvil */
     @media (max-width: 576px) {
-      .main-logo {
-        height: 60px;
-      }
-      .title-text h1 {
-        font-size: 1.75rem;
-      }
-      .title-text small {
-        font-size: 0.9rem;
-      }
-      .option-card h3.option-title {
-        font-size: 1.25rem;
-      }
-      .option-card p {
-        font-size: 0.8rem;
-      }
+      .main-logo { height: 60px; }
+      .title-text h1 { font-size: 1.75rem; }
+      .title-text small { font-size: 0.9rem; }
+      .option-card h3.option-title { font-size: 1.25rem; }
+      .option-card p { font-size: 0.8rem; }
     }
   </style>
 </head>
 <body>
 
-<div class="container text-center pb-5">
+  <div class="container text-center pb-5">
 
-  <!-- Logo principal centrado arriba -->
-  <img src="{{ url_for('static', filename='logo.png') }}"
-       alt="Logo Facultad"
-       class="main-logo">
+    <!-- Logo con animación -->
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo fade-in"
+         style="animation-delay: 0.2s;">
 
-  <!-- Título centrado sin mayúsculas forzadas -->
-  <div class="title-text">
-    <h1>Museo de Embriología</h1>
-    <small>Dra. Dora Virginia Chávez Corral</small>
-  </div>
+    <!-- Título con un pequeño retraso -->
+    <div class="title-text fade-in" style="animation-delay: 0.4s;">
+      <h1>Museo de Embriología</h1>
+      <small>Dra. Dora Virginia Chávez Corral</small>
+    </div>
 
-  <!-- Mensajes flash -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} text-center" role="alert">
-          {{ message }}
+    <!-- Tarjetas en cascada -->
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 0.6s;">
+          <h3 class="option-title">Agendar visita general</h3>
+          <p>Para público en general, visitantes individuales o grupos pequeños.</p>
+          <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3">Agendar visita</a>
         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+      </div>
+      <div class="col-md-5">
+        <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 0.8s;">
+          <h3 class="option-title">Solicitar visita grupal institucional</h3>
+          <p>Para instituciones como bachilleratos o universidades.</p>
+          <a href="{{ url_for('ir_a_visita_grupal') }}" class="btn btn-cafe mt-3">Solicitar visita grupal</a>
+        </div>
+      </div>
+      <div class="col-md-10">
+        <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 1s;">
+          <h3 class="option-title">Registrar asistencia a cita grupal</h3>
+          <p>Para estudiantes que ya están en el museo con una visita grupal confirmada.</p>
+          <a href="{{ url_for('registrar_asistencia_grupal') }}" class="btn btn-cafe mt-3">Registrar asistencia</a>
+        </div>
+      </div>
+    </div>
 
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="option-card text-center shadow-sm">
-        <h3 class="option-title">Agendar visita general</h3>
-        <p>Para público en general, visitantes individuales o grupos pequeños.</p>
-        <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3">Agendar visita</a>
-      </div>
-    </div>
-    <div class="col-md-5">
-      <div class="option-card text-center shadow-sm">
-        <h3 class="option-title">Solicitar visita grupal institucional</h3>
-        <p>Para instituciones como bachilleratos o universidades.</p>
-        <a href="{{ url_for('ir_a_visita_grupal') }}" class="btn btn-cafe mt-3">Solicitar visita grupal</a>
-      </div>
-    </div>
-    <div class="col-md-10">
-      <div class="option-card text-center shadow-sm">
-        <h3 class="option-title">Registrar asistencia a cita grupal</h3>
-        <p>Para estudiantes que ya están en el museo con una visita grupal confirmada.</p>
-        <a href="{{ url_for('registrar_asistencia_grupal') }}" class="btn btn-cafe mt-3">Registrar asistencia</a>
-      </div>
-    </div>
   </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
