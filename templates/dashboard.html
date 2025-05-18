@@ -102,6 +102,7 @@
         <th>Fecha confirmada</th>
         <th>Acciones</th>
         <th>Cancelar</th>
+        <th>Eliminar</th>
       </tr>
     </thead>
     <tbody>
@@ -146,6 +147,12 @@
           {% else %}
             <span class="badge bg-secondary">Cancelada</span>
           {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}"
+             class="btn btn-sm btn-outline-danger eliminar-visita-btn">
+             🗑️
+          </a>
         </td>
       </tr>
       {% endfor %}
@@ -312,25 +319,26 @@
 
     // Confirmaciones para cancelar o eliminar
     document.addEventListener("DOMContentLoaded", function () {
-    const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn');
+  const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn');
 
-    enlaces.forEach(function (enlace) {
-        enlace.addEventListener('click', function (e) {
-            const texto = enlace.textContent.toLowerCase();
-            let mensaje = "¿Estás seguro de que deseas continuar?";
-            if (texto.includes("cancelar") && texto.includes("visita")) {
-                mensaje = "¿Deseas cancelar esta visita grupal?";
-            } else if (texto.includes("cancelar")) {
-                mensaje = "¿Deseas cancelar esta cita u horario?";
-            } else if (texto.includes("🗑")) {
-                mensaje = "¿Deseas eliminar esta cita permanentemente?";
-            }
-            if (!confirm(mensaje)) {
-                e.preventDefault();
-            }
-        });
+  enlaces.forEach(function (enlace) {
+    enlace.addEventListener('click', function (e) {
+      const texto = enlace.textContent.toLowerCase();
+      let mensaje = "¿Estás seguro de que deseas continuar?";
+      if (texto.includes("cancelar") && texto.includes("visita")) {
+        mensaje = "¿Deseas cancelar esta visita grupal?";
+      } else if (texto.includes("cancelar")) {
+        mensaje = "¿Deseas cancelar esta cita u horario?";
+      } else if (texto.includes("🗑")) {
+        mensaje = "¿Deseas eliminar esta solicitud permanentemente?";
+      }
+      if (!confirm(mensaje)) {
+        e.preventDefault();
+      }
     });
+  });
 });
+
 
 </script>
 </body>
