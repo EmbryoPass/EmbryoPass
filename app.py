@@ -610,41 +610,60 @@ def marcar_asistencia(id_cita, estado):
 
 @app.route('/cancelar_usuario/<int:id_cita>/<token>')
 def cancelar_usuario(id_cita, token):
+    zona  = pytz.timezone('America/Chihuahua')
+    ahora = datetime.now(zona)
+
+    # Buscar cita activa con token válido
     cita = Cita.query.filter_by(id=id_cita, token_cancelacion=token, estado='activa').first()
-    if cita:
-        cita.estado = 'cancelada'
-        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
-        if horario:
-            horario.disponibles += 1
-        db.session.commit()
-
-        # ✉️ Notificación al museo incluyendo edad y sexo
-        cuerpo_admin = f"""
-        <html>
-          <body style="font-family: Arial, sans-serif; color: #333;">
-            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-              <h2 style="color: #d9534f;">Cancelación de Cita</h2>
-              <p>Un visitante ha cancelado su cita:</p>
-              <ul style="line-height: 1.6;">
-                <li><strong>Nombre:</strong> {cita.nombre}</li>
-                <li><strong>Correo:</strong> {cita.correo}</li>
-                <li><strong>Teléfono:</strong> {cita.telefono}</li>
-                <li><strong>Edad:</strong> {cita.edad}</li>
-                <li><strong>Sexo:</strong> {cita.sexo}</li>        
-                <li><strong>Institución:</strong> {cita.institucion or '—'}</li>
-                <li><strong>Nivel educativo:</strong> {cita.nivel_educativo or '—'}</li>
-                <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
-              </ul>
-            </div>
-          </body>
-        </html>
-        """
-        enviar_correo('museoembriologia@gmail.com', 'Cancelación de Cita - Museo de Embriología', cuerpo_admin)
-
-        flash('✅ Tu cita fue cancelada correctamente.', 'success')
-    else:
+    if not cita:
         flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
+        return redirect(url_for('agendar'))
+
+    # Parsear la fecha de la cita
+    try:
+        fecha = datetime.strptime(cita.fecha_hora, "%d/%m/%Y %I:%M %p")
+    except ValueError:
+        fecha = datetime.strptime(cita.fecha_hora, "%Y-%m-%d %H:%M")
+    fecha = zona.localize(fecha)
+
+    # Validar que la cita no haya pasado
+    if ahora > fecha:
+        flash('⚠️ No puedes cancelar una cita pasada.', 'warning')
+        return redirect(url_for('agendar'))
+
+    # Si aún no ha pasado, proceder a cancelar
+    cita.estado = 'cancelada'
+    horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
+    if horario:
+        horario.disponibles += 1
+    db.session.commit()
+
+    # ✉️ Notificación al museo incluyendo edad y sexo
+    cuerpo_admin = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+          <h2 style="color: #d9534f;">Cancelación de Cita</h2>
+          <p>Un visitante ha cancelado su cita:</p>
+          <ul style="line-height: 1.6;">
+            <li><strong>Nombre:</strong> {cita.nombre}</li>
+            <li><strong>Correo:</strong> {cita.correo}</li>
+            <li><strong>Teléfono:</strong> {cita.telefono}</li>
+            <li><strong>Edad:</strong> {cita.edad}</li>
+            <li><strong>Sexo:</strong> {cita.sexo}</li>        
+            <li><strong>Institución:</strong> {cita.institucion or '—'}</li>
+            <li><strong>Nivel educativo:</strong> {cita.nivel_educativo or '—'}</li>
+            <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
+          </ul>
+        </div>
+      </body>
+    </html>
+    """
+    enviar_correo('museoembriologia@gmail.com', 'Cancelación de Cita - Museo de Embriología', cuerpo_admin)
+
+    flash('✅ Tu cita fue cancelada correctamente.', 'success')
     return redirect(url_for('agendar'))
+
 
 @app.route('/cancelar_cita/<int:id_cita>')
 def cancelar_cita(id_cita):
