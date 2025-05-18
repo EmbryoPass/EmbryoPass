@@ -58,7 +58,7 @@ class VisitaGrupal(db.Model):
 class EstudianteGrupal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    correo = db.Column(db.String(120), nullable=False)
+    correo = db.Column(db.String(120), nullable=True)
     telefono = db.Column(db.String(20), nullable=True)  
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
@@ -359,20 +359,20 @@ def registrar_asistencia_grupal():
 
     if request.method == 'POST':
         nombre = request.form.get('nombre')
-        correo = request.form.get('correo')
-        telefono = request.form.get('telefono')  # ✅ Nuevo campo
+        correo = request.form.get('correo') or None  # correo opcional
+        telefono = request.form.get('telefono')
         edad = request.form.get('edad')
         sexo = request.form.get('sexo')
         visita_id = request.form.get('visita_id')
 
-        if not nombre or not correo or not visita_id:
+        if not nombre or not visita_id:
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
 
         estudiante = EstudianteGrupal(
             nombre=nombre,
             correo=correo,
-            telefono=telefono,  # ✅ Aquí también
+            telefono=telefono,
             edad=edad,
             sexo=sexo,
             visita_id=visita_id,
@@ -384,6 +384,7 @@ def registrar_asistencia_grupal():
         return redirect(url_for('registrar_asistencia_grupal'))
 
     return render_template('registrar_asistencia_grupal.html', visitas=visitas)
+
 
 # Nuevas rutas para el flujo de visitas grupales
 @app.route('/aceptar_visita/<int:id>')
