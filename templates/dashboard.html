@@ -289,17 +289,36 @@
             <span class="badge bg-primary">Finalizada</span>
           {% endif %}
         </td>
-        <td>
+        <td style="vertical-align: middle;">
           {% if registro.estado == 'cancelada' %}
             <span class="badge bg-secondary">—</span>
           {% elif registro.tipo == 'Individual' %}
-            <!-- Siempre ambas opciones para marcar o cambiar asistencia -->
-            <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
-               class="btn btn-success btn-sm">✔Asistió</a>
-            <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
-               class="btn btn-danger btn-sm">No asistió</a>
+            <div class="d-flex align-items-center">
+              {% if registro.asistio == 'sí' %}
+                <span class="badge bg-success mb-0">✔️ Asistió</span>
+              {% elif registro.asistio == 'no' %}
+                <span class="badge bg-danger mb-0">❌ No asistió</span>
+              {% else %}
+                <span class="badge bg-warning mb-0">Sin definir</span>
+              {% endif %}
+              <button class="btn btn-sm btn-outline-primary ms-2"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#editar-{{ registro.id }}"
+                      aria-expanded="false"
+                      aria-controls="editar-{{ registro.id }}">
+                Editar
+              </button>
+            </div>
+            <div class="collapse mt-1" id="editar-{{ registro.id }}">
+              <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
+                 class="btn btn-success btn-sm">✔️ Asistió</a>
+              <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
+                 class="btn btn-danger btn-sm">❌ No asistió</a>
+            </div>
           {% else %}
-            <span class="badge bg-success">Asistió</span>
+    <!-- Para citas grupales -->
+            <span class="badge bg-success">✔️ Asistió</span>
           {% endif %}
         </td>
         <td>
