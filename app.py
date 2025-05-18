@@ -494,7 +494,7 @@ def dashboard():
         tupla = (
             c.id, c.nombre, c.correo, c.telefono,
             c.fecha_hora, c.estado, c.asistio,
-            c.edad, c.sexo, c.institucion, c.nivel
+            c.edad, c.sexo, c.institucion, c.nivel_educativo
         )
 
         if fecha >= ahora:
