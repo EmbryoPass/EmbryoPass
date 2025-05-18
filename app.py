@@ -568,8 +568,8 @@ def cancelar_usuario(id_cita, token):
                 <li><strong>Teléfono:</strong> {cita.telefono}</li>
                 <li><strong>Edad:</strong> {cita.edad}</li>
                 <li><strong>Sexo:</strong> {cita.sexo}</li>        
-                <li><strong>Institución:</strong> {institucion or '—'}</li>
-                <li><strong>Nivel educativo:</strong> {nivel_educativo or '—'}</li>
+                <li><strong>Institución:</strong> {cita.institucion or '—'}</li>
+                <li><strong>Nivel educativo:</strong> {cita.nivel_educativo or '—'}</li>
                 <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
               </ul>
             </div>
@@ -632,8 +632,8 @@ def cancelar_cita(id_cita):
         <li><strong>Teléfono:</strong> {cita.telefono}</li>
         <li><strong>Edad:</strong> {cita.edad}</li>
         <li><strong>Sexo:</strong> {cita.sexo}</li>
-        <li><strong>Institución:</strong> {institucion or '—'}</li>
-        <li><strong>Nivel educativo:</strong> {nivel_educativo or '—'}</li>
+        <li><strong>Institución:</strong> {cita.institucion or '—'}</li>
+        <li><strong>Nivel educativo:</strong> {cita.nivel_educativo or '—'}</li>
         <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
       </ul>
     </div>
