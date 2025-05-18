@@ -291,22 +291,27 @@
           {% endif %}
         </td>
         <td>
-         {% if registro.tipo == 'Individual' %}
-           {% if registro.asistio == 'sí' %}
-             <span class="badge bg-success">✔️ Asistió</span>
-           {% elif registro.asistio == 'no' %}
-             <span class="badge bg-danger">❌ No asistió</span>
-           {% else %}
-             <!-- Mostrar botones para registrar asistencia -->
-             <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
-                class="btn btn-success btn-sm">✔️ Asistió</a>
-             <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
-                class="btn btn-danger btn-sm">❌ No asistió</a>
-           {% endif %}
-         {% else %}
-           <span class="badge bg-success">✔️ Asistió</span>
-         {% endif %}
+          {% if registro.estado == 'cancelada' %}
+            <!-- Si está cancelada, ya no hay botones -->
+            <span class="badge bg-secondary">—</span>
+          {% else %}
+            {% if registro.tipo == 'Individual' %}
+              {% if registro.asistio == 'sí' %}
+                <span class="badge bg-success">Asistió</span>
+              {% elif registro.asistio == 'no' %}
+                <span class="badge bg-danger">No asistió</span>
+              {% else %}
+                <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
+                   class="btn btn-success btn-sm">Asistió</a>
+                <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
+                   class="btn btn-danger btn-sm">No asistió</a>
+              {% endif %}
+            {% else %}
+              <span class="badge bg-success">✔Asistió</span>
+            {% endif %}
+          {% endif %}
         </td>
+
         <td>
           {% if registro.tipo == 'Individual' %}
             <a href="{{ url_for('eliminar_cita', id_cita=registro.id) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
