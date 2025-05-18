@@ -471,8 +471,9 @@ def dashboard():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
-    tipo = request.args.get('tipo', default='todos')  # nuevo filtro de tipo
+    tipo = request.args.get('tipo', default='todos')
 
+    # Definir el inicio del rango según el filtro
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
     elif rango == '30':
@@ -484,20 +485,21 @@ def dashboard():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
+    # Cargar todas las citas y preparar listas
     citas_crudas = Cita.query.all()
     citas_futuras = []
     historial_completo = []
 
-        # justo después de haber inicializado citas_crudas, citas_futuras e historial_completo:
+    # Procesar citas individuales
     for c in citas_crudas:
-        # 1) parseo de c.fecha_hora a datetime “fecha”
+        # Parsear la fecha de la cita
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        # 2) construimos la tupla de datos
+        # Construir tupla de datos
         tupla = (
             c.id,
             c.nombre,
@@ -512,9 +514,11 @@ def dashboard():
             c.nivel_educativo
         )
 
-        # 3) lógica revisada
+        # 1) Agendar futuras solo activas
         if fecha >= ahora and c.estado == 'activa':
             citas_futuras.append(tupla)
+
+        # 2) Al historial: pasadas dentro de rango o canceladas
         elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
@@ -532,7 +536,7 @@ def dashboard():
                 'nivel':      c.nivel_educativo
             })
 
-
+    # Procesar estudiantes de visitas grupales
     for e in EstudianteGrupal.query.all():
         try:
             fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
@@ -542,20 +546,21 @@ def dashboard():
 
         if fecha < ahora and fecha >= inicio_rango:
             historial_completo.append({
-                'tipo': 'Grupal',
-                'id': e.id,
-                'nombre': e.nombre,
-                'edad': e.edad,
-                'sexo': e.sexo,
-                'correo': e.correo,
-                'telefono': e.telefono,
+                'tipo':       'Grupal',
+                'id':         e.id,
+                'nombre':     e.nombre,
+                'edad':       e.edad,
+                'sexo':       e.sexo,
+                'correo':     e.correo,
+                'telefono':   e.telefono,
                 'fecha_hora': e.visita.fecha_confirmada,
-                'estado': 'finalizada',
-                'asistio': 'sí',
-                'institucion': e.visita.institucion,
-                'nivel': e.visita.nivel
+                'estado':     'finalizada',
+                'asistio':    'sí',
+                'institucion':e.visita.institucion,
+                'nivel':      e.visita.nivel
             })
 
+    # Construir lista de horarios
     horarios = []
     for h in Horario.query.all():
         try:
@@ -566,11 +571,13 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
+    # Filtrar historial por tipo si es necesario
     if tipo == 'individual':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
+    # Cargar visitas grupales y estudiantes para el template
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
     estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
 
