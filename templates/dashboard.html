@@ -332,29 +332,30 @@
         minDate: "today"
     });
 
-    // Confirmaciones para cancelar o eliminar
-    document.addEventListener("DOMContentLoaded", function () {
-  const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn');
+<script>
+  // Confirmaciones para cancelar o eliminar
+  document.addEventListener("DOMContentLoaded", function () {
+    const enlaces = document.querySelectorAll(
+      'a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn, a.eliminar-estudiante-btn'
+    );
 
-  enlaces.forEach(function (enlace) {
-    enlace.addEventListener('click', function (e) {
-      const texto = enlace.textContent.toLowerCase();
-      let mensaje = "¿Estás seguro de que deseas continuar?";
-      if (texto.includes("cancelar") && texto.includes("visita")) {
-        mensaje = "¿Deseas cancelar esta visita grupal?";
-      } else if (texto.includes("cancelar")) {
-        mensaje = "¿Deseas cancelar esta cita u horario?";
-      } else if (texto.includes("🗑")) {
-        mensaje = "¿Deseas eliminar esta solicitud permanentemente?";
-      }
-      if (!confirm(mensaje)) {
-        e.preventDefault();
-      }
+    enlaces.forEach(function (enlace) {
+      enlace.addEventListener('click', function (e) {
+        const texto = enlace.textContent.toLowerCase();
+        let mensaje = "¿Estás seguro de que deseas continuar?";
+        if (texto.includes("cancelar") && texto.includes("visita")) {
+          mensaje = "¿Deseas cancelar esta visita grupal?";
+        } else if (texto.includes("cancelar")) {
+          mensaje = "¿Deseas cancelar esta cita u horario?";
+        } else if (texto.includes("🗑")) {
+          mensaje = "¿Deseas eliminar este registro permanentemente?";
+        }
+        if (!confirm(mensaje)) {
+          e.preventDefault();
+        }
+      });
     });
   });
-});
-
-
 </script>
 </body>
 </html>
