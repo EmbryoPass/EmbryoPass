@@ -247,7 +247,7 @@
   </div>
 
   <div class="col-auto">
-    <a href="{{ url_for('descargar_historial', rango=rango, tipo=tipo) }}" class="btn btn-outline-success btn-sm">
+    <a href="{{ url_for('descargar_historial', rango=rango, tipo=tipo_filtro) }}" class="btn btn-outline-success btn-sm">
       📥 Descargar historial en Excel
     </a>
   </div>
@@ -272,7 +272,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for registro in historial %}
+      {% for registro in historial_completo %}
       <tr>
         <td>{{ registro.nombre }}</td>
         <td>{{ registro.edad or '—' }}</td>
@@ -281,7 +281,7 @@
         <td>{{ registro.nivel or '—' }}</td>
         <td>{{ registro.correo or '—' }}</td>
         <td>{{ registro.telefono or '—' }}</td>
-        <td>{{ registro.fecha }}</td>
+        <td>{{ registro.fecha_hora }}</td>
         <td><span class="badge bg-info text-dark">{{ registro.tipo }}</span></td>
         <td>
           {% if registro.estado == 'cancelada' %}
