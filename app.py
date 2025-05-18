@@ -504,6 +504,7 @@ def dashboard():
         if fecha >= ahora:
             citas_futuras.append(tupla)
         elif fecha < ahora and fecha >= inicio_rango:
+            asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
                 'tipo': 'Individual',
                 'id': c.id,
@@ -514,7 +515,7 @@ def dashboard():
                 'telefono': c.telefono,
                 'fecha_hora': c.fecha_hora,
                 'estado': c.estado,
-                'asistio': c.asistio,
+                'asistio': c.asistencia,
                 'institucion': c.institucion,
                 'nivel': c.nivel_educativo
             })
