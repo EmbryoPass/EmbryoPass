@@ -499,10 +499,11 @@ def dashboard():
             c.edad, c.sexo, c.institucion, c.nivel_educativo
         )
 
-        if fecha >= ahora and c.estado == 'activa':
+        if fecha >= ahora:
             citas_futuras.append(tupla)
         elif fecha < ahora and fecha >= inicio_rango:
             citas_pasadas.append(tupla)
+
 
 
     horarios = []
