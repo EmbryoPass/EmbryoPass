@@ -370,17 +370,28 @@ def registrar_asistencia_grupal():
             visitas.append((v.id, v.institucion, v.fecha_confirmada))
 
     if request.method == 'POST':
-        nombre = request.form.get('nombre')
-        correo = request.form.get('correo') or None  # correo opcional
-        telefono = request.form.get('telefono')
-        edad = request.form.get('edad')
-        sexo = request.form.get('sexo')
+        nombre    = request.form.get('nombre').strip()
+        correo    = request.form.get('correo') or None  # correo opcional
+        telefono  = request.form.get('telefono')
+        edad      = request.form.get('edad')
+        sexo      = request.form.get('sexo')
         visita_id = request.form.get('visita_id')
 
+        # Validar campos obligatorios
         if not nombre or not visita_id:
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
 
+        # Validar duplicado: mismo nombre en la misma visita
+        existente = EstudianteGrupal.query.filter_by(
+            visita_id=visita_id,
+            nombre=nombre
+        ).first()
+        if existente:
+            flash('❌ Ya hay un registro con ese nombre para esta visita.', 'danger')
+            return redirect(url_for('registrar_asistencia_grupal'))
+
+        # Registrar asistencia
         estudiante = EstudianteGrupal(
             nombre=nombre,
             correo=correo,
@@ -388,7 +399,7 @@ def registrar_asistencia_grupal():
             edad=edad,
             sexo=sexo,
             visita_id=visita_id,
-            hora_registro=datetime.now(zona).strftime("%d/%m/%Y %I:%M %p")
+            hora_registro=ahora.strftime("%d/%m/%Y %I:%M %p")
         )
         db.session.add(estudiante)
         db.session.commit()
@@ -396,7 +407,6 @@ def registrar_asistencia_grupal():
         return redirect(url_for('registrar_asistencia_grupal'))
 
     return render_template('registrar_asistencia_grupal.html', visitas=visitas)
-
 
 # Nuevas rutas para el flujo de visitas grupales
 @app.route('/aceptar_visita/<int:id>')
