@@ -882,6 +882,10 @@ def verificar_y_agregar_columnas_postgresql():
             print("✅ Columnas agregadas: ", ', '.join([c.split()[2] for c in cambios]))
         else:
             print("✅ Las columnas ya existen. No se hicieron cambios.")
+            
+def inicializar_tablas():
+    with app.app_context():
+        db.create_all()
 
 if __name__ == '__main__':
     inicializar_tablas()
