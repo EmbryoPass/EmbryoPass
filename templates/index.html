@@ -4,10 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museo de Embriología</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?
+    family=Playfair+Display:wght@600&family=Roboto&display=swap"
+    rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
   <style>
     body {
-      background-color: #f8f9fa;
+      background-color: #fdf9f3;              /* crema suave */
+      font-family: 'Roboto', sans-serif;      /* texto general */
+      color: #333;
+    }
+    /* Títulos con Playfair Display */
+    h1, h3.option-title {
+      font-family: 'Playfair Display', serif;
+      color: #2c2c2c;
     }
     .option-card {
       border: 1px solid #dee2e6;
@@ -15,30 +29,26 @@
       padding: 30px;
       margin-top: 30px;
       transition: box-shadow 0.3s ease;
+      background-color: white;
     }
     .option-card:hover {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
-    .logo {
-      display: block;
-      margin: 20px auto;
-      height: 80px;
-    }
-
-    /* Contenedor del título siempre en fila */
+    /* Contenedor del título en fila */
     .title-container {
       display: flex;
       justify-content: center;
       align-items: center;
       flex-wrap: nowrap;
-      margin-bottom: 1.5rem;
+      margin: 2rem 0;
     }
-
-    /* Tamaño del isotipo junto al título */
     .isotipo {
       height: 60px;
     }
-
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
     h3.option-title {
       font-size: 1.75rem;
     }
@@ -46,25 +56,19 @@
       background-color: #8B4513;
       color: white;
       border: none;
+      font-family: 'Playfair Display', serif;
     }
     .btn-cafe:hover {
       background-color: #6e3610;
       color: white;
     }
-
-    /* Ajustes para celular */
+    /* Móvil */
     @media (max-width: 576px) {
-      .logo {
-        height: 50px;
-      }
       .isotipo {
         height: 35px;
       }
-      .title-container h1 {
-        font-size: 1.25rem;
-      }
-      .title-container small {
-        font-size: 0.75rem;
+      h1 {
+        font-size: 1.5rem;
       }
       h3.option-title {
         font-size: 1rem;
@@ -75,21 +79,19 @@
 <body>
 
 <div class="container">
-  <!-- Logo de la facultad -->
-  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="logo">
 
-  <!-- Título con isotipo SIEMPRE a la izquierda -->
+  <!-- Título con isotipo a la izquierda -->
   <div class="title-container">
     <img src="{{ url_for('static', filename='isotipo.png') }}"
-         alt="Isotipo Museo de Embriología"
+         alt="Isotipo Museo"
          class="isotipo me-2">
     <div class="text-start">
-      <h1 class="mb-0">Museo de Embriología</h1>
+      <h1 class="mb-1">Museo de Embriología</h1>
       <small class="text-muted">Dra. Dora Virginia Chávez Corral</small>
     </div>
   </div>
 
-  <!-- Bloque para mostrar mensajes flash -->
+  <!-- Mensajes flash -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
@@ -101,28 +103,30 @@
   {% endwith %}
 
   <div class="row justify-content-center">
+    <!-- Tarjetas de acción -->
     <div class="col-md-5">
-      <div class="option-card text-center bg-white shadow-sm">
+      <div class="option-card text-center shadow-sm">
         <h3 class="option-title">Agendar cita general</h3>
         <p>Para público en general, visitantes individuales o grupos pequeños.</p>
         <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3">Agendar visita</a>
       </div>
     </div>
     <div class="col-md-5">
-      <div class="option-card text-center bg-white shadow-sm">
+      <div class="option-card text-center shadow-sm">
         <h3 class="option-title">Solicitar visita grupal institucional</h3>
         <p>Para instituciones como bachilleratos o universidades.</p>
         <a href="{{ url_for('ir_a_visita_grupal') }}" class="btn btn-cafe mt-3">Solicitar visita grupal</a>
       </div>
     </div>
     <div class="col-md-10">
-      <div class="option-card text-center bg-white shadow-sm">
+      <div class="option-card text-center shadow-sm">
         <h3 class="option-title">Registrar asistencia a cita grupal</h3>
         <p>Para estudiantes que ya están en el museo con una visita grupal confirmada.</p>
         <a href="{{ url_for('registrar_asistencia_grupal') }}" class="btn btn-cafe mt-3">Registrar asistencia</a>
       </div>
     </div>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
