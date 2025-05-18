@@ -101,6 +101,7 @@
         <th>Estado</th>
         <th>Fecha confirmada</th>
         <th>Acciones</th>
+        <th>Cancelar</th>
       </tr>
     </thead>
     <tbody>
@@ -128,13 +129,22 @@
           {% if visita.estado == 'pendiente' %}
             <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-success mb-1">Aceptar</a>
             <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-danger mb-1">Rechazar</a>
-            <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-warning mb-1">Cancelar</a>
 
           {% elif visita.estado == 'aceptada' %}
             <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
               <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1" required>
               <button type="submit" class="btn btn-sm btn-primary">Asignar Fecha</button>
             </form>
+          {% endif %}
+        </td>
+        <td>
+          {% if visita.estado != 'cancelada' %}
+            <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}"
+               class="btn btn-sm btn-outline-danger cancelar-visita-btn">
+               Cancelar
+            </a>
+          {% else %}
+            <span class="badge bg-secondary">Cancelada</span>
           {% endif %}
         </td>
       </tr>
@@ -302,20 +312,26 @@
 
     // Confirmaciones para cancelar o eliminar
     document.addEventListener("DOMContentLoaded", function () {
-        const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger');
+    const enlaces = document.querySelectorAll('a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn');
 
-        enlaces.forEach(function (enlace) {
-            enlace.addEventListener('click', function (e) {
-                const texto = enlace.textContent.toLowerCase();
-                let mensaje = "¿Estás seguro de que deseas continuar?";
-                if (texto.includes("cancelar")) mensaje = "¿Deseas cancelar esta cita u horario?";
-                if (texto.includes("🗑")) mensaje = "¿Deseas eliminar esta cita permanentemente?";
-                if (!confirm(mensaje)) {
-                    e.preventDefault();
-                }
-            });
+    enlaces.forEach(function (enlace) {
+        enlace.addEventListener('click', function (e) {
+            const texto = enlace.textContent.toLowerCase();
+            let mensaje = "¿Estás seguro de que deseas continuar?";
+            if (texto.includes("cancelar") && texto.includes("visita")) {
+                mensaje = "¿Deseas cancelar esta visita grupal?";
+            } else if (texto.includes("cancelar")) {
+                mensaje = "¿Deseas cancelar esta cita u horario?";
+            } else if (texto.includes("🗑")) {
+                mensaje = "¿Deseas eliminar esta cita permanentemente?";
+            }
+            if (!confirm(mensaje)) {
+                e.preventDefault();
+            }
         });
     });
+});
+
 </script>
 </body>
 </html>
