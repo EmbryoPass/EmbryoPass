@@ -197,6 +197,8 @@ def agendar():
         <li><strong>Teléfono:</strong> {telefono}</li>
         <li><strong>Edad:</strong> {edad}</li>
         <li><strong>Sexo:</strong> {sexo}</li>
+        <li><strong>Institución:</strong> {cita.institucion or '—'}</li>
+        <li><strong>Nivel educativo:</strong> {cita.nivel_educativo or '—'}</li>
         <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       </ul>
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
