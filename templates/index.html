@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -16,29 +17,13 @@
       color: #333;
     }
 
-    /* Overlay para efecto "página" */
-    #pageTurn {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #fdf9f3;
-      transform-origin: left center;
-      transform: perspective(1200px) rotateY(0deg);
-      transition: transform 0.8s ease-in-out;
-      z-index: 2000;
-      pointer-events: none;
-    }
-    #pageTurn.turn {
-      transform: perspective(1200px) rotateY(-90deg);
-    }
-
     /* Keyframes para fade-in + slide-up */
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0);   }
     }
     .fade-in {
-      opacity: 0;
+      opacity: 0;                   /* arranca invisible */
       animation: fadeSlideIn .8s ease-out forwards;
     }
 
@@ -103,12 +88,9 @@
       border: none;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
-      transition: transform .15s ease, box-shadow .15s ease;
     }
     .btn-cafe:hover {
       background-color: #6e3610;
-      transform: scale(1.03);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
 
     @media (max-width: 576px) {
@@ -121,9 +103,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Overlay para animar cambio de "página" -->
-  <div id="pageTurn"></div>
 
   <div class="container text-center pb-5">
 
@@ -145,41 +124,26 @@
         <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 0.6s;">
           <h3 class="option-title">Agendar visita general</h3>
           <p>Para público en general, visitantes individuales o grupos pequeños.</p>
-          <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3 page-link">Agendar visita</a>
+          <a href="{{ url_for('agendar') }}" class="btn btn-cafe mt-3">Agendar visita</a>
         </div>
       </div>
       <div class="col-md-5">
         <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 0.8s;">
           <h3 class="option-title">Solicitar visita grupal institucional</h3>
           <p>Para instituciones como bachilleratos o universidades.</p>
-          <a href="{{ url_for('ir_a_visita_grupal') }}" class="btn btn-cafe mt-3 page-link">Solicitar visita grupal</a>
+          <a href="{{ url_for('ir_a_visita_grupal') }}" class="btn btn-cafe mt-3">Solicitar visita grupal</a>
         </div>
       </div>
       <div class="col-md-10">
         <div class="option-card text-center shadow-sm fade-in" style="animation-delay: 1s;">
           <h3 class="option-title">Registrar asistencia a visita grupal</h3>
           <p>Para estudiantes que ya están en el museo con una visita grupal confirmada.</p>
-          <a href="{{ url_for('registrar_asistencia_grupal') }}" class="btn btn-cafe mt-3 page-link">Registrar asistencia</a>
+          <a href="{{ url_for('registrar_asistencia_grupal') }}" class="btn btn-cafe mt-3">Registrar asistencia</a>
         </div>
       </div>
     </div>
 
   </div>
-
-  <script>
-    // intercepta clicks en enlaces .page-link para animar "página"
-    document.querySelectorAll('a.page-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const href = this.href;
-        const overlay = document.getElementById('pageTurn');
-        overlay.classList.add('turn');
-        overlay.addEventListener('transitionend', () => {
-          window.location.href = href;
-        }, { once: true });
-      });
-    });
-  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
