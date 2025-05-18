@@ -18,6 +18,40 @@
       min-height: 100vh;
     }
 
+    /* Progress bar top */
+    #progressBar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: #8B4513;
+      width: 0;
+      transition: width .4s ease;
+      z-index: 9999;
+    }
+
+    /* Typewriter effect */
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes blink-caret {
+      50% { border-color: transparent; }
+    }
+    .section-title {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .1em solid #4a3526;
+      width: 0;
+      animation:
+        typewriter 1.5s steps(30) forwards,
+        blink-caret .75s step-end infinite;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
     /* Logo principal centrado */
     .main-logo {
       display: block;
@@ -51,14 +85,6 @@
       font-size: 1rem;
     }
 
-    /* Título de sección */
-    .section-title {
-      font-family: 'Nunito', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-    }
-
     /* Card de formulario */
     #formAsistencia {
       max-width: 600px;
@@ -68,22 +94,28 @@
       padding: 2rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    #formAsistencia .form-label,
-    #formAsistencia .form-select,
-    #formAsistencia .form-control {
-      font-family: 'Roboto', sans-serif;
+
+    /* Inputs & select focus */
+    #formAsistencia .form-control:focus,
+    #formAsistencia .form-select:focus {
+      border-color: #8B4513;
+      box-shadow: 0 0 0 .2rem rgba(139,69,19,0.25);
+      transition: border-color .2s, box-shadow .2s;
     }
 
-    /* Botón café */
+    /* Botón café con micro-interacción */
     .btn-cafe {
       background-color: #8B4513;
       color: white;
       border: none;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
+      transition: transform .15s ease, box-shadow .15s ease;
     }
     .btn-cafe:hover {
       background-color: #6e3610;
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
 
     /* Responsividad */
@@ -98,10 +130,14 @@
 </head>
 <body>
 
-  <div class="container text-center pb-5">
+  <!-- Progress bar -->
+  <div id="progressBar"></div>
 
+  <div class="container text-center pb-5">
     <!-- Logo -->
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="main-logo">
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo">
 
     <!-- Título del sitio -->
     <div class="title-text">
@@ -109,7 +145,7 @@
       <small>Dra. Dora Virginia Chávez Corral</small>
     </div>
 
-    <!-- Título de sección -->
+    <!-- Título de sección con typewriter -->
     <h2 class="section-title">Registrar asistencia a cita grupal</h2>
 
     <!-- Mensajes flash -->
@@ -122,7 +158,7 @@
     {% endwith %}
 
     <!-- Formulario -->
-    <form method="POST" id="formAsistencia">
+    <form method="POST" id="formAsistencia" onsubmit="return handleSubmit();">
       <div class="mb-3 text-start">
         <label class="form-label" for="nombre">Nombre completo</label>
         <input type="text" class="form-control" id="nombre" name="nombre" required
@@ -130,13 +166,13 @@
       </div>
 
       <div class="mb-3 text-start">
-        <label class="form-label" for="correo">Correo electrónico</label>
+        <label class="form-label" for="correo">Correo electrónico (opcional)</label>
         <input type="email" class="form-control" id="correo" name="correo"
                value="{{ request.form.get('correo','') }}">
       </div>
-
+      
       <div class="mb-3 text-start">
-        <label class="form-label" for="telefono">Teléfono</label>
+        <label class="form-label" for="telefono">Teléfono (opcional)</label>
         <input type="text" class="form-control" id="telefono" name="telefono" pattern="\d{10}"
                title="Debe contener 10 dígitos" value="{{ request.form.get('telefono','') }}">
       </div>
@@ -150,7 +186,9 @@
       <div class="mb-3 text-start">
         <label class="form-label" for="sexo">Sexo</label>
         <select class="form-select" id="sexo" name="sexo">
-          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona una opción</option>
+          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>
+            Selecciona una opción
+          </option>
           <option value="Mujer" {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
           <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
         </select>
@@ -159,7 +197,9 @@
       <div class="mb-3 text-start">
         <label class="form-label" for="visita_id">Selecciona tu institución y fecha</label>
         <select class="form-select" id="visita_id" name="visita_id" required>
-          <option value="" disabled {% if not request.form.get('visita_id') %}selected{% endif %}>Selecciona una visita</option>
+          <option value="" disabled {% if not request.form.get('visita_id') %}selected{% endif %}>
+            Selecciona una visita
+          </option>
           {% for id, institucion, fecha in visitas %}
             <option value="{{ id }}" {% if request.form.get('visita_id')==id|string %}selected{% endif %}>
               {{ institucion }} – {{ fecha }}
@@ -175,11 +215,15 @@
   </div>
 
   <script>
-    document.getElementById('formAsistencia').addEventListener('submit', function(){
+    function handleSubmit() {
+      // Start progress bar
+      document.getElementById('progressBar').style.width = '100%';
+      // Disable button
       const btn = document.getElementById('btnEnviar');
       btn.disabled = true;
-      btn.textContent = 'Procesando...';
-    });
+      btn.textContent = 'Procesando…';
+      return true;
+    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
