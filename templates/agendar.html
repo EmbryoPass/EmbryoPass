@@ -152,7 +152,7 @@
     <div class="mb-3 text-start">
       <label for="nivel" class="form-label">Nivel Académico</label>
       <select class="form-select" id="nivel" name="nivel">
-        <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona nivel académico</option>
+        <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona una opción</option>
         <option value="Primaria"     {% if request.form.get('nivel')=='Primaria'     %}selected{% endif %}>Primaria</option>
         <option value="Secundaria"   {% if request.form.get('nivel')=='Secundaria'   %}selected{% endif %}>Secundaria</option>
         <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
