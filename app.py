@@ -515,7 +515,7 @@ def dashboard():
                 'telefono': c.telefono,
                 'fecha_hora': c.fecha_hora,
                 'estado': c.estado,
-                'asistio': c.asistencia,
+                'asistio': asistencia,
                 'institucion': c.institucion,
                 'nivel': c.nivel_educativo
             })
