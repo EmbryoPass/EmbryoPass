@@ -862,10 +862,29 @@ def logout():
     flash('✅ Sesión cerrada.', 'success')
     return redirect(url_for('login'))
 
-def inicializar_tablas():
+def verificar_y_agregar_columnas_postgresql():
     with app.app_context():
-        db.create_all()
+        inspector = db.inspect(db.engine)
+        columnas = [col['name'] for col in inspector.get_columns('cita')]
+
+        cambios = []
+
+        if 'institucion' not in columnas:
+            cambios.append("ADD COLUMN institucion VARCHAR(100)")
+
+        if 'nivel_educativo' not in columnas:
+            cambios.append("ADD COLUMN nivel_educativo VARCHAR(50)")
+
+        if cambios:
+            alter_sql = f"ALTER TABLE cita {', '.join(cambios)};"
+            db.session.execute(text(alter_sql))
+            db.session.commit()
+            print("✅ Columnas agregadas: ", ', '.join([c.split()[2] for c in cambios]))
+        else:
+            print("✅ Las columnas ya existen. No se hicieron cambios.")
 
 if __name__ == '__main__':
     inicializar_tablas()
+    verificar_y_agregar_columnas_postgresql()  # 👈 agrega esta línea
     app.run(host='0.0.0.0', port=10000)
+
