@@ -488,35 +488,50 @@ def dashboard():
     citas_futuras = []
     historial_completo = []
 
-        for c in citas_crudas:
-        # … parseo de fecha a datetime “fecha” …
+        # justo después de haber inicializado citas_crudas, citas_futuras e historial_completo:
+    for c in citas_crudas:
+        # 1) parseo de c.fecha_hora a datetime “fecha”
+        try:
+            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+
+        # 2) construimos la tupla de datos
         tupla = (
-            c.id, c.nombre, c.correo, c.telefono,
-            c.fecha_hora, c.estado, c.asistio,
-            c.edad, c.sexo, c.institucion, c.nivel_educativo
+            c.id,
+            c.nombre,
+            c.correo,
+            c.telefono,
+            c.fecha_hora,
+            c.estado,
+            c.asistio,
+            c.edad,
+            c.sexo,
+            c.institucion,
+            c.nivel_educativo
         )
 
-        # 1) Próximas: solo las activas y con fecha >= hoy
+        # 3) lógica revisada
         if fecha >= ahora and c.estado == 'activa':
             citas_futuras.append(tupla)
-
-        # 2) Historial: las pasadas dentro de rango OR las canceladas (pasadas o futuras)
         elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
-                'tipo':      'Individual',
-                'id':        c.id,
-                'nombre':    c.nombre,
-                'edad':      c.edad,
-                'sexo':      c.sexo,
-                'correo':    c.correo,
-                'telefono':  c.telefono,
-                'fecha_hora':c.fecha_hora,
-                'estado':    c.estado,
-                'asistio':   asistencia,
-                'institucion':   c.institucion,
-                'nivel':         c.nivel_educativo
+                'tipo':       'Individual',
+                'id':         c.id,
+                'nombre':     c.nombre,
+                'edad':       c.edad,
+                'sexo':       c.sexo,
+                'correo':     c.correo,
+                'telefono':   c.telefono,
+                'fecha_hora': c.fecha_hora,
+                'estado':     c.estado,
+                'asistio':    asistencia,
+                'institucion':c.institucion,
+                'nivel':      c.nivel_educativo
             })
+
 
     for e in EstudianteGrupal.query.all():
         try:
