@@ -130,13 +130,13 @@
       </div>
 
       <div class="mb-3 text-start">
-        <label class="form-label" for="correo">Correo electrónico (opcional)</label>
+        <label class="form-label" for="correo">Correo electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo"
                value="{{ request.form.get('correo','') }}">
       </div>
 
       <div class="mb-3 text-start">
-        <label class="form-label" for="telefono">Teléfono (opcional)</label>
+        <label class="form-label" for="telefono">Teléfono</label>
         <input type="text" class="form-control" id="telefono" name="telefono" pattern="\d{10}"
                title="Debe contener 10 dígitos" value="{{ request.form.get('telefono','') }}">
       </div>
