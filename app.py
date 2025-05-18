@@ -9,6 +9,8 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import os
 from sqlalchemy import text
+import pandas as pd
+from flask import make_response
 
 # Configuración base
 app = Flask(__name__)
@@ -42,7 +44,7 @@ class Cita(db.Model):
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
     institucion = db.Column(db.String(100), nullable=True) 
-    nivel_educativo = db.Column(db.String(50), nullable=True
+    nivel_educativo = db.Column(db.String(50), nullable=True)
 
 class VisitaGrupal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -175,7 +177,7 @@ def agendar():
                 fecha_hora=horario.fecha_hora,
                 token_cancelacion=token,
                 edad=edad,
-                sexo=sexo
+                sexo=sexo,
                 institucion=institucion,
                 nivel_educativo=nivel_educativo
             )
@@ -288,8 +290,6 @@ def solicitar_visita_grupal():
             numero_alumnos=numero_alumnos,
             fechas_preferidas=fechas,
             comentarios=comentarios
-            institucion=institucion,
-            nivel_educativo=nivel_educativo
         )
         db.session.add(nueva_visita)
         db.session.commit()
@@ -494,7 +494,7 @@ def dashboard():
         tupla = (
             c.id, c.nombre, c.correo, c.telefono,
             c.fecha_hora, c.estado, c.asistio,
-            c.edad, c.sexo
+            c.edad, c.sexo, c.institucion, c.nivel
         )
 
         if fecha >= ahora:
@@ -566,7 +566,9 @@ def cancelar_usuario(id_cita, token):
                 <li><strong>Correo:</strong> {cita.correo}</li>
                 <li><strong>Teléfono:</strong> {cita.telefono}</li>
                 <li><strong>Edad:</strong> {cita.edad}</li>
-                <li><strong>Sexo:</strong> {cita.sexo}</li>
+                <li><strong>Sexo:</strong> {cita.sexo}</li>        
+                <li><strong>Institución:</strong> {institucion or '—'}</li>
+                <li><strong>Nivel educativo:</strong> {nivel_educativo or '—'}</li>
                 <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
               </ul>
             </div>
@@ -629,6 +631,8 @@ def cancelar_cita(id_cita):
         <li><strong>Teléfono:</strong> {cita.telefono}</li>
         <li><strong>Edad:</strong> {cita.edad}</li>
         <li><strong>Sexo:</strong> {cita.sexo}</li>
+        <li><strong>Institución:</strong> {institucion or '—'}</li>
+        <li><strong>Nivel educativo:</strong> {nivel_educativo or '—'}</li>
         <li><strong>Fecha y hora:</strong> {cita.fecha_hora}</li>
       </ul>
     </div>
