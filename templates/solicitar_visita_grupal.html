@@ -93,6 +93,7 @@
     <label class="form-label">Nivel académico</label>
     <select class="form-select" name="nivel_educativo" required>
       <option value="" disabled selected>Selecciona una opción</option>
+      <option value="Primaria" {% if request.form.get('nivel_educativo') == 'Primaria' %}selected{% endif %}>Secundaria</option>
       <option value="Secundaria" {% if request.form.get('nivel_educativo') == 'Secundaria' %}selected{% endif %}>Secundaria</option>
       <option value="Bachillerato" {% if request.form.get('nivel_educativo') == 'Bachillerato' %}selected{% endif %}>Bachillerato</option>
       <option value="Universidad" {% if request.form.get('nivel_educativo') == 'Universidad' %}selected{% endif %}>Universidad</option>
