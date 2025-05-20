@@ -327,9 +327,24 @@
         </td>
         <td>
           {% if registro.tipo == 'Individual' %}
-            <a href="{{ url_for('eliminar_cita', id_cita=registro.id) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
+            {% if registro.estado == 'cancelada' %}
+              <a href="{{ url_for('eliminar_cita', id_cita=registro.id) }}"
+                 class="btn btn-outline-danger btn-sm"
+                 title="Eliminar cita cancelada">
+                 🗑️
+              </a>
+           {% else %}
+              <button class="btn btn-sm btn-outline-secondary" disabled
+                      title="Solo se puede eliminar si la cita está cancelada">
+                🗑️
+              </button>
+            {% endif %}
           {% else %}
-            <a href="{{ url_for('eliminar_estudiante_grupal', id=registro.id) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
+            <a href="{{ url_for('eliminar_estudiante_grupal', id=registro.id) }}"
+               class="btn btn-outline-danger btn-sm"
+              title="Eliminar estudiante de visita grupal">
+               🗑️
+            </a>
           {% endif %}
         </td>
       </tr>
