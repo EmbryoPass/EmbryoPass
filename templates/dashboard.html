@@ -9,7 +9,7 @@
 </head>
 <body class="bg-light">
 <div class="container p-3">
-    <h1 class="text-center mb-4">🏛️ Panel de Administración</h1>
+    <h1 class="text-center mb-4">Panel de Administración</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -52,9 +52,6 @@
                    {% else %}
                      <span class="badge bg-secondary">Cancelada</span>
                    {% endif %}
-                 </td>
-                 <td>
-                   <a href="{{ url_for('eliminar_cita', id_cita=cita[0]) }}" class="btn btn-outline-danger btn-sm">🗑️</a>
                  </td>
                </tr>
                {% endfor %}
