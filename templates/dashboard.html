@@ -1,14 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard - Museo de Embriología</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Museo de Embriología</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #fdf9f3;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      color: #222;
+    }
+
+    .btn-pastel-primary {
+      background-color: #a7dffb;
+      border-color: #a7dffb;
+      color: #004e6b;
+    }
+    .btn-pastel-primary:hover {
+      background-color: #8fd3f5;
+      border-color: #8fd3f5;
+    }
+
+    .btn-pastel-success {
+      background-color: #b9e4c9;
+      border-color: #b9e4c9;
+      color: #2e6e4c;
+    }
+    .btn-pastel-success:hover {
+      background-color: #a0d8b6;
+      border-color: #a0d8b6;
+    }
+
+    .btn-pastel-danger {
+      background-color: #f7c6c7;
+      border-color: #f7c6c7;
+      color: #842029;
+    }
+    .btn-pastel-danger:hover {
+      background-color: #f3b0b2;
+      border-color: #f3b0b2;
+    }
+
+    .btn-pastel-secondary {
+      background-color: #eaeaea;
+      border-color: #eaeaea;
+      color: #555;
+    }
+    .btn-pastel-secondary:hover {
+      background-color: #dcdcdc;
+      border-color: #dcdcdc;
+    }
+
+    .btn-disabled {
+      background-color: #f0f0f0;
+      border-color: #f0f0f0;
+      color: #999;
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .table thead {
+      background-color: #e9ecef;
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container p-3">
+
+<body>
+  <div class="container py-4 px-3 rounded shadow-sm bg-white">
     <h1 class="text-center mb-4">Panel de Administración</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -20,75 +88,86 @@
     {% endwith %}
 
     <h2 class="mt-4">Citas Agendadas</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Sexo</th>
-                    <th>Institución</th>
-                    <th>Nivel Académico</th>
-                    <th>Correo</th>
-                    <th>Teléfono</th>
-                    <th>Fecha y Hora</th>
-                    <th>Cancelar</th>
-                </tr>
-            </thead>
-            <tbody>
-              {% for cita in citas %}
-              <tr>
-                <td>{{ cita[1] }}</td> <!-- nombre -->
-                <td>{{ cita[7] or '—' }}</td> <!-- edad -->
-                <td>{{ cita[8] or '—' }}</td> <!-- sexo -->
-                <td>{{ cita[9] or '—' }}</td> <!-- institución -->
-                <td>{{ cita[10] or '—' }}</td> <!-- nivel educativo -->
-                <td>{{ cita[2] }}</td> <!-- correo -->
-                <td>{{ cita[3] }}</td> <!-- teléfono -->
-                <td>{{ cita[4] }}</td> <!-- fecha y hora -->
-                <td>
-                   {% if cita[5] == 'activa' %}
-                     <a href="{{ url_for('cancelar_cita', id_cita=cita[0]) }}" class="btn btn-danger btn-sm">Cancelar</a>
-                   {% else %}
-                     <span class="badge bg-secondary">Cancelada</span>
-                   {% endif %}
-                 </td>
-               </tr>
-               {% endfor %}
-             </tbody>
-        </table>
-    </div>
 
-    <h2 class="mt-5">Horarios Disponibles</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Disponibles</th>
-                    <th>Capacidad</th>
-                    <th>Cancelar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for horario in horarios %}
-                <tr>
-                    <td>{{ horario[1] }}</td>
-                    <td>{{ horario[2] }}</td>
-                    <td>{{ horario[3] }}</td>
-                    <td>
-                        <a href="{{ url_for('eliminar_horario', id_horario=horario[0]) }}" class="btn btn-danger btn-sm text-white">Cancelar</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="table-responsive">
+  <table class="table table-striped table-hover shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Nombre</th>
+        <th>Edad</th>
+        <th>Sexo</th>
+        <th>Institución</th>
+        <th>Nivel Académico</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+        <th>Fecha y Hora</th>
+        <th>Cancelar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cita in citas %}
+      <tr>
+        <td>{{ cita[1] }}</td>
+        <td>{{ cita[7] or '—' }}</td>
+        <td>{{ cita[8] or '—' }}</td>
+        <td>{{ cita[9] or '—' }}</td>
+        <td>{{ cita[10] or '—' }}</td>
+        <td>{{ cita[2] }}</td>
+        <td>{{ cita[3] }}</td>
+        <td>{{ cita[4] }}</td>
+        <td>
+          {% if cita[5] == 'activa' %}
+            <a href="{{ url_for('cancelar_cita', id_cita=cita[0]) }}"
+               class="btn btn-pastel-danger btn-sm">
+               Cancelar
+            </a>
+          {% else %}
+            <span class="badge bg-secondary">Cancelada</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<h2 class="mt-5">Horarios Disponibles</h2>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Disponibles</th>
+        <th>Capacidad</th>
+        <th>Cancelar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for horario in horarios %}
+      <tr>
+        <td>{{ horario[1] }}</td>
+        <td>{{ horario[2] }}</td>
+        <td>{{ horario[3] }}</td>
+        <td>
+          <a href="{{ url_for('eliminar_horario', id_horario=horario[0]) }}"
+             class="btn btn-pastel-danger btn-sm">
+             Cancelar
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 
     <h2 class="mt-5">Solicitudes de Visitas Grupales</h2>
+
 <div class="table-responsive">
   <table class="table table-bordered table-hover shadow-sm">
-    <thead class="table-secondary">
+    <thead class="table-light">
       <tr>
         <th>Institución</th>
         <th>Encargado</th>
@@ -128,20 +207,27 @@
         <td>{{ visita.fecha_confirmada or '—' }}</td>
         <td>
           {% if visita.estado == 'pendiente' %}
-            <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-success mb-1">Aceptar</a>
-            <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-danger mb-1">Rechazar</a>
-
+            <a href="{{ url_for('aceptar_visita', id=visita.id) }}"
+               class="btn btn-sm btn-pastel-success mb-1">
+               Aceptar
+            </a>
+            <a href="{{ url_for('rechazar_visita', id=visita.id) }}"
+               class="btn btn-sm btn-pastel-danger mb-1">
+               Rechazar
+            </a>
           {% elif visita.estado == 'aceptada' %}
-            <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
-              <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1" required>
-              <button type="submit" class="btn btn-sm btn-primary">Asignar Fecha</button>
+            <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}"
+                  method="POST" class="d-flex flex-column">
+              <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa"
+                     class="form-control form-control-sm mb-1" required>
+              <button type="submit" class="btn btn-sm btn-pastel-primary">Asignar Fecha</button>
             </form>
           {% endif %}
         </td>
         <td>
           {% if visita.estado != 'cancelada' %}
             <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}"
-               class="btn btn-sm btn-outline-danger cancelar-visita-btn">
+               class="btn btn-sm btn-pastel-danger cancelar-visita-btn">
                Cancelar
             </a>
           {% else %}
@@ -156,7 +242,8 @@
                🗑️
             </a>
           {% else %}
-            <button class="btn btn-sm btn-outline-secondary" disabled title="Solo se puede eliminar si la visita está cancelada">
+            <button class="btn btn-sm btn-disabled"
+                    title="Solo se puede eliminar si la visita está cancelada">
               🗑️
             </button>
           {% endif %}
@@ -167,57 +254,67 @@
   </table>
 </div>
 
-    <h2 class="mt-5">Estudiantes Registrados en Visitas Grupales</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover shadow-sm">
-        <thead class="table-dark">
-          <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Edad</th>
-            <th>Sexo</th>
-            <th>Institución</th>
-            <th>Nivel académico</th>
-            <th>Fecha y Hora</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for estudiante in estudiantes_grupales %}
-          <tr>
-            <td>{{ estudiante.nombre }}</td>
-            <td>{{ estudiante.correo }}</td>
-            <td>{{ estudiante.edad }}</td>
-            <td>{{ estudiante.sexo }}</td>
-            <td>{{ estudiante.visita.institucion }}</td>
-            <td>{{ estudiante.visita.nivel }}</td>
-            <td>{{ estudiante.visita.fecha_confirmada }}</td>
-            <td>
-              <a href="{{ url_for('eliminar_estudiante_grupal', id=estudiante.id) }}"
-                 class="btn btn-sm btn-outline-danger eliminar-estudiante-btn">
-                 🗑️
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+
+    <h2 class="mt-5"> Estudiantes Registrados en Visitas Grupales</h2>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-hover shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Edad</th>
+        <th>Sexo</th>
+        <th>Institución</th>
+        <th>Nivel académico</th>
+        <th>Fecha y Hora</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for estudiante in estudiantes_grupales %}
+      <tr>
+        <td>{{ estudiante.nombre }}</td>
+        <td>{{ estudiante.correo }}</td>
+        <td>{{ estudiante.edad }}</td>
+        <td>{{ estudiante.sexo }}</td>
+        <td>{{ estudiante.visita.institucion }}</td>
+        <td>{{ estudiante.visita.nivel }}</td>
+        <td>{{ estudiante.visita.fecha_confirmada }}</td>
+        <td>
+          <a href="{{ url_for('eliminar_estudiante_grupal', id=estudiante.id) }}"
+             class="btn btn-sm btn-outline-danger eliminar-estudiante-btn"
+             title="Eliminar estudiante">
+             🗑️
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 
     <h2 class="mt-5">Agregar Nuevo Horario</h2>
-    <form method="POST" action="{{ url_for('agregar_horario') }}" class="card p-4 shadow-sm">
-        <div class="mb-3">
-            <label for="fecha_hora" class="form-label">Fecha y Hora</label>
-            <input type="text" class="form-control" id="fecha_hora" name="fecha_hora" placeholder="Selecciona fecha y hora" required>
-        </div>
-        <div class="mb-3">
-            <label for="disponibles" class="form-label">Número de espacios disponibles</label>
-            <input type="number" class="form-control" id="disponibles" name="disponibles" min="1" max="20" required>
-        </div>
-        <div class="text-center">
-            <button type="submit" class="btn btn-success w-100">Agregar Horario</button>
-        </div>
-    </form>
+
+<form method="POST" action="{{ url_for('agregar_horario') }}" class="card p-4 shadow-sm border-0 bg-light">
+  <div class="mb-3">
+    <label for="fecha_hora" class="form-label fw-bold">Fecha y Hora</label>
+    <input type="text" class="form-control" id="fecha_hora" name="fecha_hora"
+           placeholder="Selecciona fecha y hora" required>
+  </div>
+  <div class="mb-3">
+    <label for="disponibles" class="form-label fw-bold">Número de espacios disponibles</label>
+    <input type="number" class="form-control" id="disponibles" name="disponibles"
+           min="1" max="20" required>
+  </div>
+  <div class="text-center">
+    <button type="submit" class="btn btn-pastel-primary w-100">
+      Agregar Horario
+    </button>
+  </div>
+</form>
+
 
     <h2 class="mt-5">Historial de Citas</h2>
 
@@ -246,11 +343,12 @@
   </div>
 
   <div class="col-auto">
-    <button type="submit" class="btn btn-outline-primary btn-sm">Aplicar</button>
+    <button type="submit" class="btn btn-pastel-primary btn-sm">Aplicar</button>
   </div>
 
   <div class="col-auto">
-    <a href="{{ url_for('descargar_historial', rango=rango, tipo=tipo_filtro) }}" class="btn btn-outline-success btn-sm">
+    <a href="{{ url_for('descargar_historial', rango=rango, tipo=tipo_filtro) }}"
+       class="btn btn-pastel-success btn-sm">
       📥 Descargar historial en Excel
     </a>
   </div>
@@ -258,7 +356,7 @@
 
 <div class="table-responsive">
   <table class="table table-bordered table-hover shadow-sm">
-    <thead class="table-secondary">
+    <thead class="table-light">
       <tr>
         <th>Nombre</th>
         <th>Edad</th>
@@ -316,12 +414,11 @@
             </div>
             <div class="collapse mt-1" id="editar-{{ registro.id }}">
               <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='sí') }}"
-                 class="btn btn-success btn-sm">✔Asistió</a>
+                 class="btn btn-pastel-success btn-sm">✔ Asistió</a>
               <a href="{{ url_for('marcar_asistencia', id_cita=registro.id, estado='no') }}"
-                 class="btn btn-danger btn-sm">No asistió</a>
+                 class="btn btn-pastel-danger btn-sm">✖ No asistió</a>
             </div>
           {% else %}
-    <!-- Para citas grupales -->
             <span class="badge bg-success">Asistió</span>
           {% endif %}
         </td>
@@ -334,7 +431,7 @@
                  🗑️
               </a>
            {% else %}
-              <button class="btn btn-sm btn-outline-secondary" disabled
+              <button class="btn btn-sm btn-disabled"
                       title="Solo se puede eliminar si la cita está cancelada">
                 🗑️
               </button>
@@ -342,7 +439,7 @@
           {% else %}
             <a href="{{ url_for('eliminar_estudiante_grupal', id=registro.id) }}"
                class="btn btn-outline-danger btn-sm"
-              title="Eliminar estudiante de visita grupal">
+               title="Eliminar estudiante de visita grupal">
                🗑️
             </a>
           {% endif %}
@@ -355,7 +452,7 @@
 
 
     <div class="text-center mt-4">
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar sesión</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-pastel-danger">Cerrar sesión</a>
     </div>
 </div>
 
@@ -363,21 +460,21 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Flatpickr para agregar horario
-    flatpickr("#fecha_hora", {
-        enableTime: true,
-        dateFormat: "d/m/Y h:i K",
-        time_24hr: false,
-        minDate: "today"
-    });
+  // Flatpickr para agregar horario
+  flatpickr("#fecha_hora", {
+    enableTime: true,
+    dateFormat: "d/m/Y h:i K",
+    time_24hr: false,
+    minDate: "today"
+  });
 
-    // Flatpickr para todos los inputs que asignan fecha a visitas aceptadas
-    flatpickr("input[name='fecha_confirmada']", {
-        enableTime: true,
-        dateFormat: "d/m/Y h:i K",
-        time_24hr: false,
-        minDate: "today"
-    });
+  // Flatpickr para todos los inputs que asignan fecha a visitas aceptadas
+  flatpickr("input[name='fecha_confirmada']", {
+    enableTime: true,
+    dateFormat: "d/m/Y h:i K",
+    time_24hr: false,
+    minDate: "today"
+  });
 
   // Confirmaciones para cancelar o eliminar
   document.addEventListener("DOMContentLoaded", function () {
