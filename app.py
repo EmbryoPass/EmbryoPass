@@ -749,14 +749,23 @@ def eliminar_visita_grupal(id):
         return redirect(url_for('login'))
 
     visita = VisitaGrupal.query.get(id)
-    if visita:
-        db.session.delete(visita)
-        db.session.commit()
-        flash('✅ Solicitud de visita eliminada.', 'success')
-    else:
+    if not visita:
         flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('dashboard'))
 
+    if visita.estado != 'cancelada':
+        flash('❌ Solo puedes eliminar visitas que ya han sido canceladas.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    # Eliminar estudiantes asociados
+    for estudiante in visita.estudiantes:
+        db.session.delete(estudiante)
+
+    db.session.delete(visita)
+    db.session.commit()
+    flash('✅ Visita cancelada eliminada correctamente.', 'success')
     return redirect(url_for('dashboard'))
+
     
 @app.route('/eliminar_horario/<int:id_horario>')
 def eliminar_horario(id_horario):
