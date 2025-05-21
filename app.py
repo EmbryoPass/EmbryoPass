@@ -358,6 +358,7 @@ def registrar_asistencia_grupal():
     ahora = datetime.now(zona)
 
     # Filtrar visitas aceptadas y con fecha confirmada válida
+    # Filtrar visitas aceptadas con fecha confirmada válida y las que ya pasaron
     visitas = []
     for v in VisitaGrupal.query.filter_by(estado='aceptada').all():
         if not v.fecha_confirmada:
@@ -367,8 +368,11 @@ def registrar_asistencia_grupal():
         except ValueError:
             continue
         fecha = zona.localize(fecha)
-        if fecha.date() == ahora.date():
+
+    # Aquí cambiamos la verificación: mostrar todas las visitas, tanto las futuras como las pasadas
+        if fecha <= ahora:  # Cualquier visita cuya fecha confirmada ya haya pasado
             visitas.append((v.id, v.institucion, v.fecha_confirmada))
+
 
 
     if request.method == 'POST':
@@ -574,6 +578,7 @@ def dashboard():
             })
 
     # Procesar estudiantes de visitas grupales: considerar visita activa TODO el día de fecha_confirmada
+    # Procesar estudiantes de visitas grupales: considerar visita activa TODO el día de fecha_confirmada
     estudiantes_grupales = []
     for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
         if not e.visita.fecha_confirmada:
@@ -584,8 +589,8 @@ def dashboard():
             continue
         fecha = zona.localize(fecha)
 
-        # Cambiado: considerar activa toda la fecha sin importar hora
-        if fecha.date() == ahora.date():
+    # Considerar toda la fecha (sin importar la hora)
+        if fecha <= ahora:  # Para asegurarse de que las visitas pasadas también se muestren
             estudiantes_grupales.append(e)
 
     # Construir lista de horarios
