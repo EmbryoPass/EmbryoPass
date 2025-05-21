@@ -259,7 +259,7 @@ def solicitar_visita_grupal():
         fechas = request.form.get('fechas_preferidas')
         comentarios = request.form.get('comentarios')
 
-        # ✅ Validar correo
+        # Validar correo
         import re
         patron_correo = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         if correo != confirmar_correo:
@@ -269,12 +269,12 @@ def solicitar_visita_grupal():
             flash('❌ El correo no tiene un formato válido.', 'danger')
             return render_template('solicitar_visita_grupal.html')
 
-        # ✅ Validar teléfono
+        # Validar teléfono
         if not telefono.isdigit() or len(telefono) != 10:
             flash('❌ El teléfono debe contener exactamente 10 dígitos numéricos.', 'danger')
             return render_template('solicitar_visita_grupal.html')
 
-        # ✅ Validar número de alumnos
+        # Validar número de alumnos
         try:
             numero_alumnos = int(numero_alumnos)
             if numero_alumnos <= 0:
@@ -283,7 +283,7 @@ def solicitar_visita_grupal():
             flash('❌ El número de alumnos debe ser mayor a 0.', 'danger')
             return render_template('solicitar_visita_grupal.html')
 
-        # ✅ Guardar en la base de datos
+        # Guardar en la base de datos
         nueva_visita = VisitaGrupal(
             encargado=encargado,
             correo=correo,
@@ -297,7 +297,7 @@ def solicitar_visita_grupal():
         db.session.add(nueva_visita)
         db.session.commit()
 
-        # ✅ Correo al museo
+        # Correo al museo
         cuerpo_museo = f"""
         <html>
           <body style="font-family: Arial, sans-serif;">
@@ -319,7 +319,7 @@ def solicitar_visita_grupal():
         """
         enviar_correo('museoembriologia@gmail.com', f'Solicitud de visita grupal externa – {institucion}', cuerpo_museo)
 
-        # ✅ Correo al encargado
+        # Correo al encargado
         cuerpo_encargado = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -371,7 +371,7 @@ def registrar_asistencia_grupal():
 
     if request.method == 'POST':
         nombre    = request.form.get('nombre').strip()
-        correo    = request.form.get('correo') or None  # correo opcional
+        correo    = request.form.get('correo') or None  
         telefono  = request.form.get('telefono')
         edad      = request.form.get('edad')
         sexo      = request.form.get('sexo')
@@ -663,7 +663,7 @@ def cancelar_usuario(id_cita, token):
         horario.disponibles += 1
     db.session.commit()
 
-    # ✉️ Notificación al museo incluyendo edad y sexo
+    # Notificación al museo incluyendo edad y sexo
     cuerpo_admin = f"""
     <html>
       <body style="font-family: Arial, sans-serif; color: #333;">
@@ -704,7 +704,7 @@ def cancelar_cita(id_cita):
             horario.disponibles += 1
         db.session.commit()
 
-        # ✉️ Correo al usuario
+        #Correo al usuario
         cuerpo_usuario = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -726,7 +726,7 @@ def cancelar_cita(id_cita):
 """
         enviar_correo(cita.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo_usuario)
 
-        # ✉️ Notificación al museo
+        # Notificación al museo
         cuerpo_admin = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -805,7 +805,7 @@ def eliminar_horario(id_horario):
         for c in citas:
             c.estado = "cancelada"
 
-            # ✉️ Correo al usuario
+            #Correo al usuario
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -827,7 +827,7 @@ def eliminar_horario(id_horario):
 """
             enviar_correo(c.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
 
-        # ✉️ Notificación global al museo
+        # Notificación global al museo
         cuerpo_admin = f"""
         <html>
           <body style="font-family: Arial, sans-serif; color: #333;">
@@ -997,13 +997,13 @@ def descargar_historial():
                 'nivel': e.visita.nivel
             })
 
-    # Aplicar filtro por tipo
+    # Filtro por tipo
     if tipo == 'individual':
         historial = [h for h in historial if h['tipo'] == 'Individual']
     elif tipo == 'grupal':
         historial = [h for h in historial if h['tipo'] == 'Grupal']
 
-    # Construir DataFrame
+    # DataFrame
     data = [{
         'ID': h['id'],
         'Nombre': h['nombre'],
@@ -1021,7 +1021,7 @@ def descargar_historial():
 
     df = pd.DataFrame(data)
 
-    # Crear archivo con fecha en el nombre
+    # Archivo con fecha en el nombre
     fecha_str = ahora.strftime("%Y-%m-%d_%H-%M")
     nombre_archivo = f"historial_citas_{fecha_str}.xlsx"
     df.to_excel(nombre_archivo, index=False)
@@ -1069,6 +1069,6 @@ def inicializar_tablas():
 
 if __name__ == '__main__':
     inicializar_tablas()
-    verificar_y_agregar_columnas_postgresql()  # 👈 agrega esta línea
+    verificar_y_agregar_columnas_postgresql()  
     app.run(host='0.0.0.0', port=10000)
 
