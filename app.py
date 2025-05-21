@@ -367,10 +367,18 @@ def registrar_asistencia_grupal():
             continue
         fecha = zona.localize(fecha)
    
-        inicio_dia = fecha.replace(hour=0, minute=0, second=0, microsecond=0)
-        fin_dia = fecha.replace(hour=23, minute=59, second=59, microsecond=999999)
-        if ahora >= inicio_dia and ahora <= fin_dia:
-            visitas.append((v.id, v.institucion, v.fecha_confirmada))
+        try:
+            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+
+        print(f"Cita: {c.fecha_hora} -> Fecha: {fecha}, Ahora: {ahora}, Inicio rango: {inicio_rango}")
+
+        if fecha >= ahora and c.estado == 'activa':
+            citas_futuras.append(tupla)
+        elif fecha < ahora or c.estado == 'cancelada':  # filtro menos restrictivo para pruebas
+    # Agregar al historial
 
 
     if request.method == 'POST':
