@@ -117,7 +117,7 @@ def agendar():
             horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles))
 
     if request.method == 'POST':
-        nombre = request.form['nombre']
+        nombre = request.form['nombre'].strip()
         correo = request.form['correo']
         confirmar_correo = request.form['confirmar_correo']
         telefono = request.form['telefono']
@@ -249,7 +249,7 @@ def agendar():
 @app.route('/solicitar-visita-grupal', methods=['GET', 'POST'])
 def solicitar_visita_grupal():
     if request.method == 'POST':
-        encargado = request.form.get('nombre_encargado')
+        encargado = request.form.get('nombre_encargado').strip()
         correo = request.form.get('correo_encargado')
         confirmar_correo = request.form.get('confirmar_correo_encargado')
         telefono = request.form.get('telefono_encargado')
