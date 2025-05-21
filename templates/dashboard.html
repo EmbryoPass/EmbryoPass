@@ -217,79 +217,93 @@
       </table>
     </div>
 
-    <h2 class="section-title mt-5">Solicitudes de Visitas Grupales</h2>
+<h2 class="section-title mt-5">Solicitudes de Visitas Grupales</h2>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover shadow-sm">
-        <thead class="table-light">
-          <tr>
-            <th>Institución</th>
-            <th>Encargado</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th>Nivel Académico</th>
-            <th>Alumnos</th>
-            <th>Fechas Propuestas</th>
-            <th>Comentarios</th>
-            <th>Estado</th>
-            <th>Fecha confirmada</th>
-            <th>Acciones</th>
-            <th>Cancelar</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for visita in visitas_grupales %}
-          <tr>
-            <td>{{ visita.institucion }}</td>
-            <td>{{ visita.encargado }}</td>
-            <td>{{ visita.correo }}</td>
-            <td>{{ visita.telefono }}</td>
-            <td>{{ visita.nivel }}</td>
-            <td>{{ visita.numero_alumnos }}</td>
-            <td>{{ visita.fechas_preferidas }}</td>
-            <td>{{ visita.comentarios or '—' }}</td>
-            <td>
-              {% if visita.estado == 'pendiente' %}
-                <span class="badge bg-warning text-dark">Pendiente</span>
-              {% elif visita.estado == 'aceptada' %}
-                <span class="badge bg-success">Aceptada</span>
-              {% elif visita.estado == 'rechazada' %}
-                <span class="badge bg-danger">Rechazada</span>
-              {% endif %}
-            </td>
-            <td>{{ visita.fecha_confirmada or '—' }}</td>
-            <td>
-              {% if visita.estado == 'pendiente' %}
-                <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-pastel-success mb-1">Aceptar</a>
-                <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-pastel-danger mb-1">Rechazar</a>
-              {% elif visita.estado == 'aceptada' %}
-                <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
-                  <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1" required>
-                  <button type="submit" class="btn btn-sm btn-pastel-primary">Asignar Fecha</button>
-                </form>
-              {% endif %}
-            </td>
-            <td>
-              {% if visita.estado != 'cancelada' %}
-                <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-pastel-danger cancelar-visita-btn">Cancelar</a>
-              {% else %}
-                <span class="badge bg-secondary">Cancelada</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if visita.estado == 'cancelada' %}
-                <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-outline-danger eliminar-visita-btn" title="Eliminar visita cancelada">🗑️</a>
-              {% else %}
-                <button class="btn btn-sm btn-disabled" title="Solo se puede eliminar si la visita está cancelada">🗑️</button>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<div class="table-responsive">
+  <table class="table table-bordered table-hover shadow-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Institución</th>
+        <th>Encargado</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+        <th>Nivel Académico</th>
+        <th>Alumnos</th>
+        <th>Fechas Propuestas</th>
+        <th>Comentarios</th>
+        <th>Estado</th>
+        <th>Fecha confirmada</th>
+        <th>Acciones</th>
+        <th>Cancelar</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for visita in visitas_grupales %}
+      <tr>
+        <td>{{ visita.institucion }}</td>
+        <td>{{ visita.encargado }}</td>
+        <td>{{ visita.correo }}</td>
+        <td>{{ visita.telefono }}</td>
+        <td>{{ visita.nivel }}</td>
+        <td>{{ visita.numero_alumnos }}</td>
+        <td>{{ visita.fechas_preferidas }}</td>
+        <td>{{ visita.comentarios or '—' }}</td>
+        <td>
+          {% if visita.estado == 'pendiente' %}
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          {% elif visita.estado == 'aceptada' %}
+            <span class="badge bg-success">Aceptada</span>
+          {% elif visita.estado == 'rechazada' %}
+            <span class="badge bg-danger">Rechazada</span>
+          {% endif %}
+        </td>
+        <td>{{ visita.fecha_confirmada or '—' }}</td>
+        <td>
+          {% if visita.estado == 'pendiente' %}
+            <a href="{{ url_for('aceptar_visita', id=visita.id) }}" class="btn btn-sm btn-pastel-success mb-1">Aceptar</a>
+            <a href="{{ url_for('rechazar_visita', id=visita.id) }}" class="btn btn-sm btn-pastel-danger mb-1">Rechazar</a>
+          {% elif visita.estado == 'aceptada' %}
+            <form action="{{ url_for('asignar_fecha_visita', id=visita.id) }}" method="POST" class="d-flex flex-column">
+              <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa" class="form-control form-control-sm mb-1 fecha-confirmada" required>
+              <button type="submit" class="btn btn-sm btn-pastel-primary btn-asignar-fecha" disabled>Asignar Fecha</button>
+            </form>
+          {% endif %}
+        </td>
+        <td>
+          {% if visita.estado != 'cancelada' %}
+            <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-pastel-danger cancelar-visita-btn">Cancelar</a>
+          {% else %}
+            <span class="badge bg-secondary">Cancelada</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if visita.estado == 'cancelada' %}
+            <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-outline-danger eliminar-visita-btn" title="Eliminar visita cancelada">🗑️</a>
+          {% else %}
+            <button class="btn btn-sm btn-disabled" title="Solo se puede eliminar si la visita está cancelada">🗑️</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
+    
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Para cada formulario con campo fecha-confirmada
+    document.querySelectorAll('form.d-flex.flex-column').forEach(function(form) {
+      const inputFecha = form.querySelector('.fecha-confirmada');
+      const btnAsignar = form.querySelector('.btn-asignar-fecha');
+      
+      inputFecha.addEventListener('input', function() {
+        btnAsignar.disabled = inputFecha.value.trim() === '';
+      });
+    });
+  });
+</script>
 
     <h2 class="section-title mt-5">Estudiantes Registrados en Visitas Grupales</h2>
 
