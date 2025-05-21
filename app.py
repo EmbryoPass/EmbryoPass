@@ -591,15 +591,20 @@ def dashboard():
             estudiantes_grupales.append(e)
 
     # Construir lista de horarios
+    # Construir lista de horarios futuros únicamente
     horarios = []
-    for h in Horario.query.all():
+    for h in Horario.query.filter(Horario.disponibles > 0).all():
         try:
             fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
-        total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
-        horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
+
+        # sólo incluir los que aún no han pasado
+        if fecha >= ahora:
+            total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
+            horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
+
 
     # Filtro por tipo de cita en historial
     if tipo == 'individual':
