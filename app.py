@@ -367,8 +367,9 @@ def registrar_asistencia_grupal():
         except ValueError:
             continue
         fecha = zona.localize(fecha)
-        if ahora >= (fecha - timedelta(hours=1)) and ahora <= (fecha + timedelta(hours=2)):
+        if fecha.date() == ahora.date():
             visitas.append((v.id, v.institucion, v.fecha_confirmada))
+
 
     if request.method == 'POST':
         nombre    = request.form.get('nombre').strip()
@@ -572,7 +573,7 @@ def dashboard():
                 'nivel':      c.nivel_educativo
             })
 
-    # Procesar estudiantes de visitas grupales: solo incluir si visita aún no pasó
+    # Procesar estudiantes de visitas grupales: considerar visita activa TODO el día de fecha_confirmada
     estudiantes_grupales = []
     for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
         if not e.visita.fecha_confirmada:
@@ -583,8 +584,8 @@ def dashboard():
             continue
         fecha = zona.localize(fecha)
 
-        # Solo agregamos si la fecha de la visita NO ha pasado
-        if fecha >= ahora:
+        # Cambiado: considerar activa toda la fecha sin importar hora
+        if fecha.date() == ahora.date():
             estudiantes_grupales.append(e)
 
     # Construir lista de horarios
@@ -604,7 +605,7 @@ def dashboard():
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
-    # Cargar visitas grupales para el template
+    # Cargar visitas grupales para el template (puedes agregar filtro similar si quieres)
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
     return render_template(
@@ -617,6 +618,7 @@ def dashboard():
         visitas_grupales=visitas_grupales,
         estudiantes_grupales=estudiantes_grupales
     )
+
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
 def marcar_asistencia(id_cita, estado):
