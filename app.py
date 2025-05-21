@@ -403,10 +403,35 @@ def registrar_asistencia_grupal():
         )
         db.session.add(estudiante)
         db.session.commit()
+
+        # --- Envío de correo ---
+        if correo:
+            visita = VisitaGrupal.query.get(visita_id)
+            cuerpo = f"""
+            <html>
+              <body style="font-family: Arial, sans-serif; color: #333;">
+                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                  <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
+                  <p>Hola <strong>{nombre}</strong>,</p>
+                  <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
+                  <p><strong>Detalles de la visita:</strong></p>
+                  <ul>
+                    <li><strong>Institución:</strong> {visita.institucion}</li>
+                    <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+                    <li><strong>Fecha y hora confirmada:</strong> {visita.fecha_confirmada}</li>
+                  </ul>
+                  <p>Esperamos que disfrutes tu visita.</p>
+                </div>
+              </body>
+            </html>
+            """
+            enviar_correo(correo, "Confirmación de asistencia a visita grupal", cuerpo)
+
         flash('✅ Asistencia registrada correctamente.', 'success')
         return redirect(url_for('registrar_asistencia_grupal'))
 
     return render_template('registrar_asistencia_grupal.html', visitas=visitas)
+
 
 # Nuevas rutas para el flujo de visitas grupales
 @app.route('/aceptar_visita/<int:id>')
