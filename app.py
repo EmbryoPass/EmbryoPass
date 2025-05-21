@@ -366,8 +366,12 @@ def registrar_asistencia_grupal():
         except ValueError:
             continue
         fecha = zona.localize(fecha)
-        if ahora >= (fecha - timedelta(hours=1)) and ahora <= (fecha + timedelta(hours=2)):
+   
+        inicio_dia = fecha.replace(hour=0, minute=0, second=0, microsecond=0)
+        fin_dia = fecha.replace(hour=23, minute=59, second=59, microsecond=999999)
+        if ahora >= inicio_dia and ahora <= fin_dia:
             visitas.append((v.id, v.institucion, v.fecha_confirmada))
+
 
     if request.method == 'POST':
         nombre    = request.form.get('nombre').strip()
@@ -614,7 +618,7 @@ def dashboard():
         rango=rango,
         tipo_filtro=tipo,
         visitas_grupales=visitas_grupales,
-        estudiantes_grupales=estudiantes_grupales
+        estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
     )
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
