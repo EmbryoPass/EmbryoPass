@@ -509,6 +509,7 @@ def login():
         flash('❌ Usuario o contraseña incorrectos.', 'danger')
     return render_template('login.html')
 
+
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session:
@@ -532,21 +533,18 @@ def dashboard():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    # Cargar todas las citas y preparar listas
     citas_crudas = Cita.query.all()
     citas_futuras = []
     historial_completo = []
 
-    # Procesar citas individuales
     for c in citas_crudas:
-        # Parsear la fecha de la cita
+        # Parsear la fecha de la cita con manejo de formatos
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        # Construir tupla de datos
         tupla = (
             c.id,
             c.nombre,
@@ -561,12 +559,12 @@ def dashboard():
             c.nivel_educativo
         )
 
-        # 1) Agendar futuras solo activas
+        # Citas futuras activas
         if fecha >= ahora and c.estado == 'activa':
             citas_futuras.append(tupla)
 
-        # 2) Al historial: pasadas dentro de rango o canceladas
-        elif fecha < ahora or c.estado == 'cancelada':
+        # Historial: citas pasadas que no estén activas
+        elif fecha < ahora and c.estado != 'activa':
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
                 'tipo':       'Individual',
@@ -583,7 +581,6 @@ def dashboard():
                 'nivel':      c.nivel_educativo
             })
 
-    # Procesar estudiantes de visitas grupales: solo incluir si visita aún no pasó
     estudiantes_grupales = []
     for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
         if not e.visita.fecha_confirmada:
@@ -594,11 +591,10 @@ def dashboard():
             continue
         fecha = zona.localize(fecha)
 
-        # Solo agregamos si la fecha de la visita NO ha pasado
+        # Solo incluir estudiantes de visitas grupales activas (fecha >= ahora)
         if fecha >= ahora:
             estudiantes_grupales.append(e)
 
-    # Construir lista de horarios
     horarios = []
     for h in Horario.query.all():
         try:
@@ -609,13 +605,12 @@ def dashboard():
         total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
         horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
-    # Filtrar historial por tipo si es necesario
+    # Filtrar historial por tipo de cita
     if tipo == 'individual':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
-    # Cargar visitas grupales para el template
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
     return render_template(
@@ -626,7 +621,7 @@ def dashboard():
         rango=rango,
         tipo_filtro=tipo,
         visitas_grupales=visitas_grupales,
-        estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+        estudiantes_grupales=estudiantes_grupales
     )
 
 @app.route('/marcar_asistencia/<int:id_cita>/<estado>')
