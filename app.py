@@ -558,7 +558,7 @@ def dashboard():
             citas_futuras.append(tupla)
 
         # 2) Al historial: pasadas dentro de rango o canceladas
-        elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
+        elif fecha < ahora or c.estado == 'cancelada':
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
                 'tipo':       'Individual',
