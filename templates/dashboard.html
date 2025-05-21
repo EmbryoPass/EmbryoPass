@@ -105,7 +105,21 @@
       letter-spacing: 0.02em;
       color: #555;
     }
-    
+
+    .section-title {
+      font-size: 1.75rem; /* tamaño para escritorio */
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    /* Ajuste para pantallas pequeñas (móviles) */
+    @media (max-width: 576px) {
+      .section-title {
+        font-size: 1.25rem; /* tamaño reducido en móviles */
+        margin-bottom: 0.75rem;
+      }
+    }
+
     .table thead {
       background-color: #e9ecef;
     }
