@@ -144,6 +144,14 @@ def agendar():
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('agendar'))
 
+        if not institucion or institucion.strip() == '':
+            flash('❌ El campo Institución es obligatorio.', 'danger')
+            return redirect(url_for('agendar'))
+
+        if not nivel_educativo or nivel_educativo.strip() == '':
+            flash('❌ El campo Nivel educativo es obligatorio.', 'danger')
+            return redirect(url_for('agendar'))
+
         horario = Horario.query.get(horario_id)
         if not horario:
             flash('❌ El horario seleccionado no existe.', 'danger')
