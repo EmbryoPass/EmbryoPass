@@ -1,6 +1,7 @@
 
 
 
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import smtplib
@@ -46,8 +47,8 @@ class Cita(db.Model):
     token_cancelacion = db.Column(db.String(100), nullable=False)
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
-    institucion = db.Column(db.String(100), nullable=False) 
-    nivel_educativo = db.Column(db.String(50), nullable=False)
+    institucion = db.Column(db.String(100), nullable=True) 
+    nivel_educativo = db.Column(db.String(50), nullable=True)
 
 class VisitaGrupal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -126,8 +127,9 @@ def agendar():
         horario_id = request.form['horario']
         edad = request.form['edad']
         sexo = request.form['sexo']
-        institucion = request.form.get('institucion')
-        nivel_educativo = request.form.get('nivel') 
+        institucion = request.form.get('institucion') or None
+        nivel_educativo = request.form.get('nivel') or None
+
 
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
@@ -142,14 +144,6 @@ def agendar():
 
         if not telefono.isdigit() or len(telefono) != 10:
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
-            return redirect(url_for('agendar'))
-
-        if not institucion or institucion.strip() == '':
-            flash('❌ El campo Institución es obligatorio.', 'danger')
-            return redirect(url_for('agendar'))
-
-        if not nivel_educativo or nivel_educativo.strip() == '':
-            flash('❌ El campo Nivel educativo es obligatorio.', 'danger')
             return redirect(url_for('agendar'))
 
         horario = Horario.query.get(horario_id)
