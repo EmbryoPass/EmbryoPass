@@ -46,8 +46,8 @@ class Cita(db.Model):
     token_cancelacion = db.Column(db.String(100), nullable=False)
     edad = db.Column(db.Integer, nullable=True)
     sexo = db.Column(db.String(10), nullable=True)
-    institucion = db.Column(db.String(100), nullable=True) 
-    nivel_educativo = db.Column(db.String(50), nullable=True)
+    institucion = db.Column(db.String(100), nullable=False) 
+    nivel_educativo = db.Column(db.String(50), nullable=False)
 
 class VisitaGrupal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
