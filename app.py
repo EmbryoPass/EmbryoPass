@@ -375,7 +375,7 @@ def registrar_asistencia_grupal():
     if request.method == 'POST':
         nombre    = request.form.get('nombre').strip()
         correo    = request.form.get('correo') or None  
-        telefono  = request.form.get('telefono')
+        telefono  = request.form.get('telefono') or None
         edad      = request.form.get('edad')
         sexo      = request.form.get('sexo')
         visita_id = request.form.get('visita_id')
