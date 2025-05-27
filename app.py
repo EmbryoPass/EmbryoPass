@@ -204,6 +204,19 @@ def agendar():
         <li><strong>Nivel educativo:</strong> {nueva_cita.nivel_educativo or '—'}</li>
         <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       </ul>
+
+      <p><strong>Duración estimada de la cita:</strong> 10 a 15 minutos.</p>
+
+      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li>No tocar las exhibiciones.</li>
+        <li>No comer ni beber dentro del museo.</li>
+        <li>No hablar en voz alta.</li>
+        <li>No tomar fotos ni videos.</li>
+        <li>No correr ni empujar dentro del museo para evitar accidentes y daños.</li>
+        <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
+      </ul>
+
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
       <p>
         <a href="https://embryopass.onrender.com/cancelar_usuario/{nueva_cita.id}/{token}"
@@ -215,7 +228,8 @@ def agendar():
     </div>
   </body>
 </html>
-            """
+"""
+
             enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
             enviar_correo(
@@ -411,23 +425,37 @@ def registrar_asistencia_grupal():
         if correo:
             visita = VisitaGrupal.query.get(visita_id)
             cuerpo = f"""
-            <html>
-              <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                  <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
-                  <p>Hola <strong>{nombre}</strong>,</p>
-                  <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
-                  <p><strong>Detalles de la visita:</strong></p>
-                  <ul>
-                    <li><strong>Institución:</strong> {visita.institucion}</li>
-                    <li><strong>Nivel académico:</strong> {visita.nivel}</li>
-                    <li><strong>Fecha y hora confirmada:</strong> {visita.fecha_confirmada}</li>
-                  </ul>
-                  <p>Esperamos que disfrutes tu visita.</p>
-                </div>
-              </body>
-            </html>
-            """
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
+      <p>Hola <strong>{nombre}</strong>,</p>
+      <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
+      <p><strong>Detalles de la visita:</strong></p>
+      <ul>
+        <li><strong>Institución:</strong> {visita.institucion}</li>
+        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+        <li><strong>Fecha y hora confirmada:</strong> {visita.fecha_confirmada}</li>
+      </ul>
+
+      <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
+
+      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita para preservar las exhibiciones y mantener un buen ambiente:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li>No tocar las exhibiciones.</li>
+        <li>No comer ni beber dentro del museo.</li>
+        <li>No hablar en voz alta.</li>
+        <li>No tomar fotos ni videos.</li>
+        <li>No correr ni empujar dentro del museo para evitar accidentes y daños.</li>
+        <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
+      </ul>
+
+      <p>Esperamos que disfrutes tu visita.</p>
+    </div>
+  </body>
+</html>
+"""
+
             enviar_correo(correo, "Confirmación de asistencia a visita grupal", cuerpo)
 
         flash('✅ Asistencia registrada correctamente.', 'success')
