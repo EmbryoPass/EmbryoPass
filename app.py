@@ -511,7 +511,7 @@ def dashboard():
     rango = request.args.get('rango', default='30')
     tipo = request.args.get('tipo', default='todos')
 
-    # Definir el inicio del rango según el filtro
+    # Definir inicio del rango según filtro
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
     elif rango == '30':
@@ -530,14 +530,12 @@ def dashboard():
 
     # Procesar citas individuales
     for c in citas_crudas:
-        # Parsear la fecha de la cita
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        # Construir tupla de datos
         tupla = (
             c.id,
             c.nombre,
@@ -552,11 +550,8 @@ def dashboard():
             c.nivel_educativo
         )
 
-        # 1) AMostrar futuras solo activas
         if fecha >= ahora and c.estado == 'activa':
             citas_futuras.append(tupla)
-
-        # 2) Al historial: pasadas dentro de rango o canceladas
         elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
@@ -574,9 +569,7 @@ def dashboard():
                 'nivel':      c.nivel_educativo
             })
 
-    # Procesar estudiantes de visitas grupales: considerar visita activa TODO el día de fecha_confirmada
-    #registro
-    estudiantes_grupales = []
+    # Procesar estudiantes de visitas grupales para historial (pasados dentro del rango)
     for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
         if not e.visita.fecha_confirmada:
             continue
@@ -586,12 +579,23 @@ def dashboard():
             continue
         fecha = zona.localize(fecha)
 
-        # Cambiado: considerar activa toda la fecha sin importar hora
-        if fecha.date() == ahora.date():
-            estudiantes_grupales.append(e)
+        if fecha < ahora and fecha >= inicio_rango:
+            historial_completo.append({
+                'tipo': 'Grupal',
+                'id': e.id,
+                'nombre': e.nombre,
+                'edad': e.edad,
+                'sexo': e.sexo,
+                'correo': e.correo,
+                'telefono': e.telefono,
+                'fecha_hora': e.visita.fecha_confirmada,
+                'estado': 'finalizada',
+                'asistio': 'sí',
+                'institucion': e.visita.institucion,
+                'nivel': e.visita.nivel
+            })
 
-    # Construir lista de horarios
-    # Construir lista de horarios futuros únicamente
+    # Construir lista de horarios futuros
     horarios = []
     for h in Horario.query.filter(Horario.disponibles > 0).all():
         try:
@@ -600,20 +604,32 @@ def dashboard():
             fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        # sólo incluir los que aún no han pasado
         if fecha >= ahora:
             total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
             horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
 
-
-    # Filtro por tipo de cita en historial
+    # Aplicar filtro por tipo en historial
     if tipo == 'individual':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
     elif tipo == 'grupal':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
-    # Mostrar solicitudes grupales para el template 
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+
+    # NOTA: Puedes seguir enviando estudiantes_grupales si quieres mostrarlos aparte
+    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+
+    return render_template(
+        'dashboard.html',
+        citas=citas_futuras,
+        historial_completo=historial_completo,
+        horarios=horarios,
+        rango=rango,
+        tipo_filtro=tipo,
+        visitas_grupales=visitas_grupales,
+        estudiantes_grupales=estudiantes_grupales
+    )
+
 
     return render_template(
         'dashboard.html',
