@@ -126,9 +126,8 @@ def agendar():
         horario_id = request.form['horario']
         edad = request.form['edad']
         sexo = request.form['sexo']
-        institucion = request.form.get('institucion') or None
-        nivel_educativo = request.form.get('nivel') or None
-
+        institucion = request.form.get('institucion')
+        nivel_educativo = request.form.get('nivel') 
 
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
