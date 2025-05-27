@@ -621,7 +621,19 @@ def dashboard():
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
 
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
-    estudiantes_grupales = EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all()
+    estudiantes_grupales = []
+    for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
+        if not e.visita.fecha_confirmada:
+            continue
+        try:
+            fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+        except (ValueError, TypeError):
+            continue
+        fecha = zona.localize(fecha)
+
+        # Solo incluir estudiantes cuya visita sea HOY o en el futuro
+        if fecha >= ahora:
+            estudiantes_grupales.append(e)
 
     return render_template(
         'dashboard.html',
