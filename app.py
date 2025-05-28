@@ -400,6 +400,15 @@ def registrar_asistencia_grupal():
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
 
+        try:
+            edad_int = int(edad)
+            if edad_int <= 0:
+                raise ValueError
+        except Exception:
+           flash('❌ La edad debe ser un número entero mayor que cero.', 'danger')
+           return redirect(url_for('registrar_asistencia_grupal'))
+
+
         # Validar duplicado: mismo nombre en la misma visita
         existente = EstudianteGrupal.query.filter_by(
             visita_id=visita_id,
@@ -414,7 +423,7 @@ def registrar_asistencia_grupal():
             nombre=nombre,
             correo=correo,
             telefono=telefono,
-            edad=edad,
+            edad=edad_int,
             sexo=sexo,
             visita_id=visita_id,
             hora_registro=ahora.strftime("%d/%m/%Y %I:%M %p")
