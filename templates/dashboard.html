@@ -432,7 +432,15 @@
         <td>{{ registro.correo or '—' }}</td>
         <td>{{ registro.telefono or '—' }}</td>
         <td>{{ registro.fecha_hora }}</td>
-        <td><span class="badge bg-info text-dark">{{ registro.tipo }}</span></td>
+        <td>
+          {% if registro.tipo == 'Individual' %}
+            <span class="badge" style="background-color: #a7dffb; color: #004e6b;">Individual</span>
+          {% elif registro.tipo == 'Grupal' %}
+            <span class="badge" style="background-color: #b0d7f7; color: #003a5d;">Grupal</span>
+          {% else %}
+            <span class="badge bg-info text-dark">{{ registro.tipo }}</span>
+          {% endif %}
+        </td>
         <td>
           {% if registro.estado == 'cancelada' %}
             <span class="badge bg-secondary">Cancelada</span>
