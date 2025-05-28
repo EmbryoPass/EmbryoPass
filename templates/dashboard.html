@@ -404,6 +404,12 @@
   </div>
 </form>
 
+<div class="mb-3">
+  <label for="searchNombre" class="form-label fw-bold">Buscar por nombre:</label>
+  <input type="text" id="searchNombre" class="form-control" placeholder="Escribe un nombre para filtrar">
+</div>
+
+    
 <div class="table-responsive" style="background-color: #fdf9f3; padding: 1rem; border-radius: 0.3rem;">
   <table class="table table-bordered table-hover shadow-sm" style="background-color: #fdf9f3;">
     <thead class="table-light">
@@ -493,6 +499,21 @@
     dateFormat: "d/m/Y h:i K",
     time_24hr: false,
     minDate: "today"
+  });
+
+  document.getElementById('searchNombre').addEventListener('input', function() {
+    const filtro = this.value.toLowerCase();
+    const tabla = document.querySelector('table tbody');
+    const filas = tabla.getElementsByTagName('tr');
+
+    for (let fila of filas) {
+      const nombre = fila.cells[0].textContent.toLowerCase();
+      if (nombre.includes(filtro)) {
+        fila.style.display = '';
+      } else {
+        fila.style.display = 'none';
+      }
+    }
   });
 
   // Confirmaciones para cancelar o eliminar
