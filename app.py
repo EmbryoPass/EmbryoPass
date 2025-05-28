@@ -396,7 +396,7 @@ def registrar_asistencia_grupal():
         visita_id = request.form.get('visita_id')
 
         # Validar campos obligatorios
-        if not nombre or not visita_id:
+        if not nombre or not edad or not visita_id:
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
 
