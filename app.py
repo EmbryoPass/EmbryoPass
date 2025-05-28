@@ -1,7 +1,6 @@
 
 
 
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 import smtplib
@@ -205,19 +204,6 @@ def agendar():
         <li><strong>Nivel educativo:</strong> {nueva_cita.nivel_educativo or '—'}</li>
         <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       </ul>
-
-      <p><strong>Duración estimada de la cita:</strong> 10 a 15 minutos.</p>
-
-      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita:</strong></p>
-      <ul style="line-height: 1.6;">
-        <li>No tocar las exhibiciones.</li>
-        <li>No comer ni beber dentro del museo.</li>
-        <li>No hablar en voz alta.</li>
-        <li>No tomar fotos ni videos.</li>
-        <li>No correr ni empujar dentro del museo para evitar accidentes y daños.</li>
-        <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
-      </ul>
-
       <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
       <p>
         <a href="https://embryopass.onrender.com/cancelar_usuario/{nueva_cita.id}/{token}"
@@ -229,8 +215,7 @@ def agendar():
     </div>
   </body>
 </html>
-"""
-
+            """
             enviar_correo(correo, 'Confirmación de Cita - Museo de Embriología', cuerpo)
 
             enviar_correo(
@@ -389,25 +374,16 @@ def registrar_asistencia_grupal():
 
     if request.method == 'POST':
         nombre    = request.form.get('nombre').strip()
-        correo    = request.form.get('correo') or ''  
-        telefono  = request.form.get('telefono') or ''
+        correo    = request.form.get('correo') or None  
+        telefono  = request.form.get('telefono')
         edad      = request.form.get('edad')
         sexo      = request.form.get('sexo')
         visita_id = request.form.get('visita_id')
 
         # Validar campos obligatorios
-        if not nombre or not sexo or not edad or not visita_id:
+        if not nombre or not visita_id:
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
-
-        try:
-            edad_int = int(edad)
-            if edad_int <= 0:
-                raise ValueError
-        except Exception:
-           flash('❌ La edad debe ser un número entero mayor que cero.', 'danger')
-           return redirect(url_for('registrar_asistencia_grupal'))
-
 
         # Validar duplicado: mismo nombre en la misma visita
         existente = EstudianteGrupal.query.filter_by(
@@ -423,7 +399,7 @@ def registrar_asistencia_grupal():
             nombre=nombre,
             correo=correo,
             telefono=telefono,
-            edad=edad_int,
+            edad=edad,
             sexo=sexo,
             visita_id=visita_id,
             hora_registro=ahora.strftime("%d/%m/%Y %I:%M %p")
@@ -435,37 +411,23 @@ def registrar_asistencia_grupal():
         if correo:
             visita = VisitaGrupal.query.get(visita_id)
             cuerpo = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
-      <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
-      <p><strong>Detalles de la visita:</strong></p>
-      <ul>
-        <li><strong>Institución:</strong> {visita.institucion}</li>
-        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
-        <li><strong>Fecha y hora confirmada:</strong> {visita.fecha_confirmada}</li>
-      </ul>
-
-      <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
-
-      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita para preservar las exhibiciones y mantener un buen ambiente:</strong></p>
-      <ul style="line-height: 1.6;">
-        <li>No tocar las exhibiciones.</li>
-        <li>No comer ni beber dentro del museo.</li>
-        <li>No hablar en voz alta.</li>
-        <li>No tomar fotos ni videos.</li>
-        <li>No correr ni empujar dentro del museo para evitar accidentes y daños.</li>
-        <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
-      </ul>
-
-      <p>Esperamos que disfrutes tu visita.</p>
-    </div>
-  </body>
-</html>
-"""
-
+            <html>
+              <body style="font-family: Arial, sans-serif; color: #333;">
+                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                  <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
+                  <p>Hola <strong>{nombre}</strong>,</p>
+                  <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
+                  <p><strong>Detalles de la visita:</strong></p>
+                  <ul>
+                    <li><strong>Institución:</strong> {visita.institucion}</li>
+                    <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+                    <li><strong>Fecha y hora confirmada:</strong> {visita.fecha_confirmada}</li>
+                  </ul>
+                  <p>Esperamos que disfrutes tu visita.</p>
+                </div>
+              </body>
+            </html>
+            """
             enviar_correo(correo, "Confirmación de asistencia a visita grupal", cuerpo)
 
         flash('✅ Asistencia registrada correctamente.', 'success')
@@ -549,6 +511,7 @@ def dashboard():
     rango = request.args.get('rango', default='30')
     tipo = request.args.get('tipo', default='todos')
 
+    # Definir el inicio del rango según el filtro
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
     elif rango == '30':
@@ -560,23 +523,21 @@ def dashboard():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
+    # Cargar todas las citas y filtrar
     citas_crudas = Cita.query.all()
     citas_futuras = []
     historial_completo = []
 
+    # Procesar citas individuales
     for c in citas_crudas:
+        # Parsear la fecha de la cita
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
-            try:
-                fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
-            except ValueError:
-                print(f"[ERROR] No se pudo parsear la fecha de cita ID {c.id}: '{c.fecha_hora}'")
-                continue
+            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
 
-        print(f"[DEBUG] Cita ID {c.id}: Fecha = {fecha}, Ahora = {ahora}, Estado = {c.estado}")
-
+        # Construir tupla de datos
         tupla = (
             c.id,
             c.nombre,
@@ -591,74 +552,30 @@ def dashboard():
             c.nivel_educativo
         )
 
+        # 1) AMostrar futuras solo activas
         if fecha >= ahora and c.estado == 'activa':
-            print(f"  -> Cita futura (ID {c.id}) añadida a citas_futuras")
             citas_futuras.append(tupla)
+
+        # 2) Al historial: pasadas dentro de rango o canceladas
         elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
-            print(f"  -> Cita (ID {c.id}) añadida a historial_completo")
             asistencia = c.asistio if c.asistio in ['sí', 'no'] else None
             historial_completo.append({
-                'tipo': 'Individual',
-                'id': c.id,
-                'nombre': c.nombre,
-                'edad': c.edad,
-                'sexo': c.sexo,
-                'correo': c.correo,
-                'telefono': c.telefono,
+                'tipo':       'Individual',
+                'id':         c.id,
+                'nombre':     c.nombre,
+                'edad':       c.edad,
+                'sexo':       c.sexo,
+                'correo':     c.correo,
+                'telefono':   c.telefono,
                 'fecha_hora': c.fecha_hora,
-                'estado': c.estado,
-                'asistio': asistencia,
-                'institucion': c.institucion,
-                'nivel': c.nivel_educativo
+                'estado':     c.estado,
+                'asistio':    asistencia,
+                'institucion':c.institucion,
+                'nivel':      c.nivel_educativo
             })
 
-    for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
-        if not e.visita.fecha_confirmada:
-            continue
-        try:
-            fecha = datetime.strptime(e.visita.fecha_confirmada, "%d/%m/%Y %I:%M %p")
-        except (ValueError, TypeError):
-            print(f"[ERROR] No se pudo parsear la fecha de visita grupal para estudiante ID {e.id}: '{e.visita.fecha_confirmada}'")
-            continue
-        fecha = zona.localize(fecha)
-
-        print(f"[DEBUG] Estudiante grupal ID {e.id}: Fecha visita = {fecha}, Ahora = {ahora}")
-
-        if fecha < ahora and fecha >= inicio_rango:
-            print(f"  -> Estudiante grupal (ID {e.id}) añadido a historial_completo")
-            historial_completo.append({
-                'tipo': 'Grupal',
-                'id': e.id,
-                'nombre': e.nombre,
-                'edad': e.edad,
-                'sexo': e.sexo,
-                'correo': e.correo,
-                'telefono': e.telefono,
-                'fecha_hora': e.visita.fecha_confirmada,
-                'estado': 'finalizada',
-                'asistio': 'sí',
-                'institucion': e.visita.institucion,
-                'nivel': e.visita.nivel
-            })
-
-    horarios = []
-    for h in Horario.query.filter(Horario.disponibles > 0).all():
-        try:
-            fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
-        except ValueError:
-            fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
-        fecha = zona.localize(fecha)
-
-        if fecha >= ahora:
-            total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
-            horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
-
-    if tipo == 'individual':
-        historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
-    elif tipo == 'grupal':
-        historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
-
-    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+    # Procesar estudiantes de visitas grupales: considerar visita activa TODO el día de fecha_confirmada
+    #registro
     estudiantes_grupales = []
     for e in EstudianteGrupal.query.order_by(EstudianteGrupal.hora_registro.desc()).all():
         if not e.visita.fecha_confirmada:
@@ -669,9 +586,34 @@ def dashboard():
             continue
         fecha = zona.localize(fecha)
 
-        # Solo incluir estudiantes cuya visita sea HOY o en el futuro
-        if fecha >= ahora:
+        # Cambiado: considerar activa toda la fecha sin importar hora
+        if fecha.date() == ahora.date():
             estudiantes_grupales.append(e)
+
+    # Construir lista de horarios
+    # Construir lista de horarios futuros únicamente
+    horarios = []
+    for h in Horario.query.filter(Horario.disponibles > 0).all():
+        try:
+            fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
+        fecha = zona.localize(fecha)
+
+        # sólo incluir los que aún no han pasado
+        if fecha >= ahora:
+            total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
+            horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
+
+
+    # Filtro por tipo de cita en historial
+    if tipo == 'individual':
+        historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
+    elif tipo == 'grupal':
+        historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
+
+    # Mostrar solicitudes grupales para el template 
+    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
     return render_template(
         'dashboard.html',
@@ -1141,4 +1083,3 @@ if __name__ == '__main__':
     inicializar_tablas()
     verificar_y_agregar_columnas_postgresql()  
     app.run(host='0.0.0.0', port=10000)
-
