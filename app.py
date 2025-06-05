@@ -28,7 +28,7 @@ with app.app_context():
 
 # Configuración de correo
 GMAIL_USER = 'museoembriologia@gmail.com'
-GMAIL_PASSWORD = 'qukljqwqdnfjdzgm'
+GMAIL_PASSWORD = 'ueaxqkeljtadsnxa'
 
 # MODELOS
 class Horario(db.Model):
