@@ -20,38 +20,29 @@ from sqlalchemy.pool import NullPool
 app = Flask(__name__)
 app.secret_key = 'secreto123'
 
-# --- CONFIG DB ROBUSTA PARA RENDER (SSL + pool_pre_ping + recycle) ---
 uri = os.environ.get('DATABASE_URL', '')
 
-# Render a veces entrega URIs que empiezan con postgres://; cámbialas al dialecto correcto:
+# Render a veces entrega postgres:// y SQLAlchemy requiere postgresql+psycopg2://
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# connect_args con SSL solo cuando estamos en Render (o si la URI apunta a render.com)
-connect_args = {}
-if "render.com" in uri or os.getenv("RENDER"):
-    connect_args["sslmode"] = "require"
-
-# Opciones del engine para conexiones estables en Render
+# Agregar SSL y opciones de conexión
 engine_options = {
-    "pool_pre_ping": True,   # detecta y renueva conexiones muertas
-    "pool_recycle": 300,     # recicla cada 5 min para evitar cortes por inactividad
-    "connect_args": connect_args
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    "connect_args": {"sslmode": "require"}  # fuerza SSL
 }
 
-# (OPCIONAL) Si tienes muy poco tráfico o usas planes con cortes frecuentes, puedes usar NullPool:
-# if os.getenv("USE_NULLPOOL") == "1":
-#     engine_options["poolclass"] = NullPool
+# Si Render cierra conexiones inactivas, usa NullPool para crear conexión nueva cada vez:
+# engine_options["poolclass"] = NullPool
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 
 db = SQLAlchemy(app)
 
-with app.app_context():
-    db.create_all()
 
 # Configuración de correo
 GMAIL_USER = 'museoembriologia@gmail.com'
@@ -1164,8 +1155,12 @@ def inicializar_tablas():
     with app.app_context():
         db.create_all()
 
-if __name__ == '__main__':
-    inicializar_tablas()
-    verificar_y_agregar_columnas_postgresql()  
-    app.run(host='0.0.0.0', port=10000)
+if __name__ == "__main__":
+    with app.app_context():
+        inicializar_tablas()
+        verificar_y_agregar_columnas_postgresql()
+    # Ejecuta la app una sola vez
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
+
 
