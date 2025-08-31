@@ -12,41 +12,50 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import os
-from sqlalchemy import text
+from sqlalchemy import text, update
+from sqlalchemy.pool import NullPool
 import pandas as pd
 from flask import make_response
-from sqlalchemy.pool import NullPool
 
 app = Flask(__name__)
 app.secret_key = 'secreto123'
 
-uri = os.environ.get('DATABASE_URL', '')
+uri = os.environ.get('DATABASE_URL')
+if not uri:
+    raise RuntimeError("DATABASE_URL no está definido.")
 
-# Render a veces entrega postgres:// y SQLAlchemy requiere postgresql+psycopg2://
+# Normaliza driver para psycopg2
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
+elif uri.startswith("postgresql://") and "+psycopg2" not in uri:
+    uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+# Asegura SSL si no viene
+if "sslmode=" not in uri:
+    uri += ("&" if "?" in uri else "?") + "sslmode=require"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Agregar SSL y opciones de conexión
 engine_options = {
     "pool_pre_ping": True,
     "pool_recycle": 300,
-    "connect_args": {"sslmode": "require"}  # fuerza SSL
+    "poolclass": NullPool,  # evita conexiones zombis cuando Render “duerme”
+    "connect_args": {
+        "sslmode": "require",
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    },
 }
-
-# Si Render cierra conexiones inactivas, usa NullPool para crear conexión nueva cada vez:
-# engine_options["poolclass"] = NullPool
-
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 
 db = SQLAlchemy(app)
 
 
-# Configuración de correo
-GMAIL_USER = 'museoembriologia@gmail.com'
-GMAIL_PASSWORD = 'ueaxqkeljtadsnxa'
+GMAIL_USER = os.environ.get('GMAIL_USER', 'museoembriologia@gmail.com')
+GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
 
 # MODELOS
 class Horario(db.Model):
@@ -180,11 +189,12 @@ def agendar():
 
         try:
             rows_updated = db.session.execute(
-                db.update(Horario)
+                update(Horario)
                 .where(Horario.id == horario_id)
                 .where(Horario.disponibles > 0)
                 .values(disponibles=Horario.disponibles - 1)
             ).rowcount
+
 
             if rows_updated == 0:
                 flash('❌ El horario ya está lleno.', 'danger')
@@ -1150,10 +1160,18 @@ def verificar_y_agregar_columnas_postgresql():
             print("✅ Columnas agregadas: ", ', '.join([c.split()[2] for c in cambios]))
         else:
             print("✅ Las columnas ya existen. No se hicieron cambios.")
-            
+
 def inicializar_tablas():
     with app.app_context():
         db.create_all()
+
+@app.route('/db-ping')
+def db_ping():
+    try:
+        db.session.execute(text("select 1"))
+        return "ok", 200
+    except Exception as e:
+        return f"db error: {e}", 500
 
 if __name__ == "__main__":
     with app.app_context():
@@ -1161,6 +1179,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
