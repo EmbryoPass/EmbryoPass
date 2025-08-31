@@ -35,18 +35,6 @@ if "sslmode=" not in uri:
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-engine_options = {
-    "pool_pre_ping": True,
-    "pool_recycle": 300,
-    "poolclass": NullPool,  # evita conexiones zombis cuando Render “duerme”
-    "connect_args": {
-        "sslmode": "require",
-        "keepalives": 1,
-        "keepalives_idle": 30,
-        "keepalives_interval": 10,
-        "keepalives_count": 5,
-    },
-}
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_pre_ping": True,
     "pool_recycle": 300,
@@ -61,14 +49,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 
 db = SQLAlchemy(app)
-
-@app.route('/db-ping')
-def db_ping():
-    try:
-        db.session.execute(text("select 1"))
-        return "ok", 200
-    except Exception as e:
-        return f"db error: {e}", 500
 
 GMAIL_USER = os.environ.get('GMAIL_USER', 'museoembriologia@gmail.com')
 GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
@@ -132,6 +112,9 @@ def ir_a_visita_grupal():
 
 # Función para enviar correos
 def enviar_correo(destinatario, asunto, cuerpo_html):
+    if not GMAIL_USER or not GMAIL_PASSWORD:
+        print("⚠️ GMAIL_USER/GMAIL_PASSWORD no configurados; no se envía correo.")
+        return
     mensaje = MIMEMultipart()
     mensaje['From'] = GMAIL_USER
     mensaje['To'] = destinatario
@@ -1195,6 +1178,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
