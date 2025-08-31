@@ -24,13 +24,11 @@ uri = os.environ.get('DATABASE_URL')
 if not uri:
     raise RuntimeError("DATABASE_URL no está definido.")
 
-# Normaliza driver para psycopg2
 if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
 elif uri.startswith("postgresql://") and "+psycopg2" not in uri:
     uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
 
-# Asegura SSL si no viene
 if "sslmode=" not in uri:
     uri += ("&" if "?" in uri else "?") + "sslmode=require"
 
@@ -49,10 +47,28 @@ engine_options = {
         "keepalives_count": 5,
     },
 }
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    "poolclass": NullPool,
+    "connect_args": {
+        "sslmode": "require",
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    },
+}
 
 db = SQLAlchemy(app)
 
+@app.route('/db-ping')
+def db_ping():
+    try:
+        db.session.execute(text("select 1"))
+        return "ok", 200
+    except Exception as e:
+        return f"db error: {e}", 500
 
 GMAIL_USER = os.environ.get('GMAIL_USER', 'museoembriologia@gmail.com')
 GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
@@ -1179,6 +1195,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
