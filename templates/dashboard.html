@@ -288,11 +288,11 @@
   {% endif %}
 </td>
         <td>
-          {% if visita.estado == 'cancelada' %}
-            <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-outline-danger eliminar-visita-btn" title="Eliminar visita cancelada">🗑️</a>
-          {% else %}
-            <button class="btn btn-sm btn-disabled" title="Solo se puede eliminar si la visita está cancelada">🗑️</button>
-          {% endif %}
+          {% if visita.estado in ['cancelada', 'rechazada'] %}
+  <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-outline-danger eliminar-visita-btn" title="Eliminar visita {{ visita.estado }}">🗑️</a>
+{% else %}
+  <button class="btn btn-sm btn-disabled" title="Solo se puede eliminar si la visita está cancelada o rechazada">🗑️</button>
+{% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -531,5 +531,6 @@
 </script>
 </body>
 </html>
+
 
 
