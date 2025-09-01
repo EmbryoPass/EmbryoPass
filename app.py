@@ -428,7 +428,7 @@ def registrar_asistencia_grupal():
         # Validar campos obligatorios
         if not nombre or not sexo or not edad or not visita_id:
             flash('❌ Todos los campos obligatorios deben estar llenos.', 'danger')
-            return redirect(url_for('registrar_asistencia_grupal'))
+            return render_template('registrar_asistencia_grupal.html', visitas=visitas)
 
         try:
             edad_int = int(edad)
@@ -436,7 +436,8 @@ def registrar_asistencia_grupal():
                 raise ValueError
         except Exception:
            flash('❌ La edad debe ser un número entero mayor que cero.', 'danger')
-           return redirect(url_for('registrar_asistencia_grupal'))
+           return render_template('registrar_asistencia_grupal.html', visitas=visitas)
+
 
 
         norm_in = ''.join(nombre.split()).lower()
@@ -446,7 +447,8 @@ def registrar_asistencia_grupal():
             visita_id_int = int(visita_id)
         except (TypeError, ValueError):
             flash('❌ Visita inválida.', 'danger')
-            return redirect(url_for('registrar_asistencia_grupal'))
+            return render_template('registrar_asistencia_grupal.html', visitas=visitas)
+
 
         # Chequeo de duplicado ignorando espacios y mayúsculas (PostgreSQL)
         existente = (
@@ -462,7 +464,7 @@ def registrar_asistencia_grupal():
 
         if existente:
             flash('❌ Ya hay un registro con ese nombre para esta visita.', 'danger')
-            return redirect(url_for('registrar_asistencia_grupal'))
+            return render_template('registrar_asistencia_grupal.html', visitas=visitas)
 
 
         # Registrar asistencia
@@ -1383,6 +1385,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
