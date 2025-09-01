@@ -489,24 +489,32 @@
   });
 
   // Confirmaciones para cancelar o eliminar
-  document.addEventListener("DOMContentLoaded", function () {
+ document.addEventListener("DOMContentLoaded", function () {
+    // Incluimos también a.btn-pastel-danger
     const enlaces = document.querySelectorAll(
-      'a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn, a.eliminar-estudiante-btn'
+      "a.btn-pastel-danger, a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn, a.eliminar-estudiante-btn"
     );
 
     enlaces.forEach(function (enlace) {
-      enlace.addEventListener('click', function (e) {
-        const texto = enlace.textContent.toLowerCase();
+      enlace.addEventListener("click", function (e) {
+        // Evita que links sin href (o con #) sigan si no confirman
+        const texto = (enlace.textContent || "").toLowerCase().trim();
+
         let mensaje = "¿Estás seguro de que deseas continuar?";
         if (texto.includes("cancelar") && texto.includes("visita")) {
+          // Botón "Cancelar" de visitas grupales
           mensaje = "¿Deseas cancelar esta visita grupal?";
         } else if (texto.includes("cancelar")) {
+          // "Cancelar" genérico: citas individuales u horarios
           mensaje = "¿Deseas cancelar esta cita u horario?";
         } else if (texto.includes("🗑")) {
+          // Icono de eliminar (emoji del basurero)
           mensaje = "¿Deseas eliminar este registro permanentemente?";
         }
+
         if (!confirm(mensaje)) {
           e.preventDefault();
+          e.stopPropagation();
         }
       });
     });
@@ -514,3 +522,4 @@
 </script>
 </body>
 </html>
+
