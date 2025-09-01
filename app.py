@@ -153,9 +153,12 @@ def agendar():
         horario_id = request.form['horario']
         edad = request.form['edad']
         sexo = request.form['sexo']
-        institucion = request.form.get('institucion') or None
-        nivel_educativo = request.form.get('nivel') or None
+        institucion = request.form.get('institucion', '').strip()
+        nivel_educativo = request.form.get('nivel', '').strip()
 
+        if not institucion or not nivel_educativo:
+           flash('❌ Institución y nivel académico son obligatorios.', 'danger')
+           return redirect(url_for('agendar'))
 
         if correo != confirmar_correo:
             flash('❌ Los correos no coinciden.', 'danger')
@@ -1178,6 +1181,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
