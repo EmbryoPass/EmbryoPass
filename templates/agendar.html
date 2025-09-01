@@ -185,26 +185,63 @@
         </select>
       </div>
       <div class="mb-3 text-start">
-        <label for="institucion" class="form-label">Institución</label>
-        <input type="text" class="form-control" id="institucion" name="institucion"
-               placeholder="Ej. UACH, público general"
-               value="{{ request.form.get('institucion','') }}">
-      </div>
-      <div class="mb-3 text-start">
-        <label for="nivel" class="form-label">Nivel Académico</label>
-        <select class="form-select" id="nivel" name="nivel">
-          <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona una opción</option>
-          <option value="Primaria" {% if request.form.get('nivel')=='Primaria' %}selected{% endif %}>Primaria</option>
-          <option value="Secundaria" {% if request.form.get('nivel')=='Secundaria' %}selected{% endif %}>Secundaria</option>
-          <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
-          <option value="Universidad" {% if request.form.get('nivel')=='Universidad' %}selected{% endif %}>Universidad</option>
-          <option value="Posgrado" {% if request.form.get('nivel')=='Posgrado' %}selected{% endif %}>Posgrado</option>
-          <option value="Otro" {% if request.form.get('nivel')=='Otro' %}selected{% endif %}>Otro</option>
-        </select>
-        <input type="text" class="form-control mt-2" id="nivel_otro" name="nivel_otro"
-               placeholder="Especifica nivel" style="display:none;"
-               value="{{ request.form.get('nivel_otro','') }}">
-      </div>
+  <label for="institucion" class="form-label">Institución</label>
+  <input
+    type="text"
+    class="form-control"
+    id="institucion"
+    name="institucion"
+    placeholder="Ej. UACH, público general"
+    value="{{ request.form.get('institucion','') }}"
+    required
+  >
+</div>
+
+<div class="mb-3 text-start">
+  <label for="nivel" class="form-label">Nivel Académico</label>
+  <select
+    class="form-select"
+    id="nivel"
+    name="nivel"
+    required
+    onchange="toggleNivelOtro()"
+  >
+    <option value="" disabled {% if not request.form.get('nivel') %}selected{% endif %}>Selecciona una opción</option>
+    <option value="Primaria"     {% if request.form.get('nivel')=='Primaria' %}selected{% endif %}>Primaria</option>
+    <option value="Secundaria"   {% if request.form.get('nivel')=='Secundaria' %}selected{% endif %}>Secundaria</option>
+    <option value="Preparatoria" {% if request.form.get('nivel')=='Preparatoria' %}selected{% endif %}>Preparatoria</option>
+    <option value="Universidad"  {% if request.form.get('nivel')=='Universidad' %}selected{% endif %}>Universidad</option>
+    <option value="Posgrado"     {% if request.form.get('nivel')=='Posgrado' %}selected{% endif %}>Posgrado</option>
+    <option value="Otro"         {% if request.form.get('nivel')=='Otro' %}selected{% endif %}>Otro</option>
+  </select>
+
+  <input
+    type="text"
+    class="form-control mt-2"
+    id="nivel_otro"
+    name="nivel_otro"
+    placeholder="Especifica nivel"
+    style="display:none;"
+    value="{{ request.form.get('nivel_otro','') }}"
+  >
+</div>
+
+<script>
+function toggleNivelOtro() {
+  const nivel = document.getElementById('nivel');
+  const nivelOtro = document.getElementById('nivel_otro');
+  if (nivel.value === 'Otro') {
+    nivelOtro.style.display = 'block';
+    nivelOtro.setAttribute('required', 'required');
+  } else {
+    nivelOtro.style.display = 'none';
+    nivelOtro.removeAttribute('required');
+    nivelOtro.value = '';
+  }
+}
+// Ejecutar al cargar por si el form viene con datos (postback con errores)
+document.addEventListener('DOMContentLoaded', toggleNivelOtro);
+</script>
       <div class="mb-3 text-start">
         <label for="horario" class="form-label">Selecciona un horario</label>
         {% if horarios %}
@@ -226,12 +263,6 @@
   </div>
 
   <script>
-    // manejo de nivel 'Otro'
-    document.getElementById('nivel').addEventListener('change', e => {
-      document.getElementById('nivel_otro').style.display =
-        e.target.value === 'Otro' ? 'block' : 'none';
-    });
-
     function disableButton() {
       document.getElementById('progressBar').style.width = '100%';
       const b = document.getElementById('agendarBtn');
@@ -253,3 +284,4 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
