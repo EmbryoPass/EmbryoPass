@@ -224,7 +224,7 @@ def agendar():
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #4a90e2;">Confirmación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
       <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Tu cita ha sido agendada exitosamente. Aquí tienes los detalles:</p>
+      <p>La cita ha sido agendada exitosamente. Aquí los detalles:</p>
       <ul style="line-height: 1.6;">
         <li><strong>Nombre:</strong> {nombre}</li>
         <li><strong>Correo:</strong> {correo}</li>
@@ -238,7 +238,7 @@ def agendar():
 
       <p><strong>Duración estimada de la cita:</strong> 10 a 15 minutos.</p>
 
-      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita:</strong></p>
+      <p><strong>Por favor, siga las siguientes indicaciones durante la visita:</strong></p>
       <ul style="line-height: 1.6;">
         <li>No tocar las exhibiciones.</li>
         <li>No comer ni beber dentro del museo.</li>
@@ -248,7 +248,7 @@ def agendar():
         <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
       </ul>
 
-      <p>Si necesitas cancelar tu cita, puedes hacerlo aquí:</p>
+      <p>Si necesita cancelar su cita, puede hacerlo aquí:</p>
       <p>
         <a href="https://embryopass.onrender.com/cancelar_usuario/{nueva_cita.id}/{token}"
            style="background-color: #d9534f; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
@@ -375,7 +375,7 @@ def solicitar_visita_grupal():
       <p>Hola <strong>{encargado}</strong>,</p>
       <p>Hemos recibido su solicitud de visita grupal para el Museo de Embriología  Dra. Dora Virginia Chávez Corral.</p>
       <p>Nos pondremos en contacto pronto para coordinar la visita.</p>
-      </p>Aquí tienes los detalles:</p>
+      </p>Aquí tiene los detalles:</p>
       <ul style="line-height: 1.6;">
         <li><strong>Encargado:</strong> {encargado}</li>
         <li><strong>Correo:</strong> {correo}</li>
@@ -470,7 +470,7 @@ def registrar_asistencia_grupal():
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #4a90e2;">Confirmación de Asistencia - Museo de Embriología</h2>
       <p>Hola <strong>{nombre}</strong>,</p>
-      <p>Gracias por registrar tu asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
+      <p>Gracias por registrar asistencia a la visita grupal del Museo de Embriología Dra. Dora Virginia Chávez Corral.</p>
       <p><strong>Detalles de la visita:</strong></p>
       <ul>
         <li><strong>Institución:</strong> {visita.institucion}</li>
@@ -480,7 +480,7 @@ def registrar_asistencia_grupal():
 
       <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
 
-      <p><strong>Por favor, sigue las siguientes indicaciones durante tu visita para preservar las exhibiciones y mantener un buen ambiente:</strong></p>
+      <p><strong>Por favor, siga las siguientes indicaciones durante la visita para preservar las exhibiciones y mantener un buen ambiente:</strong></p>
       <ul style="line-height: 1.6;">
         <li>No tocar las exhibiciones.</li>
         <li>No comer ni beber dentro del museo.</li>
@@ -490,7 +490,7 @@ def registrar_asistencia_grupal():
         <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
       </ul>
 
-      <p>Esperamos que disfrutes tu visita.</p>
+      <p>Esperamos que disfruten su visita.</p>
     </div>
   </body>
 </html>
@@ -530,17 +530,16 @@ def aceptar_visita(id):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color:#4a90e2; margin-top:0;">Solicitud aceptada</h2>
       <p>Hola <strong>{visita.encargado}</strong>,</p>
-      <p>Tu solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong>.</p>
-      <p>En breve te enviaremos un correo con la <strong>fecha y hora confirmadas</strong>.</p>
+      <p>La solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong>.</p>
+      <p>En breve enviaremos un correo con la <strong>fecha y hora confirmadas</strong>.</p>
       <ul style="line-height:1.6; margin-top:12px;">
         <li><strong>Institución:</strong> {visita.institucion}</li>
         <li><strong>Nivel académico:</strong> {visita.nivel}</li>
         <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
         <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
       </ul>
-      <p>Si tienes restricciones de horario o prefieres alguna de las fechas propuestas, por favor <strong>responde a este correo</strong>.</p>
       <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-      <p style="font-size:12px; color:#666;">Recomendación: llegar 10 minutos antes el día de la visita.</p>
+      <p style="font-size:12px; color:#666;">Le recomendamos llegar 15 minutos antes el día de la visita.</p>
     </div>
   </body>
 </html>
@@ -583,7 +582,7 @@ def rechazar_visita(id):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color:#d9534f; margin-top:0;">Solicitud rechazada</h2>
       <p>Hola <strong>{visita.encargado}</strong>,</p>
-      <p>Lamentamos informarte que tu solicitud de visita grupal al
+      <p>Lamentamos informarle que su solicitud de visita grupal al
          <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>rechazada</strong>.</p>
       <ul style="line-height:1.6;">
         <li><strong>Institución:</strong> {visita.institucion}</li>
@@ -591,16 +590,20 @@ def rechazar_visita(id):
         <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
         <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
       </ul>
-      <p>Si lo deseas, puedes presentar una nueva solicitud con otras fechas:</p>
+      <p>Si lo desea, puede presentar una nueva solicitud con otras fechas:</p>
       <p style="text-align:center; margin-top:12px;">
         <a href="https://embryopass.onrender.com/ir-a-visita-grupal"
            style="display:inline-block; padding:10px 16px; background:#5cb85c; color:#fff; text-decoration:none; border-radius:6px;">
            Solicitar nueva visita
         </a>
+      </p>
+      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+      <p style="font-size:12px; color:#666;">Agradecemos su interés en el museo.</p>
     </div>
   </body>
 </html>
 """
+
         enviar_correo(visita.correo, asunto, cuerpo_html)
         # Opcional: copia interna
         # enviar_correo(GMAIL_USER, f"[Copia] {asunto}", cuerpo_html)
@@ -651,20 +654,33 @@ def asignar_fecha_visita(id):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #4a90e2; margin-top:0;">Confirmación de visita grupal</h2>
       <p>Hola <strong>{visita.encargado}</strong>,</p>
-      <p>Tu solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong> y se ha confirmado la fecha:</p>
+      <p>Su solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong> y se ha confirmado la fecha:</p>
       <p style="font-size:16px; font-weight:bold; margin:12px 0;">{fecha}</p>
       <ul style="line-height:1.6;">
         <li><strong>Institución:</strong> {visita.institucion}</li>
         <li><strong>Nivel académico:</strong> {visita.nivel}</li>
         <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
       </ul>
-      <p>Si necesitas reprogramar o cancelar, por favor responde a este correo.</p>
+
+      <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
+      <p><strong>Le solicitamos seguir las siguientes indicaciones para preservar las exhibiciones y mantener un buen ambiente:</strong></p>
+      <ul style="line-height: 1.6;">
+        <li>No tocar las exhibiciones.</li>
+        <li>No comer ni beber dentro del museo.</li>
+        <li>No hablar en voz alta.</li>
+        <li>No tomar fotos ni videos.</li>
+        <li>No correr ni empujar para evitar accidentes y daños.</li>
+        <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
+      </ul>
+
+      <p>Si necesita reprogramar o cancelar, por favor responda a este correo.</p>
       <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-      <p style="font-size:12px; color:#666;">Te recomendamos llegar 15 minutos antes del horario programado.</p>
+      <p style="font-size:12px; color:#666;">Le recomendamos llegar 15 minutos antes del horario programado.</p>
     </div>
   </body>
 </html>
 """
+
             enviar_correo(visita.correo, asunto, cuerpo_html)
 
             # Opcional: copia interna
@@ -680,7 +696,7 @@ def asignar_fecha_visita(id):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #4a90e2; margin-top:0;">Actualización de fecha</h2>
       <p>Hola <strong>{visita.encargado}</strong>,</p>
-      <p>La fecha de tu visita grupal ha sido <strong>actualizada</strong>:</p>
+      <p>La fecha de su visita grupal ha sido <strong>actualizada</strong>:</p>
       <ul style="line-height:1.6;">
         <li><strong>Fecha anterior:</strong> {fecha_anterior}</li>
         <li><strong>Nueva fecha:</strong> {fecha}</li>
@@ -690,7 +706,7 @@ def asignar_fecha_visita(id):
         <li><strong>Nivel académico:</strong> {visita.nivel}</li>
         <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
       </ul>
-      <p>Si hay algun inconveniente con la fecha nueva, responde a este correo para reprogramar.</p>
+      <p>Si hay algun inconveniente con la fecha nueva, responda a este correo para reprogramar.</p>
     </div>
   </body>
 </html>
@@ -864,6 +880,7 @@ def dashboard():
         historial_completo=historial_completo,
         horarios=horarios,
         rango=rango,
+        tipo=tipo,
         tipo_filtro=tipo,
         visitas_grupales=visitas_grupales,
         estudiantes_grupales=estudiantes_grupales
@@ -964,8 +981,8 @@ def cancelar_cita(id_cita):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
       <h2 style="color: #d9534f;">Cancelación de Cita</h2>
       <p>Hola <strong>{cita.nombre}</strong>,</p>
-      <p>Tu cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{cita.fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
-      <p>Te invitamos a agendar una nueva cita.</p>
+      <p>La cita al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> programada para el <strong>{cita.fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
+      <p>Le invitamos a agendar una nueva cita.</p>
       <p style="text-align: center; margin-top: 20px;">
         <a href="https://embryopass.onrender.com/" 
            style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
@@ -1065,15 +1082,15 @@ def eliminar_horario(id_horario):
     <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
       <h2 style="color: #d9534f;">Cancelación de Cita</h2>
       <p>Hola <strong>{c.nombre}</strong>,</p>
-      <p>Tu cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-      <p>Te invitamos a agendar una nueva cita.</p>
+      <p>La cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+      <p>Le invitamos a agendar una nueva cita.</p>
       <p style="text-align: center;">
         <a href="https://embryopass.onrender.com/" 
            style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
            Agendar nueva cita
         </a>
       </p>
-      <p style="margin-top: 20px;">Gracias por tu comprensión.</p>
+      <p style="margin-top: 20px;">Gracias por la comprensión.</p>
     </div>
   </body>
 </html>
@@ -1121,7 +1138,7 @@ def cancelar_visita_grupal(id):
             <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #d9534f;">Cancelación de Solicitud de Visita Grupal - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
               <p>Hola <strong>{visita.encargado}</strong>,</p>
-              <p>Lamentamos informarte que tu solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí tienes los detalles:</p>
+              <p>Lamentamos informarte que su solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí los detalles:</p>
               <ul style="line-height: 1.6;">
                 <li><strong>Encargado:</strong> {visita.encargado}</li>
                 <li><strong>Correo:</strong> {visita.correo}</li>
@@ -1132,14 +1149,14 @@ def cancelar_visita_grupal(id):
                 <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
                 <li><strong>Comentarios:</strong> {visita.comentarios or '—'}</li>
               </ul>
-              <p>Si deseas realizar una nueva solicitud, puedes hacerlo aquí:</p>
+              <p>Si desea realizar una nueva solicitud, puede hacerlo aquí:</p>
               <p>
                 <a href="https://embryopass.onrender.com/ir-a-visita-grupal"
                    style="background-color: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
                    Solicitar nueva visita
                 </a>
               </p>
-              <p style="margin-top: 20px;">Gracias por tu interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
+              <p style="margin-top: 20px;">Gracias por su interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
             </div>
           </body>
         </html>
@@ -1336,6 +1353,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
