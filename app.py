@@ -1127,9 +1127,17 @@ def cancelar_visita_grupal(id):
         return redirect(url_for('login'))
 
     visita = VisitaGrupal.query.get(id)
-    if visita:
-        visita.estado = 'cancelada'
-        db.session.commit()
+    if not visita:
+        flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    # ⛔ No permitir cancelar si ya está rechazada o cancelada
+    if visita.estado in ['rechazada', 'cancelada']:
+        flash('ℹ️ No es posible cancelar una solicitud rechazada o ya cancelada.', 'info')
+        return redirect(url_for('dashboard'))
+
+    visita.estado = 'cancelada'
+    db.session.commit()
 
         # Enviar correo al encargado notificando la cancelación
         cuerpo = f"""
@@ -1353,6 +1361,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
