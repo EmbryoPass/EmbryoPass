@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 import smtplib
 import requests
+import secrets, string
 import uuid
 import pytz
 from email.mime.text import MIMEText
@@ -97,6 +98,12 @@ class EstudianteGrupal(db.Model):
     visita_id = db.Column(db.Integer, db.ForeignKey('visita_grupal.id'), nullable=False)
     visita = db.relationship('VisitaGrupal', backref=db.backref('estudiantes', lazy=True))
 
+class AdminSecret(db.Model):
+    __tablename__ = 'admin_secret'
+    id = db.Column(db.Integer, primary_key=True)  # usaremos id=1 siempre
+    password = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
 
 @app.route('/inicio')
 def inicio():
@@ -126,6 +133,18 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor.login(GMAIL_USER, GMAIL_PASSWORD)
     servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
     servidor.quit()
+    
+def generar_password_segura(longitud=14):
+    # Letras, dígitos y algunos símbolos seguros
+    alfabeto = string.ascii_letters + string.digits + "!@#$%_-"
+    while True:
+        pwd = ''.join(secrets.choice(alfabeto) for _ in range(longitud))
+        # Reglas mínimas: mayúscula, minúscula, dígito y símbolo
+        if (any(c.islower() for c in pwd) and
+            any(c.isupper() for c in pwd) and
+            any(c.isdigit() for c in pwd) and
+            any(c in "!@#$%_-") for c in pwd):
+            return pwd
 
 @app.route('/agendar-cita', methods=['GET', 'POST'])
 def agendar():
@@ -893,12 +912,24 @@ def dashboard():
         if fecha >= ahora:
             estudiantes_grupales.append(e)
 
+    # Sección: contraseña admin
+    secret = AdminSecret.query.get(1)
+    admin_password = secret.password if secret else None
+    admin_password_at = None
+    if secret and secret.created_at:
+    # opcional: mostrar en tu zona horaria
+       chih = pytz.timezone('America/Chihuahua')
+       admin_password_at = secret.created_at.replace(tzinfo=pytz.utc).astimezone(chih).strftime("%d/%m/%Y %I:%M %p")
+
+
     return render_template(
         'dashboard.html',
         citas=citas_futuras,
         historial_completo=historial_completo,
         horarios=horarios,
         rango=rango,
+        admin_password=admin_password,
+        admin_password_at=admin_password_at,
         tipo=tipo,
         tipo_filtro=tipo,
         visitas_grupales=visitas_grupales,
@@ -1228,6 +1259,27 @@ def agregar_horario():
     flash('✅ Horario agregado.', 'success')
     return redirect(url_for('dashboard'))
 
+@app.route('/generar_password', methods=['POST'])
+def generar_password():
+    if 'usuario' not in session:
+        flash('⚠️ Debes iniciar sesión primero.', 'warning')
+        return redirect(url_for('login'))
+
+    nueva = generar_password_segura(14)
+
+    secret = AdminSecret.query.get(1)
+    ahora_utc = datetime.utcnow()
+    if secret:
+        secret.password = nueva
+        secret.created_at = ahora_utc
+    else:
+        secret = AdminSecret(id=1, password=nueva, created_at=ahora_utc)
+        db.session.add(secret)
+
+    db.session.commit()
+    flash('🔐 Nueva contraseña generada.', 'success')
+    return redirect(url_for('dashboard'))
+
 
 @app.route('/descargar_historial')
 def descargar_historial():
@@ -1385,6 +1437,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
