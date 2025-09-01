@@ -732,7 +732,7 @@ def dashboard():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
-    tipo = request.args.get('tipo', default='todos')
+    tipo = request.args.get('tipo', default='todas')
 
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
@@ -1189,7 +1189,7 @@ def descargar_historial():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
-    tipo = request.args.get('tipo', default='todos')
+    tipo = request.args.get('tipo', default='todas')
 
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
@@ -1336,6 +1336,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
