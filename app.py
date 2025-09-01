@@ -1140,6 +1140,7 @@ def cancelar_visita_grupal(id):
     db.session.commit()
 
         # Enviar correo al encargado notificando la cancelación
+    try:
         cuerpo = f"""
         <html>
           <body style="font-family: Arial, sans-serif; color: #333;">
@@ -1361,6 +1362,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
