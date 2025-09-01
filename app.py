@@ -1037,8 +1037,8 @@ def eliminar_cita(id_cita):
         flash('✅ Cita eliminada.', 'success')
     return redirect(url_for('dashboard'))
 
-@app.route('/eliminar_visita_grupal/<int:id>')
-def eliminar_visita_grupal(id):
+@app.route('/cancelar_visita_grupal/<int:id>')
+def cancelar_visita_grupal(id):
     if 'usuario' not in session:
         flash('⚠️ Debes iniciar sesión primero.', 'warning')
         return redirect(url_for('login'))
@@ -1048,77 +1048,54 @@ def eliminar_visita_grupal(id):
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('dashboard'))
 
-    if visita.estado != 'cancelada':
-        flash('❌ Solo puedes eliminar visitas que ya han sido canceladas.', 'danger')
+    # ⛔ No permitir cancelar si ya está rechazada o cancelada
+    if visita.estado in ['rechazada', 'cancelada']:
+        flash('ℹ️ No es posible cancelar una solicitud rechazada o ya cancelada.', 'info')
         return redirect(url_for('dashboard'))
 
-    # Eliminar estudiantes asociados
-    for estudiante in visita.estudiantes:
-        db.session.delete(estudiante)
-
-    db.session.delete(visita)
+    # Cancelar y guardar
+    visita.estado = 'cancelada'
     db.session.commit()
-    flash('✅ Visita cancelada eliminada correctamente.', 'success')
-    return redirect(url_for('dashboard'))
 
-    
-@app.route('/eliminar_horario/<int:id_horario>')
-def eliminar_horario(id_horario):
-    if 'usuario' not in session:
-        flash('⚠️ Debes iniciar sesión primero.', 'warning')
-        return redirect(url_for('login'))
-
-    horario = Horario.query.get(id_horario)
-    if horario:
-        citas = Cita.query.filter_by(fecha_hora=horario.fecha_hora, estado='activa').all()
-
-        for c in citas:
-            c.estado = "cancelada"
-
-            #Correo al usuario
-            cuerpo = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #f5c6cb; border-radius: 10px;">
-      <h2 style="color: #d9534f;">Cancelación de Cita</h2>
-      <p>Hola <strong>{c.nombre}</strong>,</p>
-      <p>La cita programada para el <strong>{c.fecha_hora}</strong> ha sido cancelada debido a cambios en la disponibilidad del <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
-      <p>Le invitamos a agendar una nueva cita.</p>
-      <p style="text-align: center;">
-        <a href="https://embryopass.onrender.com/" 
-           style="display: inline-block; padding: 10px 20px; background-color: #5cb85c; color: white; text-decoration: none; border-radius: 5px;">
-           Agendar nueva cita
-        </a>
-      </p>
-      <p style="margin-top: 20px;">Gracias por la comprensión.</p>
-    </div>
-  </body>
-</html>
-"""
-            enviar_correo(c.correo, 'Cancelación de Cita - Museo de Embriología Dra. Dora Virginia Chávez Corral', cuerpo)
-
-        # Notificación global al museo
-        cuerpo_admin = f"""
+    # Enviar correo al encargado notificando la cancelación
+    try:
+        cuerpo = f"""
         <html>
           <body style="font-family: Arial, sans-serif; color: #333;">
-            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-              <h2 style="color: #d9534f;">Horario Eliminado</h2>
-              <p>El siguiente horario ha sido eliminado y todas sus citas activas han sido canceladas:</p>
-              <ul>
-                <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
-                <li><strong>Total de citas canceladas:</strong> {len(citas)}</li>
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #d9534f;">Cancelación de Solicitud de Visita Grupal - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
+              <p>Hola <strong>{visita.encargado}</strong>,</p>
+              <p>Lamentamos informarle que su solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí los detalles:</p>
+              <ul style="line-height: 1.6;">
+                <li><strong>Encargado:</strong> {visita.encargado}</li>
+                <li><strong>Correo:</strong> {visita.correo}</li>
+                <li><strong>Teléfono:</strong> {visita.telefono}</li>
+                <li><strong>Institución:</strong> {visita.institucion}</li>
+                <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+                <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+                <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
+                <li><strong>Comentarios:</strong> {visita.comentarios or '—'}</li>
               </ul>
+              <p>Si desea realizar una nueva solicitud, puede hacerlo aquí:</p>
+              <p>
+                <a href="https://embryopass.onrender.com/ir-a-visita-grupal"
+                   style="background-color: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                   Solicitar nueva visita
+                </a>
+              </p>
+              <p style="margin-top: 20px;">Gracias por su interés en el <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong>.</p>
             </div>
           </body>
         </html>
         """
-        enviar_correo('museoembriologia@gmail.com', 'Horario eliminado - Museo de Embriología', cuerpo_admin)
-
-        db.session.delete(horario)
-        db.session.commit()
-        flash('✅ Horario eliminado y notificaciones enviadas.', 'success')
+        enviar_correo(visita.correo, 'Cancelación de visita grupal - Museo de Embriología', cuerpo)
+        flash('✅ Visita cancelada y notificación enviada.', 'success')
+    except Exception as e:
+        print(f"[EMAIL] Error al enviar correo de cancelación: {e}")
+        flash('✅ Visita cancelada, pero no se pudo enviar el correo.', 'warning')
 
     return redirect(url_for('dashboard'))
+
 
 @app.route('/cancelar_visita_grupal/<int:id>')
 def cancelar_visita_grupal(id):
@@ -1362,6 +1339,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
