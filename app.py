@@ -1048,9 +1048,10 @@ def eliminar_visita_grupal(id):
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('dashboard'))
 
-    if visita.estado != 'cancelada':
-        flash('❌ Solo puedes eliminar visitas que ya han sido canceladas.', 'danger')
-        return redirect(url_for('dashboard'))
+    if visita.estado not in ['cancelada', 'rechazada']:
+    flash('❌ Solo puedes eliminar visitas que ya han sido canceladas o rechazadas.', 'danger')
+    return redirect(url_for('dashboard'))
+
 
     # Eliminar estudiantes asociados
     for estudiante in visita.estudiantes:
@@ -1365,6 +1366,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
