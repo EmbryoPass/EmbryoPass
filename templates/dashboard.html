@@ -471,6 +471,60 @@
   </table>
 </div>
 
+<!-- ====== Sección: Contraseña del panel ====== -->
+<div class="card mt-5">
+  <div class="card-body">
+    <h5 class="card-title">Contraseña del panel</h5>
+
+    {% if admin_password %}
+      <div class="mb-2">
+        <label class="form-label">Contraseña actual</label>
+        <div class="input-group">
+          <input type="password" class="form-control" id="pwField" value="{{ admin_password }}" readonly>
+          <button class="btn btn-outline-secondary" type="button" id="togglePw">Mostrar</button>
+          <button class="btn btn-outline-secondary" type="button" id="copyPw">Copiar</button>
+        </div>
+        {% if admin_password_at %}
+          <small class="text-muted">Generada el {{ admin_password_at }}</small>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="text-muted mb-2">Aún no has generado una contraseña.</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('generar_password') }}">
+  <button type="submit" class="btn btn-pastel-primary">Generar nueva contraseña</button>
+</form>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const pwField = document.getElementById('pwField');
+    const toggle = document.getElementById('togglePw');
+    const copy = document.getElementById('copyPw');
+
+    if (toggle && pwField) {
+      toggle.addEventListener('click', () => {
+        const isHidden = pwField.type === 'password';
+        pwField.type = isHidden ? 'text' : 'password';
+        toggle.textContent = isHidden ? 'Ocultar' : 'Mostrar';
+      });
+    }
+
+    if (copy && pwField) {
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pwField.value);
+          copy.textContent = '¡Copiado!';
+          setTimeout(() => (copy.textContent = 'Copiar'), 1200);
+        } catch (e) {
+          alert('No se pudo copiar al portapapeles.');
+        }
+      });
+    }
+  })();
+</script>
 
     <div class="text-center mt-4 mb-4">
         <a href="{{ url_for('logout') }}" class="btn btn-pastel-danger">Cerrar sesión</a>
@@ -531,6 +585,7 @@
 </script>
 </body>
 </html>
+
 
 
 
