@@ -161,73 +161,94 @@
     {% endwith %}
 
     <!-- Formulario -->
-    <form method="POST" id="formAsistencia" onsubmit="return handleSubmit();">
-      <div class="mb-3 text-start">
-        <label class="form-label" for="nombre">Nombre completo</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required
-               value="{{ request.form.get('nombre','') }}">
-      </div>
-
-      <div class="mb-3 text-start">
-        <label class="form-label" for="correo">Correo electrónico (opcional)</label>
-        <input type="email" class="form-control" id="correo" name="correo"
-               value="{{ request.form.get('correo','') }}">
-      </div>
-      
-      <div class="mb-3 text-start">
-        <label class="form-label" for="telefono">Teléfono (opcional)</label>
-        <input type="text" class="form-control" id="telefono" name="telefono" pattern="\d{10}"
-               title="Debe contener 10 dígitos" value="{{ request.form.get('telefono','') }}">
-      </div>
-
-      <div class="mb-3 text-start">
-        <label class="form-label" for="edad">Edad</label>
-        <input type="number" class="form-control" id="edad" name="edad" min="1"
-               value="{{ request.form.get('edad','') }}">
-      </div>
-
-      <div class="mb-3 text-start">
-        <label class="form-label" for="sexo">Sexo</label>
-        <select class="form-select" id="sexo" name="sexo">
-          <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>
-            Selecciona una opción
-          </option>
-          <option value="Mujer" {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
-          <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
-        </select>
-      </div>
-
-      <div class="mb-3 text-start">
-        <label class="form-label" for="visita_id">Selecciona tu institución y fecha</label>
-        <select class="form-select" id="visita_id" name="visita_id" required>
-          <option value="" disabled {% if not request.form.get('visita_id') %}selected{% endif %}>
-            Selecciona una visita
-          </option>
-          {% for id, institucion, fecha in visitas %}
-            <option value="{{ id }}" {% if request.form.get('visita_id')==id|string %}selected{% endif %}>
-              {{ institucion }} – {{ fecha }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="text-center">
-        <button type="submit" id="btnEnviar" class="btn btn-cafe w-100">Registrar asistencia</button>
-      </div>
-    </form>
+ <form method="POST" id="formAsistencia" onsubmit="return handleSubmit();">
+  <div class="mb-3 text-start">
+    <label class="form-label" for="nombre">Nombre completo</label>
+    <input
+      type="text"
+      class="form-control {% if request.method=='POST' and not request.form.get('nombre') %}is-invalid{% endif %}"
+      id="nombre" name="nombre" required
+      value="{{ request.form.get('nombre','') }}">
+    <div class="invalid-feedback">El nombre es obligatorio.</div>
   </div>
 
-  <script>
-    function handleSubmit() {
-      // Start progress bar
-      document.getElementById('progressBar').style.width = '100%';
-      // Disable button
-      const btn = document.getElementById('btnEnviar');
-      btn.disabled = true;
-      btn.textContent = 'Procesando…';
-      return true;
+  <div class="mb-3 text-start">
+    <label class="form-label" for="correo">Correo electrónico (opcional)</label>
+    <input type="email" class="form-control" id="correo" name="correo"
+           value="{{ request.form.get('correo','') }}">
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="telefono">Teléfono (opcional)</label>
+    <input
+      type="text"
+      class="form-control {% if request.method=='POST' and request.form.get('telefono') and not (request.form.get('telefono')|length == 10 and request.form.get('telefono').isdigit()) %}is-invalid{% endif %}"
+      id="telefono" name="telefono"
+      pattern="^\d{10}$" inputmode="numeric" title="Debe contener 10 dígitos"
+      value="{{ request.form.get('telefono','') }}">
+    <div class="invalid-feedback">Deben ser exactamente 10 dígitos.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="edad">Edad</label>
+    <input
+      type="number"
+      class="form-control {% if request.method=='POST' and not request.form.get('edad') %}is-invalid{% endif %}"
+      id="edad" name="edad" min="1" step="1" required
+      value="{{ request.form.get('edad','') }}">
+    <div class="invalid-feedback">La edad es obligatoria.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="sexo">Sexo</label>
+    <select
+      class="form-select {% if request.method=='POST' and not request.form.get('sexo') %}is-invalid{% endif %}"
+      id="sexo" name="sexo" required>
+      <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona una opción</option>
+      <option value="Mujer"  {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
+      <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
+    </select>
+    <div class="invalid-feedback">Selecciona una opción.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="visita_id">Selecciona tu institución y fecha</label>
+    <select
+      class="form-select {% if request.method=='POST' and not request.form.get('visita_id') %}is-invalid{% endif %}"
+      id="visita_id" name="visita_id" required>
+      <option value="" disabled {% if not request.form.get('visita_id') %}selected{% endif %}>Selecciona una visita</option>
+      {% for id, institucion, fecha in visitas %}
+        <option value="{{ id }}" {% if request.form.get('visita_id')==id|string %}selected{% endif %}>
+          {{ institucion }} – {{ fecha }}
+        </option>
+      {% endfor %}
+    </select>
+    <div class="invalid-feedback">Selecciona tu visita.</div>
+  </div>
+
+  <div class="text-center">
+    <button type="submit" id="btnEnviar" class="btn btn-cafe w-100">Registrar asistencia</button>
+  </div>
+</form>
+  </div>
+
+ <script>
+  function handleSubmit() {
+    const form = document.getElementById('formAsistencia');
+
+    if (!form.checkValidity()) {
+      form.classList.add('was-validated');  // 👈 activa mensajes .invalid-feedback
+      form.reportValidity();                // tooltips nativos
+      return false;
     }
-  </script>
+
+    document.getElementById('progressBar').style.width = '100%';
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.textContent = 'Procesando…';
+    return true;
+  }
+</script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
