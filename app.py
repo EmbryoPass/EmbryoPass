@@ -1138,7 +1138,7 @@ def cancelar_visita_grupal(id):
             <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #d9534f;">Cancelación de Solicitud de Visita Grupal - Museo de Embriología Dra. Dora Virginia Chávez Corral</h2>
               <p>Hola <strong>{visita.encargado}</strong>,</p>
-              <p>Lamentamos informarte que su solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí los detalles:</p>
+              <p>Lamentamos informarle que su solicitud de visita grupal institucional ha sido <strong>cancelada</strong>. Aquí los detalles:</p>
               <ul style="line-height: 1.6;">
                 <li><strong>Encargado:</strong> {visita.encargado}</li>
                 <li><strong>Correo:</strong> {visita.correo}</li>
@@ -1353,6 +1353,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
