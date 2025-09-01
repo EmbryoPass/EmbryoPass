@@ -12,7 +12,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import os
-from sqlalchemy import text, update
+from sqlalchemy import text, update, func
 from sqlalchemy.pool import NullPool
 import pandas as pd
 from flask import make_response
@@ -418,7 +418,7 @@ def registrar_asistencia_grupal():
 
 
     if request.method == 'POST':
-        nombre    = request.form.get('nombre').strip()
+        nombre = (request.form.get('nombre') or '').strip()
         correo    = request.form.get('correo') or ''  
         telefono  = request.form.get('telefono') or ''
         edad      = request.form.get('edad')
@@ -439,14 +439,31 @@ def registrar_asistencia_grupal():
            return redirect(url_for('registrar_asistencia_grupal'))
 
 
-        # Validar duplicado: mismo nombre en la misma visita
-        existente = EstudianteGrupal.query.filter_by(
-            visita_id=visita_id,
-            nombre=nombre
-        ).first()
+        norm_in = ''.join(nombre.split()).lower()
+
+        # Asegura que visita_id sea int (opcional pero recomendable)
+        try:
+            visita_id_int = int(visita_id)
+        except (TypeError, ValueError):
+            flash('❌ Visita inválida.', 'danger')
+            return redirect(url_for('registrar_asistencia_grupal'))
+
+        # Chequeo de duplicado ignorando espacios y mayúsculas (PostgreSQL)
+        existente = (
+            EstudianteGrupal.query
+            .filter(EstudianteGrupal.visita_id == visita_id_int)
+            .filter(
+                func.lower(
+                    func.regexp_replace(EstudianteGrupal.nombre, r'\s+', '', 'g')
+                ) == norm_in
+            )
+            .first()
+        )
+
         if existente:
             flash('❌ Ya hay un registro con ese nombre para esta visita.', 'danger')
             return redirect(url_for('registrar_asistencia_grupal'))
+
 
         # Registrar asistencia
         estudiante = EstudianteGrupal(
@@ -455,7 +472,7 @@ def registrar_asistencia_grupal():
             telefono=telefono,
             edad=edad_int,
             sexo=sexo,
-            visita_id=visita_id,
+            visita_id=visita_id_int,
             hora_registro=ahora.strftime("%d/%m/%Y %I:%M %p")
         )
         db.session.add(estudiante)
@@ -463,7 +480,7 @@ def registrar_asistencia_grupal():
 
         # --- Envío de correo ---
         if correo:
-            visita = VisitaGrupal.query.get(visita_id)
+            visita = VisitaGrupal.query.get(visita_id_int)
             cuerpo = f"""
 <html>
   <body style="font-family: Arial, sans-serif; color: #333;">
@@ -1366,6 +1383,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
