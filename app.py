@@ -512,13 +512,52 @@ def aceptar_visita(id):
         return redirect(url_for('login'))
 
     visita = VisitaGrupal.query.get(id)
-    if visita:
-        visita.estado = 'aceptada'
-        db.session.commit()
-        flash('✅ Visita marcada como aceptada.', 'success')
-    else:
+    if not visita:
         flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    ya_aceptada = (visita.estado == 'aceptada')
+    visita.estado = 'aceptada'
+    db.session.commit()
+
+    # Solo enviamos correo la primera vez que pasa a "aceptada"
+    if not ya_aceptada:
+        try:
+            asunto = 'Solicitud de visita grupal aceptada — Museo de Embriología'
+            cuerpo_html = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color:#4a90e2; margin-top:0;">Solicitud aceptada</h2>
+      <p>Hola <strong>{visita.encargado}</strong>,</p>
+      <p>Tu solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong>.</p>
+      <p>En breve te enviaremos un correo con la <strong>fecha y hora confirmadas</strong>.</p>
+      <ul style="line-height:1.6; margin-top:12px;">
+        <li><strong>Institución:</strong> {visita.institucion}</li>
+        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+        <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+        <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
+      </ul>
+      <p>Si tienes restricciones de horario o prefieres alguna de las fechas propuestas, por favor <strong>responde a este correo</strong>.</p>
+      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+      <p style="font-size:12px; color:#666;">Recomendación: llegar 10 minutos antes el día de la visita.</p>
+    </div>
+  </body>
+</html>
+"""
+            if visita.correo:
+                enviar_correo(visita.correo, asunto, cuerpo_html)
+                # (Opcional) Copia interna al museo:
+                # enviar_correo(GMAIL_USER, f"[Copia] {asunto}", cuerpo_html)
+            flash('✅ Visita marcada como aceptada y correo enviado.', 'success')
+        except Exception as e:
+            print(f"[EMAIL] Error al enviar correo de aceptación: {e}")
+            flash('✅ Visita aceptada, pero no se pudo enviar el correo.', 'warning')
+    else:
+        flash('ℹ️ La visita ya estaba aceptada.', 'info')
+
     return redirect(url_for('dashboard'))
+
 
 
 @app.route('/rechazar_visita/<int:id>')
@@ -528,12 +567,49 @@ def rechazar_visita(id):
         return redirect(url_for('login'))
 
     visita = VisitaGrupal.query.get(id)
-    if visita:
-        visita.estado = 'rechazada'
-        db.session.commit()
-        flash('✅ Visita marcada como rechazada.', 'success')
-    else:
+    if not visita:
         flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    visita.estado = 'rechazada'
+    db.session.commit()
+
+    # --- Envío de correo al encargado ---
+    try:
+        asunto = 'Solicitud de visita grupal rechazada — Museo de Embriología'
+        cuerpo_html = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color:#d9534f; margin-top:0;">Solicitud rechazada</h2>
+      <p>Hola <strong>{visita.encargado}</strong>,</p>
+      <p>Lamentamos informarte que tu solicitud de visita grupal al
+         <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>rechazada</strong>.</p>
+      <ul style="line-height:1.6;">
+        <li><strong>Institución:</strong> {visita.institucion}</li>
+        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+        <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+        <li><strong>Fechas propuestas:</strong> {visita.fechas_preferidas}</li>
+      </ul>
+      <p>Si lo deseas, puedes presentar una nueva solicitud con otras fechas:</p>
+      <p style="text-align:center; margin-top:12px;">
+        <a href="https://embryopass.onrender.com/ir-a-visita-grupal"
+           style="display:inline-block; padding:10px 16px; background:#5cb85c; color:#fff; text-decoration:none; border-radius:6px;">
+           Solicitar nueva visita
+        </a>
+    </div>
+  </body>
+</html>
+"""
+        enviar_correo(visita.correo, asunto, cuerpo_html)
+        # Opcional: copia interna
+        # enviar_correo(GMAIL_USER, f"[Copia] {asunto}", cuerpo_html)
+
+        flash('✅ Visita marcada como rechazada y correo enviado.', 'success')
+    except Exception as e:
+        print(f"[EMAIL] Error al enviar correo de rechazo: {e}")
+        flash('⚠️ Visita rechazada, pero no se pudo enviar el correo.', 'warning')
+
     return redirect(url_for('dashboard'))
 
 
@@ -544,13 +620,92 @@ def asignar_fecha_visita(id):
         return redirect(url_for('login'))
 
     visita = VisitaGrupal.query.get(id)
-    if visita and visita.estado == 'aceptada':
-        fecha = request.form.get('fecha_confirmada')
-        visita.fecha_confirmada = fecha
-        db.session.commit()
-        flash('📅 Fecha confirmada para la visita grupal.', 'success')
-    else:
-        flash('❌ La visita no existe o no ha sido aceptada aún.', 'danger')
+    if not visita:
+        flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    if visita.estado != 'aceptada':
+        flash('❌ La visita aún no ha sido aceptada.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    fecha = (request.form.get('fecha_confirmada') or '').strip()
+    if not fecha:
+        flash('❌ Debes proporcionar una fecha válida.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    # Guardamos la fecha anterior para saber si es primera confirmación o reprogramación
+    fecha_anterior = (visita.fecha_confirmada or '').strip()
+
+    # Actualizamos
+    visita.fecha_confirmada = fecha
+    db.session.commit()
+
+    # --- Envío de correo al encargado ---
+    try:
+        if not fecha_anterior:
+            # Primera confirmación
+            asunto = 'Confirmación de visita grupal — Museo de Embriología'
+            cuerpo_html = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4a90e2; margin-top:0;">Confirmación de visita grupal</h2>
+      <p>Hola <strong>{visita.encargado}</strong>,</p>
+      <p>Tu solicitud de visita grupal al <strong>Museo de Embriología Dra. Dora Virginia Chávez Corral</strong> ha sido <strong>aceptada</strong> y se ha confirmado la fecha:</p>
+      <p style="font-size:16px; font-weight:bold; margin:12px 0;">{fecha}</p>
+      <ul style="line-height:1.6;">
+        <li><strong>Institución:</strong> {visita.institucion}</li>
+        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+        <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+      </ul>
+      <p>Si necesitas reprogramar o cancelar, por favor responde a este correo.</p>
+      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+      <p style="font-size:12px; color:#666;">Te recomendamos llegar 15 minutos antes del horario programado.</p>
+    </div>
+  </body>
+</html>
+"""
+            enviar_correo(visita.correo, asunto, cuerpo_html)
+
+            # Opcional: copia interna
+            # enviar_correo(GMAIL_USER, f"[Copia] {asunto}", cuerpo_html)
+            flash('📅 Fecha confirmada y correo de confirmación enviado.', 'success')
+
+        elif fecha_anterior != fecha:
+            # Reprogramación
+            asunto = 'Actualización de fecha — Visita grupal al Museo de Embriología'
+            cuerpo_html = f"""
+<html>
+  <body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4a90e2; margin-top:0;">Actualización de fecha</h2>
+      <p>Hola <strong>{visita.encargado}</strong>,</p>
+      <p>La fecha de tu visita grupal ha sido <strong>actualizada</strong>:</p>
+      <ul style="line-height:1.6;">
+        <li><strong>Fecha anterior:</strong> {fecha_anterior}</li>
+        <li><strong>Nueva fecha:</strong> {fecha}</li>
+      </ul>
+      <ul style="line-height:1.6;">
+        <li><strong>Institución:</strong> {visita.institucion}</li>
+        <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+        <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
+      </ul>
+      <p>Si hay algun inconveniente con la fecha nueva, responde a este correo para reprogramar.</p>
+    </div>
+  </body>
+</html>
+"""
+            enviar_correo(visita.correo, asunto, cuerpo_html)
+            # Opcional: copia interna
+            # enviar_correo(GMAIL_USER, f"[Copia] {asunto}", cuerpo_html)
+            flash('📅 Fecha actualizada y correo de reprogramación enviado.', 'success')
+        else:
+            flash('📅 Fecha confirmada para la visita grupal.', 'success')
+
+    except Exception as e:
+        print(f"[EMAIL] Error al enviar correo de confirmación/reprogramación: {e}")
+        flash('📅 Fecha guardada, pero no se pudo enviar el correo.', 'warning')
+
     return redirect(url_for('dashboard'))
 
 
@@ -1181,6 +1336,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
