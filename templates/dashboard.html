@@ -272,12 +272,21 @@
           {% endif %}
         </td>
         <td>
-          {% if visita.estado != 'cancelada' %}
-            <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-pastel-danger cancelar-visita-btn">Cancelar</a>
-          {% else %}
-            <span class="badge bg-secondary">Cancelada</span>
-          {% endif %}
-        </td>
+  {% set puede_cancelar = visita.estado in ['pendiente', 'aceptada'] %}
+  {% if puede_cancelar %}
+    <a href="{{ url_for('cancelar_visita_grupal', id=visita.id) }}"
+       class="btn btn-sm btn-pastel-danger cancelar-visita-btn">
+       Cancelar
+    </a>
+  {% elif visita.estado == 'rechazada' %}
+    <button class="btn btn-sm btn-disabled" disabled
+            title="No disponible para solicitudes rechazadas">
+      Cancelar
+    </button>
+  {% else %}
+    <span class="badge bg-secondary">Cancelada</span>
+  {% endif %}
+</td>
         <td>
           {% if visita.estado == 'cancelada' %}
             <a href="{{ url_for('eliminar_visita_grupal', id=visita.id) }}" class="btn btn-sm btn-outline-danger eliminar-visita-btn" title="Eliminar visita cancelada">🗑️</a>
@@ -522,4 +531,5 @@
 </script>
 </body>
 </html>
+
 
