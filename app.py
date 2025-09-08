@@ -165,6 +165,11 @@ def agendar():
             horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles))
 
     if request.method == 'POST':
+        
+        if not horarios:
+            flash('❌ Actualmente no hay citas disponibles.', 'danger')
+            return redirect(url_for('agendar'))
+            
         nombre = request.form['nombre'].strip()
         correo = request.form['correo']
         confirmar_correo = request.form['confirmar_correo']
@@ -1439,6 +1444,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
