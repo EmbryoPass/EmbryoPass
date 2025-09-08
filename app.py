@@ -310,7 +310,9 @@ def agendar():
             flash('❌ Error al agendar cita. Intenta nuevamente.', 'danger')
             print(f"Error al agendar cita: {e}")
 
-    return render_template('agendar.html', horarios=horarios)
+    hay_disponibles = len(horarios) > 0
+    return render_template('agendar.html', horarios=horarios, hay_disponibles=hay_disponibles)
+
 
 @app.route('/solicitar-visita-grupal', methods=['GET', 'POST'])
 def solicitar_visita_grupal():
@@ -1437,6 +1439,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
