@@ -1439,12 +1439,14 @@ def db_ping():
         return f"db error: {e}", 500
 
 if __name__ == "__main__":
-    with app.app_context():
-        inicializar_tablas()
-        verificar_y_agregar_columnas_postgresql()
-    # Ejecuta la app una sola vez
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    # ❌ NO tocar la DB al arrancar en Render
+    # inicializar_tablas()
+    # verificar_y_agregar_columnas_postgresql()
 
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
 
 
 
