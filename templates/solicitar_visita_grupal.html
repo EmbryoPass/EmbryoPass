@@ -159,6 +159,7 @@
 
     <!-- Form -->
     <form method="POST" id="visitaForm" onsubmit="return validarVisitaGrupal();">
+
       <!-- Datos del encargado -->
       <div class="mb-3 text-start">
         <label class="form-label" for="nombre_encargado">Nombre del encargado</label>
@@ -180,11 +181,6 @@
         <input type="text" class="form-control" id="telefono_encargado" name="telefono_encargado"
                pattern="\d{10}" title="Introduce un número de 10 dígitos" required
                value="{{ request.form.get('telefono_encargado','') }}">
-      </div>
-      <div class="mb-3 text-start">
-        <label class="form-label" for="institucion">Institución</label>
-        <input type="text" class="form-control" id="institucion" name="institucion" required
-               value="{{ request.form.get('institucion','') }}">
       </div>
 
       <!-- Ciudad y Estado -->
@@ -250,52 +246,23 @@
         </select>
       </div>
 
-      <!-- Bachillerato (solo si nivel=Bachillerato Y estado=Chihuahua) -->
+      <!-- ===== SECCIÓN BACHILLERATO (Chihuahua) ===== -->
       <div class="mb-3 text-start" id="bachi_chihuahua_section" style="display:none;">
-        <label class="form-label" for="bachillerato">Bachillerato de procedencia</label>
+        <label class="form-label" for="bachillerato">Plantel de procedencia</label>
         <select class="form-select" id="bachillerato" name="bachillerato" onchange="onBachiChange()">
-          <option value="" disabled selected>Selecciona tu bachillerato</option>
-          <option value="COBACH Plantel Chihuahua 1">COBACH Plantel Chihuahua 1</option>
-          <option value="COBACH Plantel Chihuahua 2">COBACH Plantel Chihuahua 2</option>
-          <option value="COBACH Plantel Chihuahua 3">COBACH Plantel Chihuahua 3</option>
-          <option value="COBACH Plantel Ciudad Juárez 1">COBACH Plantel Ciudad Juárez 1</option>
-          <option value="COBACH Plantel Ciudad Juárez 2">COBACH Plantel Ciudad Juárez 2</option>
-          <option value="COBACH Plantel Cuauhtémoc">COBACH Plantel Cuauhtémoc</option>
-          <option value="COBACH Plantel Parral">COBACH Plantel Parral</option>
-          <option value="COBACH Plantel Delicias">COBACH Plantel Delicias</option>
-          <option value="COBACH Plantel Camargo">COBACH Plantel Camargo</option>
-          <option value="CBTis 67 – Chihuahua">CBTis 67 – Chihuahua</option>
-          <option value="CBTis 114 – Ciudad Juárez">CBTis 114 – Ciudad Juárez</option>
-          <option value="CBTis 128 – Delicias">CBTis 128 – Delicias</option>
-          <option value="CBTis 41 – Parral">CBTis 41 – Parral</option>
-          <option value="CETis 31 – Chihuahua">CETis 31 – Chihuahua</option>
-          <option value="CETis 100 – Ciudad Juárez">CETis 100 – Ciudad Juárez</option>
-          <option value="CONALEP Chihuahua">CONALEP Chihuahua</option>
-          <option value="CONALEP Ciudad Juárez">CONALEP Ciudad Juárez</option>
-          <option value="CONALEP Cuauhtémoc">CONALEP Cuauhtémoc</option>
-          <option value="CONALEP Delicias">CONALEP Delicias</option>
-          <option value="CECyTE Chihuahua">CECyTE Chihuahua</option>
-          <option value="CECyTE Ciudad Juárez">CECyTE Ciudad Juárez</option>
-          <option value="Preparatoria UACH Campus Chihuahua">Preparatoria UACH Campus Chihuahua</option>
-          <option value="Preparatoria UACH Campus Ciudad Juárez">Preparatoria UACH Campus Ciudad Juárez</option>
-          <option value="Preparatoria UACH Campus Cuauhtémoc">Preparatoria UACH Campus Cuauhtémoc</option>
-          <option value="Preparatoria UACH Campus Parral">Preparatoria UACH Campus Parral</option>
-          <option value="Preparatoria UACJ">Preparatoria UACJ</option>
-          <option value="Preparatoria Federal Lázaro Cárdenas">Preparatoria Federal Lázaro Cárdenas</option>
-          <option value="Bachillerato General Oficial (BGO)">Bachillerato General Oficial (BGO)</option>
-          <option value="Preparatoria Estatal 1">Preparatoria Estatal 1</option>
-          <option value="Tec de Monterrey Preparatoria Chihuahua">Tec de Monterrey Preparatoria Chihuahua</option>
-          <option value="UVM Preparatoria Chihuahua">UVM Preparatoria Chihuahua</option>
-          <option value="Colegio Americano de Chihuahua">Colegio Americano de Chihuahua</option>
-          <option value="Instituto del Desierto">Instituto del Desierto</option>
-          <option value="Colegio Humanístico">Colegio Humanístico</option>
-          <option value="Instituto Juárez">Instituto Juárez</option>
-          <option value="CETAC">CETAC</option>
-          <option value="Otro">Otro</option>
+          <option value="" disabled selected>Selecciona tu plantel</option>
         </select>
       </div>
 
-      <!-- Bachillerato otro estado (si nivel=Bachillerato Y estado≠Chihuahua) -->
+      <!-- Campo visible cuando seleccionan "Otro" en el select de Chihuahua -->
+      <div class="mb-3 text-start" id="bachi_otro_section" style="display:none;">
+        <label class="form-label" for="bachillerato_otro">Especifica el nombre de tu escuela</label>
+        <input type="text" class="form-control" id="bachillerato_otro" name="bachillerato_otro"
+               placeholder="Nombre de tu bachillerato"
+               value="{{ request.form.get('bachillerato_otro','') }}">
+      </div>
+
+      <!-- ===== SECCIÓN BACHILLERATO (otro estado) ===== -->
       <div class="mb-3 text-start" id="bachi_otro_estado_section" style="display:none;">
         <label class="form-label" for="bachillerato_otro_estado">Nombre del bachillerato de procedencia</label>
         <input type="text" class="form-control" id="bachillerato_otro_estado" name="bachillerato"
@@ -303,12 +270,12 @@
                value="{{ request.form.get('bachillerato','') }}">
       </div>
 
-      <!-- Campo "Otro" bachillerato Chihuahua -->
-      <div class="mb-3 text-start" id="bachi_otro_section" style="display:none;">
-        <label class="form-label" for="bachillerato_otro">Especifica tu bachillerato</label>
-        <input type="text" class="form-control" id="bachillerato_otro" name="bachillerato_otro"
-               placeholder="Nombre de tu bachillerato"
-               value="{{ request.form.get('bachillerato_otro','') }}">
+      <!-- ===== INSTITUCIÓN (solo para niveles que NO sean Bachillerato) ===== -->
+      <div class="mb-3 text-start" id="institucion_section" style="display:none;">
+        <label class="form-label" for="institucion">Institución de procedencia</label>
+        <input type="text" class="form-control" id="institucion" name="institucion"
+               placeholder="Nombre de tu institución"
+               value="{{ request.form.get('institucion','') }}">
       </div>
 
       <!-- Resto del formulario -->
@@ -334,8 +301,15 @@
   </div>
 
   <script>
+    // ─── Ciudades por estado ────────────────────────────────────────────────
     const ciudadesPorEstado = {
-      "Chihuahua": ["Chihuahua","Ciudad Juárez","Delicias","Cuauhtémoc","Hidalgo del Parral","Nuevo Casas Grandes","Ojinaga","Camargo","Jiménez","Meoqui","Saucillo","Casas Grandes","Ahumada","Balleza","Guadalupe","Valle de Zaragoza","Guachochi","Bocoyna","Guerrero","Madera"],
+      "Chihuahua": [
+        "Ahumada","Balleza","Camargo","Casas Grandes","Chihuahua",
+        "Cuauhtémoc","Delicias","Guadalupe","Hidalgo del Parral",
+        "Jiménez","Ciudad Juárez","Meoqui","Nuevo Casas Grandes",
+        "Ojinaga","Saucillo","Valle de Zaragoza","Guachochi","Bocoyna",
+        "Guerrero","Madera"
+      ],
       "Ciudad de México": ["Benito Juárez","Coyoacán","Cuauhtémoc","Iztapalapa","Tlalpan","Xochimilco"],
       "Jalisco": ["Guadalajara","Zapopan","Tlaquepaque","Tonalá","Puerto Vallarta"],
       "Nuevo León": ["Monterrey","San Nicolás de los Garza","Guadalupe","Apodaca","San Pedro Garza García"],
@@ -369,114 +343,68 @@
       "Tlaxcala": ["Tlaxcala","Apizaco","Huamantla"]
     };
 
-    // Bachilleratos por ciudad de Chihuahua
-    const bachilleratosPorCiudad = {
+    // ─── Planteles COBACH por ciudad ────────────────────────────────────────
+    // Formato: "COBACH Plantel [Número]" + "Otro" al final
+    const cobachPorCiudad = {
+      "Ahumada":            ["COBACH Plantel 17", "Otro"],
+      "Balleza":            ["COBACH Plantel 27", "Otro"],
+      "Camargo":            ["COBACH Plantel 15", "Otro"],
+      "Casas Grandes":      ["COBACH Plantel 24", "Otro"],
       "Chihuahua": [
+        "COBACH Plantel 1",
+        "COBACH Plantel 2",
+        "COBACH Plantel 3",
+        "COBACH Plantel 4",
+        "COBACH Plantel 8",
+        "COBACH Plantel 10",
+        "COBACH Plantel 21",
         "COBACH SEA Chihuahua",
-        "COBACH Plantel 1 – Av. Cuauhtémoc, Col. Centro",
-        "COBACH Plantel 2 – C. 10a y J.J. Calvo, Col. Sta. Rosa",
-        "COBACH Plantel 3 – Blvd. Ortiz Mena y Av. Francisco Villa",
-        "COBACH Plantel 4 – Fracc. San Pablo",
-        "COBACH Plantel 8 – Col. Alta Vista",
-        "COBACH Plantel 10 – Col. Ejido Nombre de Dios",
-        "COBACH Plantel 21 – Km. 3 Carretera a Aldama",
-        "CBTis 67 – Chihuahua","CETis 31 – Chihuahua",
-        "CONALEP Chihuahua","CECyTE Chihuahua",
-        "Preparatoria UACH Campus Chihuahua",
-        "Preparatoria Federal Lázaro Cárdenas",
-        "Tec de Monterrey Preparatoria Chihuahua",
-        "UVM Preparatoria Chihuahua",
-        "Colegio Americano de Chihuahua",
-        "Instituto del Desierto","Colegio Humanístico","Instituto Juárez","CETAC",
         "Otro"
       ],
+      "Cuauhtémoc":         ["COBACH Plantel 14", "Otro"],
+      "Delicias":           ["COBACH Plantel 13", "Otro"],
+      "Guadalupe":          ["COBACH Plantel 23", "Otro"],
+      "Hidalgo del Parral": ["COBACH Plantel 12", "Otro"],
+      "Jiménez":            ["COBACH Plantel 20", "Otro"],
       "Ciudad Juárez": [
-        "COBACH SEA Ciudad Juárez",
-        "COBACH Plantel 5 – Fracc. Villa Hermosa",
-        "COBACH Plantel 6 – Parque Industrial Bermúdez",
-        "COBACH Plantel 7 – Infonavit Juárez Nuevo",
-        "COBACH Plantel 9 – Fracc. Hacienda de las Torres",
-        "COBACH Plantel 11 – Parque Industrial Las Américas",
-        "COBACH Plantel 16 – Ciudad del Conocimiento",
-        "COBACH Plantel 19 – Zona Chamizal",
-        "CBTis 114 – Ciudad Juárez","CETis 100 – Ciudad Juárez",
-        "CONALEP Ciudad Juárez","CECyTE Ciudad Juárez",
-        "Preparatoria UACH Campus Ciudad Juárez","Preparatoria UACJ",
-        "Tec de Monterrey Preparatoria Juárez",
+        "COBACH Plantel 5",
+        "COBACH Plantel 6",
+        "COBACH Plantel 7",
+        "COBACH Plantel 9",
+        "COBACH Plantel 11",
+        "COBACH Plantel 16",
+        "COBACH Plantel 19",
+        "COBACH SEA Juárez",
         "Otro"
       ],
-      "Cuauhtémoc": [
-        "COBACH Plantel 14 – Km. 5 Carretera a Anáhuac",
-        "CONALEP Cuauhtémoc","CBTis Cuauhtémoc",
-        "Preparatoria UACH Campus Cuauhtémoc",
-        "Otro"
-      ],
-      "Hidalgo del Parral": [
-        "COBACH Plantel 12 – C. Gral. Jesús Lozoya Solís Sur",
-        "CBTis 41 – Parral","CONALEP Parral",
-        "Preparatoria UACH Campus Parral",
-        "Otro"
-      ],
-      "Delicias": [
-        "COBACH Plantel 13 – Sector Sur",
-        "CBTis 128 – Delicias","CONALEP Delicias","CECyTE Delicias",
-        "Otro"
-      ],
-      "Camargo": [
-        "COBACH Plantel 15 – Col. Abraham González",
-        "CBTis Camargo",
-        "Otro"
-      ],
-      "Nuevo Casas Grandes": [
-        "COBACH Plantel 18 – Col. PRI",
-        "CBTis Nuevo Casas Grandes",
-        "Otro"
-      ],
-      "Jiménez": [
-        "COBACH Plantel 20 – Sor Juana Inés de la Cruz",
-        "CBTis Jiménez",
-        "Otro"
-      ],
-      "Ojinaga": [
-        "COBACH Plantel 22 – Col. Camargo",
-        "Otro"
-      ],
-      "Meoqui": [
-        "COBACH Plantel 26 Lázaro Cárdenas – Col. Lázaro Cárdenas",
-        "COBACH Plantel 28 – Col. Deportiva",
-        "Otro"
-      ],
-      "Saucillo": [
-        "COBACH Plantel 25 – Col. Centro",
-        "Otro"
-      ],
-      "Casas Grandes": [
-        "COBACH Plantel 24 – Col. La Esperanza",
-        "Otro"
-      ],
-      "Ahumada": [
-        "COBACH Plantel 17 – Díaz Ordaz y Galeana",
-        "Otro"
-      ],
-      "Balleza": [
-        "COBACH Plantel 27 – Prolongación Independencia",
-        "Otro"
-      ],
-      "Guadalupe": [
-        "COBACH Plantel 23 – Av. Hidalgo y Juárez Porvenir",
-        "Otro"
-      ],
-      "Valle de Zaragoza": [
-        "COBACH Ext. Plantel 12 Valle de Zaragoza – C. Gómez Farías",
-        "Otro"
-      ],
-      "Guachochi": ["COBACH Plantel Guachochi","Otro"],
-      "Bocoyna":   ["COBACH Plantel Bocoyna","Otro"],
-      "Guerrero":  ["COBACH Plantel Guerrero","Otro"],
-      "Madera":    ["COBACH Plantel Madera","Otro"]
+      "Meoqui":             ["COBACH Plantel 26", "COBACH Plantel 28", "Otro"],
+      "Nuevo Casas Grandes":["COBACH Plantel 18", "Otro"],
+      "Ojinaga":            ["COBACH Plantel 22", "Otro"],
+      "Saucillo":           ["COBACH Plantel 25", "Otro"],
+      "Valle de Zaragoza":  ["COBACH Extensión Plantel 12", "Otro"]
     };
 
-    function filtrarCiudades()    function filtrarCiudades() {
+    // ─── Helpers ────────────────────────────────────────────────────────────
+
+    function setRequired(id, isRequired) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (isRequired) {
+        el.setAttribute('required', '');
+      } else {
+        el.removeAttribute('required');
+        el.value = '';
+      }
+    }
+
+    function showSection(id, visible) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = visible ? 'block' : 'none';
+    }
+
+    // ─── Filtrar ciudades ────────────────────────────────────────────────────
+    function filtrarCiudades() {
       const estado = document.getElementById('estado_republica').value;
       const datalist = document.getElementById('ciudades_list');
       document.getElementById('ciudad').value = '';
@@ -488,61 +416,85 @@
       });
     }
 
-    function toggleBachi() {
-      const nivel = document.getElementById('nivel_educativo').value;
+    // ─── Lógica principal: actualiza todos los campos dinámicos ─────────────
+    function actualizarFormulario() {
+      const nivel  = document.getElementById('nivel_educativo').value;
       const estado = document.getElementById('estado_republica').value;
-      const ciudad = document.getElementById('ciudad').value;
+      const ciudad = document.getElementById('ciudad').value.trim();
+      const esBachi    = nivel === 'Bachillerato';
       const esChihuahua = estado === 'Chihuahua';
-      const esBachi = nivel === 'Bachillerato';
 
-      const bachiChihSection = document.getElementById('bachi_chihuahua_section');
-      const bachiOtroEstadoSection = document.getElementById('bachi_otro_estado_section');
+      // ── 1. Institución: solo visible si NO es Bachillerato
+      showSection('institucion_section', !esBachi && nivel !== '');
+      setRequired('institucion', !esBachi && nivel !== '');
 
+      // ── 2. Bachillerato secciones
       if (esBachi && esChihuahua) {
-        bachiChihSection.style.display = 'block';
-        bachiOtroEstadoSection.style.display = 'none';
-        // Llenar opciones según ciudad
+        // Mostrar selector de planteles COBACH
+        showSection('bachi_chihuahua_section', true);
+        showSection('bachi_otro_estado_section', false);
+        setRequired('bachillerato_otro_estado', false);
+
+        // Rellenar opciones según ciudad
         const sel = document.getElementById('bachillerato');
-        const valorActual = sel.value;
-        sel.innerHTML = '<option value="" disabled selected>Selecciona tu bachillerato</option>';
-        const bachis = bachilleratosPorCiudad[ciudad] || ["Otro"];
-        bachis.forEach(b => {
+        const planteles = cobachPorCiudad[ciudad] || ["Otro"];
+        sel.innerHTML = '<option value="" disabled selected>Selecciona tu plantel</option>';
+        planteles.forEach(p => {
           const opt = document.createElement('option');
-          opt.value = b;
-          opt.textContent = b;
+          opt.value = p;
+          opt.textContent = p;
           sel.appendChild(opt);
         });
-        // Restaurar valor si sigue siendo válido
-        if (valorActual && bachis.includes(valorActual)) sel.value = valorActual;
+        setRequired('bachillerato', true);
+
+        // Mostrar/ocultar campo "Otro"
+        const selVal = sel.value;
+        const mostrarOtro = selVal === 'Otro';
+        showSection('bachi_otro_section', mostrarOtro);
+        setRequired('bachillerato_otro', mostrarOtro);
+
       } else if (esBachi && !esChihuahua) {
-        bachiChihSection.style.display = 'none';
-        bachiOtroEstadoSection.style.display = 'block';
+        showSection('bachi_chihuahua_section', false);
+        showSection('bachi_otro_section', false);
+        showSection('bachi_otro_estado_section', true);
+        setRequired('bachillerato', false);
+        setRequired('bachillerato_otro', false);
+        setRequired('bachillerato_otro_estado', true);
+
       } else {
-        bachiChihSection.style.display = 'none';
-        bachiOtroEstadoSection.style.display = 'none';
-        document.getElementById('bachi_otro_section').style.display = 'none';
+        // No es bachillerato
+        showSection('bachi_chihuahua_section', false);
+        showSection('bachi_otro_section', false);
+        showSection('bachi_otro_estado_section', false);
+        setRequired('bachillerato', false);
+        setRequired('bachillerato_otro', false);
+        setRequired('bachillerato_otro_estado', false);
       }
-      if (!esBachi) onBachiChange();
     }
 
+    // ─── Cuando cambia el select de bachillerato (Chihuahua) ────────────────
+    function onBachiChange() {
+      const bachi = document.getElementById('bachillerato').value;
+      const mostrarOtro = bachi === 'Otro';
+      showSection('bachi_otro_section', mostrarOtro);
+      setRequired('bachillerato_otro', mostrarOtro);
+    }
+
+    // ─── Eventos de campos padre ─────────────────────────────────────────────
     function onEstadoChange() {
       filtrarCiudades();
-      toggleBachi();
+      actualizarFormulario();
     }
 
     function onCiudadChange() {
-      toggleBachi();
+      actualizarFormulario();
     }
 
     function onNivelChange() {
-      toggleBachi();
+      actualizarFormulario();
     }
 
-    function onBachiChange() {
-      const bachi = document.getElementById('bachillerato').value;
-      document.getElementById('bachi_otro_section').style.display = (bachi === 'Otro') ? 'block' : 'none';
-    }
-
+    // ─── Deshabilitar botón al enviar ────────────────────────────────────────
     function disableVisitaButton() {
       document.getElementById('progressBar').style.width = '100%';
       const btn = document.getElementById('visitaBtn');
@@ -550,15 +502,21 @@
       btn.textContent = 'Procesando...';
     }
 
+    // ─── Validación al enviar ────────────────────────────────────────────────
     function validarVisitaGrupal() {
-      const correo = document.getElementById('correo_encargado').value.trim();
+      const correo    = document.getElementById('correo_encargado').value.trim();
       const confirmar = document.getElementById('confirmar_correo_encargado').value.trim();
-      if (correo !== confirmar) { alert('Los correos no coinciden.'); return false; }
+      if (correo !== confirmar) {
+        alert('Los correos no coinciden.');
+        return false;
+      }
       disableVisitaButton();
       return true;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // ─── Init ────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+      // Restaurar estado guardado (en caso de error de formulario)
       const estadoGuardado = "{{ request.form.get('estado_republica', '') | safe }}";
       if (estadoGuardado) {
         document.getElementById('estado_republica').value = estadoGuardado;
@@ -566,19 +524,30 @@
         document.getElementById('estado_republica').value = 'Chihuahua';
       }
       filtrarCiudades();
+
       const ciudadGuardada = "{{ request.form.get('ciudad', '') | safe }}";
       if (ciudadGuardada) document.getElementById('ciudad').value = ciudadGuardada;
 
-      // Escuchar cambios en ciudad (datalist no tiene evento change confiable, usamos input)
-      document.getElementById('ciudad').addEventListener('input', onCiudadChange);
+      // Escuchar cambios en ciudad
+      document.getElementById('ciudad').addEventListener('input',  onCiudadChange);
       document.getElementById('ciudad').addEventListener('change', onCiudadChange);
 
-      toggleBachi();
+      // Restaurar nivel
+      const nivelGuardado = "{{ request.form.get('nivel_educativo', '') | safe }}";
+      if (nivelGuardado) {
+        document.getElementById('nivel_educativo').value = nivelGuardado;
+      }
 
+      actualizarFormulario();
+
+      // Restaurar bachillerato seleccionado
       const bachiGuardado = "{{ request.form.get('bachillerato', '') | safe }}";
       if (bachiGuardado) {
         const sel = document.getElementById('bachillerato');
-        if (sel) { sel.value = bachiGuardado; onBachiChange(); }
+        if (sel) {
+          sel.value = bachiGuardado;
+          onBachiChange();
+        }
       }
     });
   </script>
