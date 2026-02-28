@@ -335,7 +335,7 @@
 
   <script>
     const ciudadesPorEstado = {
-      "Chihuahua": ["Chihuahua","Ciudad Juárez","Delicias","Cuauhtémoc","Parral","Nuevo Casas Grandes","Ojinaga","Camargo","Jiménez","Guachochi","Bocoyna","Guerrero","Madera","Meoqui"],
+      "Chihuahua": ["Chihuahua","Ciudad Juárez","Delicias","Cuauhtémoc","Hidalgo del Parral","Nuevo Casas Grandes","Ojinaga","Camargo","Jiménez","Meoqui","Saucillo","Casas Grandes","Ahumada","Balleza","Guadalupe","Valle de Zaragoza","Guachochi","Bocoyna","Guerrero","Madera"],
       "Ciudad de México": ["Benito Juárez","Coyoacán","Cuauhtémoc","Iztapalapa","Tlalpan","Xochimilco"],
       "Jalisco": ["Guadalajara","Zapopan","Tlaquepaque","Tonalá","Puerto Vallarta"],
       "Nuevo León": ["Monterrey","San Nicolás de los Garza","Guadalupe","Apodaca","San Pedro Garza García"],
@@ -372,47 +372,111 @@
     // Bachilleratos por ciudad de Chihuahua
     const bachilleratosPorCiudad = {
       "Chihuahua": [
-        "COBACH Plantel Chihuahua 1","COBACH Plantel Chihuahua 2","COBACH Plantel Chihuahua 3",
+        "COBACH SEA Chihuahua",
+        "COBACH Plantel 1 – Av. Cuauhtémoc, Col. Centro",
+        "COBACH Plantel 2 – C. 10a y J.J. Calvo, Col. Sta. Rosa",
+        "COBACH Plantel 3 – Blvd. Ortiz Mena y Av. Francisco Villa",
+        "COBACH Plantel 4 – Fracc. San Pablo",
+        "COBACH Plantel 8 – Col. Alta Vista",
+        "COBACH Plantel 10 – Col. Ejido Nombre de Dios",
+        "COBACH Plantel 21 – Km. 3 Carretera a Aldama",
         "CBTis 67 – Chihuahua","CETis 31 – Chihuahua",
         "CONALEP Chihuahua","CECyTE Chihuahua",
         "Preparatoria UACH Campus Chihuahua",
-        "Preparatoria Federal Lázaro Cárdenas","Bachillerato General Oficial (BGO)",
-        "Tec de Monterrey Preparatoria Chihuahua","UVM Preparatoria Chihuahua",
-        "Colegio Americano de Chihuahua","Instituto del Desierto",
-        "Colegio Humanístico","Instituto Juárez","CETAC","Otro"
+        "Preparatoria Federal Lázaro Cárdenas",
+        "Tec de Monterrey Preparatoria Chihuahua",
+        "UVM Preparatoria Chihuahua",
+        "Colegio Americano de Chihuahua",
+        "Instituto del Desierto","Colegio Humanístico","Instituto Juárez","CETAC",
+        "Otro"
       ],
       "Ciudad Juárez": [
-        "COBACH Plantel Ciudad Juárez 1","COBACH Plantel Ciudad Juárez 2",
+        "COBACH SEA Ciudad Juárez",
+        "COBACH Plantel 5 – Fracc. Villa Hermosa",
+        "COBACH Plantel 6 – Parque Industrial Bermúdez",
+        "COBACH Plantel 7 – Infonavit Juárez Nuevo",
+        "COBACH Plantel 9 – Fracc. Hacienda de las Torres",
+        "COBACH Plantel 11 – Parque Industrial Las Américas",
+        "COBACH Plantel 16 – Ciudad del Conocimiento",
+        "COBACH Plantel 19 – Zona Chamizal",
         "CBTis 114 – Ciudad Juárez","CETis 100 – Ciudad Juárez",
         "CONALEP Ciudad Juárez","CECyTE Ciudad Juárez",
         "Preparatoria UACH Campus Ciudad Juárez","Preparatoria UACJ",
-        "Tec de Monterrey Preparatoria Juárez","UVM Preparatoria Juárez",
-        "Colegio de Bachilleres Juárez","Otro"
+        "Tec de Monterrey Preparatoria Juárez",
+        "Otro"
       ],
       "Cuauhtémoc": [
-        "COBACH Plantel Cuauhtémoc","CONALEP Cuauhtémoc",
-        "Preparatoria UACH Campus Cuauhtémoc","CBTis Cuauhtémoc","Otro"
+        "COBACH Plantel 14 – Km. 5 Carretera a Anáhuac",
+        "CONALEP Cuauhtémoc","CBTis Cuauhtémoc",
+        "Preparatoria UACH Campus Cuauhtémoc",
+        "Otro"
       ],
-      "Parral": [
-        "COBACH Plantel Parral","CBTis 41 – Parral",
-        "Preparatoria UACH Campus Parral","CONALEP Parral","Otro"
+      "Hidalgo del Parral": [
+        "COBACH Plantel 12 – C. Gral. Jesús Lozoya Solís Sur",
+        "CBTis 41 – Parral","CONALEP Parral",
+        "Preparatoria UACH Campus Parral",
+        "Otro"
       ],
       "Delicias": [
-        "COBACH Plantel Delicias","CBTis 128 – Delicias",
-        "CONALEP Delicias","CECyTE Delicias","Otro"
+        "COBACH Plantel 13 – Sector Sur",
+        "CBTis 128 – Delicias","CONALEP Delicias","CECyTE Delicias",
+        "Otro"
       ],
-      "Camargo": ["COBACH Plantel Camargo","CBTis Camargo","Otro"],
-      "Nuevo Casas Grandes": ["COBACH Plantel Nuevo Casas Grandes","CBTis Nuevo Casas Grandes","Otro"],
-      "Jiménez": ["COBACH Plantel Jiménez","CBTis Jiménez","Otro"],
-      "Ojinaga": ["COBACH Plantel Ojinaga","Otro"],
-      "Madera": ["COBACH Plantel Madera","Otro"],
-      "Meoqui": ["COBACH Plantel Meoqui","Otro"],
-      "Guerrero": ["COBACH Plantel Guerrero","Otro"],
-      "Bocoyna": ["COBACH Plantel Bocoyna","Otro"],
-      "Guachochi": ["COBACH Plantel Guachochi","Otro"]
+      "Camargo": [
+        "COBACH Plantel 15 – Col. Abraham González",
+        "CBTis Camargo",
+        "Otro"
+      ],
+      "Nuevo Casas Grandes": [
+        "COBACH Plantel 18 – Col. PRI",
+        "CBTis Nuevo Casas Grandes",
+        "Otro"
+      ],
+      "Jiménez": [
+        "COBACH Plantel 20 – Sor Juana Inés de la Cruz",
+        "CBTis Jiménez",
+        "Otro"
+      ],
+      "Ojinaga": [
+        "COBACH Plantel 22 – Col. Camargo",
+        "Otro"
+      ],
+      "Meoqui": [
+        "COBACH Plantel 26 Lázaro Cárdenas – Col. Lázaro Cárdenas",
+        "COBACH Plantel 28 – Col. Deportiva",
+        "Otro"
+      ],
+      "Saucillo": [
+        "COBACH Plantel 25 – Col. Centro",
+        "Otro"
+      ],
+      "Casas Grandes": [
+        "COBACH Plantel 24 – Col. La Esperanza",
+        "Otro"
+      ],
+      "Ahumada": [
+        "COBACH Plantel 17 – Díaz Ordaz y Galeana",
+        "Otro"
+      ],
+      "Balleza": [
+        "COBACH Plantel 27 – Prolongación Independencia",
+        "Otro"
+      ],
+      "Guadalupe": [
+        "COBACH Plantel 23 – Av. Hidalgo y Juárez Porvenir",
+        "Otro"
+      ],
+      "Valle de Zaragoza": [
+        "COBACH Ext. Plantel 12 Valle de Zaragoza – C. Gómez Farías",
+        "Otro"
+      ],
+      "Guachochi": ["COBACH Plantel Guachochi","Otro"],
+      "Bocoyna":   ["COBACH Plantel Bocoyna","Otro"],
+      "Guerrero":  ["COBACH Plantel Guerrero","Otro"],
+      "Madera":    ["COBACH Plantel Madera","Otro"]
     };
 
-    function filtrarCiudades() {
+    function filtrarCiudades()    function filtrarCiudades() {
       const estado = document.getElementById('estado_republica').value;
       const datalist = document.getElementById('ciudades_list');
       document.getElementById('ciudad').value = '';
