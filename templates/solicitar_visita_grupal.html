@@ -256,7 +256,7 @@
 
       <!-- Campo visible cuando seleccionan "Otro" en el select de Chihuahua -->
       <div class="mb-3 text-start" id="bachi_otro_section" style="display:none;">
-        <label class="form-label" for="bachillerato_otro">Especifica el nombre de tu escuela</label>
+        <label class="form-label" for="bachillerato_otro">Especifica el nombre de la escuela</label>
         <input type="text" class="form-control" id="bachillerato_otro" name="bachillerato_otro"
                placeholder="Nombre de tu bachillerato"
                value="{{ request.form.get('bachillerato_otro','') }}">
@@ -285,9 +285,9 @@
                value="{{ request.form.get('numero_alumnos','') }}">
       </div>
       <div class="mb-3 text-start">
-        <label class="form-label" for="fechas_preferidas">Fechas y horarios propuestos</label>
+        <label class="form-label" for="fechas_preferidas">Fechas y horarios propuestos (Fecha y hora)</label>
         <textarea class="form-control" id="fechas_preferidas" name="fechas_preferidas" rows="3" required
-                  placeholder="Ejemplo: 20 de Junio del 2025, 10:00 AM">{{ request.form.get('fechas_preferidas','') }}</textarea>
+                  placeholder="Ejemplo: 20 de Junio del 2026, 10:00 AM, 22 de Junio del 2026, 10:00 AM, etc.">{{ request.form.get('fechas_preferidas','') }}</textarea>
       </div>
       <div class="mb-3 text-start">
         <label class="form-label" for="comentarios">Comentarios adicionales (opcional)</label>
