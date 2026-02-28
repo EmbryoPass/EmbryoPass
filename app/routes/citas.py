@@ -111,7 +111,7 @@ def agendar():
       <li><strong>Nombre:</strong> {nombre}</li>
       <li><strong>Correo:</strong> {correo}</li>
       <li><strong>Teléfono:</strong> {telefono}</li>
-      <li><strong>Ciudad y estado:</strong> {ciudad}, {estado_republica}</li>
+      <li><strong>Ciudad y estado de procedencia:</strong> {ciudad}, {estado_republica}</li>
       <li><strong>Institución:</strong> {institucion}</li>
       <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
     </ul>
@@ -138,11 +138,13 @@ def agendar():
 <html><body style="font-family:Arial,sans-serif;">
   <h3>🧬 Nueva cita agendada</h3>
   <ul>
-    <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
-    <li><strong>Nombre:</strong> {nombre}</li>
-    <li><strong>Correo:</strong> {correo}</li>
-    <li><strong>Teléfono:</strong> {telefono}</li>
-    <li><strong>Institución:</strong> {institucion}</li>
+    <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
+      <li><strong>Nombre:</strong> {nombre}</li>
+      <li><strong>Correo:</strong> {correo}</li>
+      <li><strong>Teléfono:</strong> {telefono}</li>
+      <li><strong>Ciudad y estado de procedencia:</strong> {ciudad}, {estado_republica}</li>
+      <li><strong>Institución:</strong> {institucion}</li>
+      <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
   </ul>
 </body></html>""")
 
