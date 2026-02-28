@@ -91,7 +91,7 @@ def solicitar_visita_grupal():
       <li><strong>Teléfono:</strong> {telefono}</li>
       <li><strong>Ciudad:</strong> {ciudad}</li>
       <li><strong>Estado:</strong> {estado_republica}</li>
-      <li><strong>Nivel académico:</strong> {nivel}{(' – ' + bachillerato) if nivel == 'Bachillerato' and bachillerato else ''}</li>
+      <li><strong>Nivel académico:</strong> {nivel}
       <li><strong>Institución / Plantel:</strong> {nombre_institucion}</li>
       <li><strong>Alumnos estimados:</strong> {numero_alumnos}</li>
       <li><strong>Fechas propuestas:</strong> {fechas}</li>
@@ -113,8 +113,8 @@ def solicitar_visita_grupal():
     <p>Hemos recibido tu solicitud de visita grupal al {NOMBRE_MUSEO}.
        Nos pondremos en contacto pronto para coordinar la visita.</p>
     <ul style="line-height:1.8;">
+      <li><strong>Nivel académico:</strong> {nivel}</li>
       <li><strong>Institución / Plantel:</strong> {nombre_institucion}</li>
-      <li><strong>Nivel académico:</strong> {nivel}{(' – ' + bachillerato) if nivel == 'Bachillerato' and bachillerato else ''}</li>
       <li><strong>Alumnos estimados:</strong> {numero_alumnos}</li>
       <li><strong>Fechas propuestas:</strong> {fechas}</li>
     </ul>
