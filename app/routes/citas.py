@@ -126,7 +126,7 @@ def agendar():
       <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
     </ul>
     <p>Si necesitas cancelar tu cita:</p>
-    <a href="https://embryopass.onrender.com/cancelar_usuario/{nueva_cita.id}/{token}"
+    <a href="https://quixotic-veronika-uach-98c1e80d.koyeb.app/cancelar_usuario/{nueva_cita.id}/{token}"
        style="background:#d9534f;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
        Cancelar mi cita
     </a>

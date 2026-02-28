@@ -13,7 +13,7 @@ ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
 
 # URL pública del sitio (usada en los botones de correos)
-URL_SITIO = 'https://embryopass.onrender.com'
+URL_SITIO = 'https://quixotic-veronika-uach-98c1e80d.koyeb.app'
 
 
 def login_required(f):
