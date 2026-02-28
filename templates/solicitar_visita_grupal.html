@@ -3,161 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>Solicitar visita grupal – Museo de Embriología</title>
-
-  <!-- Google Fonts: Roboto para body, Nunito para headings -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    body {
-      background-color: #fdf9f3;
-      font-family: 'Roboto', sans-serif;
-      color: #333;
-      min-height: 100vh;
-    }
-
-    /* Progress bar at top */
-    #progressBar {
-      position: fixed;
-      top: 0; left: 0;
-      width: 0;
-      height: 3px;
-      background: #8B4513;
-      transition: width .4s ease;
-      z-index: 9999;
-    }
-
-    /* Typewriter effect for section title */
-    @keyframes typewriter {
-      from { width: 0; }
-      to   { width: 100%; }
-    }
-    @keyframes blink-caret {
-      50% { border-color: transparent; }
-    }
+    body { background-color:#fdf9f3; font-family:'Roboto',sans-serif; color:#333; min-height:100vh; }
+    #progressBar { position:fixed;top:0;left:0;width:0;height:3px;background:#8B4513;transition:width .4s ease;z-index:9999; }
+    @keyframes typewriter { from{width:0} to{width:100%} }
+    @keyframes blink-caret { 50%{border-color:transparent} }
     .section-title {
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: .1em solid #4a3526;
-      width: 0;
-      animation:
-        typewriter 1.5s steps(30) forwards,
-        blink-caret .75s step-end infinite;
-      font-family: 'Nunito', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      text-align: center;
+      overflow:hidden;white-space:nowrap;border-right:.1em solid #4a3526;width:0;
+      animation:typewriter 1.5s steps(30) forwards,blink-caret .75s step-end infinite;
+      font-family:'Nunito',sans-serif;font-size:1.75rem;font-weight:700;
+      margin-bottom:1.5rem;text-align:center;
     }
-
-    /* Logo principal centrado */
-    .main-logo {
-      display: block;
-      margin: 1.5rem auto;
-      height: 60px;
-    }
-
-    /* Título del sitio */
-    .title-text {
-      text-align: center;
-      margin: 2rem 0;
-    }
+    .main-logo { display:block;margin:1.5rem auto;height:60px; }
+    .title-text { text-align:center;margin:2rem 0; }
     .title-text h1 {
-      font-family: 'Nunito', sans-serif;
-      font-size: 2.25rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #4a3526;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid rgba(0,0,0,0.1);
-      display: inline-block;
-      margin: 0;
+      font-family:'Nunito',sans-serif;font-size:2.25rem;font-weight:700;
+      letter-spacing:.05em;color:#4a3526;padding-bottom:.5rem;
+      border-bottom:2px solid rgba(0,0,0,.1);display:inline-block;margin:0;
     }
-    .title-text small {
-      display: block;
-      margin-top: 0.5rem;
-      font-variant: small-caps;
-      letter-spacing: 0.02em;
-      color: #555;
-      font-size: 1rem;
-    }
-
-    /* Card de formulario */
+    .title-text small { display:block;margin-top:.5rem;font-variant:small-caps;letter-spacing:.02em;color:#555;font-size:1rem; }
     #visitaForm {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      border-radius: 10px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width:600px;margin:auto;background:white;border-radius:10px;
+      padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.1);
     }
-    /* Focus effect on inputs/selects */
     #visitaForm .form-control:focus,
-    #visitaForm .form-select:focus {
-      border-color: #8B4513;
-      box-shadow: 0 0 0 .2rem rgba(139,69,19,0.25);
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    /* Button micro-interaction */
-    .btn-cafe {
-      background-color: #8B4513;
-      color: white;
-      border: none;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      transition: transform .15s ease, box-shadow .15s ease;
-    }
-    .btn-cafe:hover {
-      background-color: #6e3610;
-      transform: scale(1.03);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    }
-
-    @media (max-width: 576px) {
-      .main-logo { height: 50px; }
-      .title-text h1 { font-size: 1.75rem; }
-      .title-text small { font-size: 0.9rem; }
-      .section-title { font-size: 1.5rem; }
-      #visitaForm { padding: 1rem; }
-    }
+    #visitaForm .form-select:focus { border-color:#8B4513;box-shadow:0 0 0 .2rem rgba(139,69,19,.25);transition:border-color .2s,box-shadow .2s; }
+    .btn-cafe { background-color:#8B4513;color:white;border:none;font-family:'Nunito',sans-serif;font-weight:700;transition:transform .15s ease,box-shadow .15s ease; }
+    .btn-cafe:hover { background-color:#6e3610;transform:scale(1.03);box-shadow:0 6px 12px rgba(0,0,0,.1); }
+    @media(max-width:576px){ .main-logo{height:50px;} .title-text h1{font-size:1.75rem;} .title-text small{font-size:.9rem;} .section-title{font-size:1.5rem;} #visitaForm{padding:1rem;} }
   </style>
 </head>
 <body>
-
-  <!-- progress bar -->
   <div id="progressBar"></div>
   {# solicitar_visita_grupal.html #}
   {% include "_menu_btn.html" %}
 
   <div class="container text-center pb-5">
-    <!-- Logo -->
-    <img src="{{ url_for('static', filename='logo.png') }}"
-         alt="Logo Facultad"
-         class="main-logo">
-
-    <!-- Site title -->
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="main-logo">
     <div class="title-text">
       <h1>"Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral"</small>
     </div>
-
-    <!-- Section title with typewriter -->
     <h2 class="section-title">Solicitar visita grupal</h2>
 
-    <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
+      {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+      {% endfor %}{% endif %}
     {% endwith %}
 
-    <!-- Form -->
     <form method="POST" id="visitaForm" onsubmit="return validarVisitaGrupal();">
 
       <!-- Datos del encargado -->
@@ -183,17 +81,18 @@
                value="{{ request.form.get('telefono_encargado','') }}">
       </div>
 
-      <!-- Ciudad y Estado -->
+      <!-- Estado -->
       <div class="mb-3 text-start">
         <label class="form-label" for="estado_republica">Estado de procedencia</label>
-        <select class="form-select" id="estado_republica" name="estado_republica" required onchange="onEstadoChange()">
-          <option value="" disabled selected>Selecciona un estado</option>
+        <select class="form-select" id="estado_republica" name="estado_republica"
+                required onchange="onEstadoChange()">
+          <option value="" disabled>Selecciona un estado</option>
           <option value="Aguascalientes">Aguascalientes</option>
           <option value="Baja California">Baja California</option>
           <option value="Baja California Sur">Baja California Sur</option>
           <option value="Campeche">Campeche</option>
           <option value="Chiapas">Chiapas</option>
-          <option value="Chihuahua" selected>Chihuahua</option>
+          <option value="Chihuahua">Chihuahua</option>
           <option value="Ciudad de México">Ciudad de México</option>
           <option value="Coahuila">Coahuila</option>
           <option value="Colima">Colima</option>
@@ -222,14 +121,13 @@
           <option value="Zacatecas">Zacatecas</option>
         </select>
       </div>
+
+      <!-- Ciudad (select dinámico) -->
       <div class="mb-3 text-start">
         <label class="form-label" for="ciudad">Ciudad de procedencia</label>
-        <input type="text" class="form-control" id="ciudad" name="ciudad"
-               list="ciudades_list" required autocomplete="off"
-               oninput="onCiudadChange()" onchange="onCiudadChange()"
-               placeholder="Escribe tu ciudad..."
-               value="{{ request.form.get('ciudad','') }}">
-        <datalist id="ciudades_list"></datalist>
+        <select class="form-select" id="ciudad" name="ciudad" required onchange="onCiudadChange()">
+          <option value="" disabled selected>Selecciona primero un estado</option>
+        </select>
       </div>
 
       <!-- Nivel académico -->
@@ -237,16 +135,16 @@
         <label class="form-label" for="nivel_educativo">Nivel académico</label>
         <select class="form-select" id="nivel_educativo" name="nivel_educativo" required onchange="onNivelChange()">
           <option value="" disabled selected>Selecciona una opción</option>
-          <option value="Primaria"     {{ 'selected' if request.form.get('nivel_educativo')=='Primaria'     }}>Primaria</option>
-          <option value="Secundaria"   {{ 'selected' if request.form.get('nivel_educativo')=='Secundaria'   }}>Secundaria</option>
+          <option value="Primaria"     {{ 'selected' if request.form.get('nivel_educativo')=='Primaria' }}>Primaria</option>
+          <option value="Secundaria"   {{ 'selected' if request.form.get('nivel_educativo')=='Secundaria' }}>Secundaria</option>
           <option value="Bachillerato" {{ 'selected' if request.form.get('nivel_educativo')=='Bachillerato' }}>Bachillerato</option>
-          <option value="Universidad"  {{ 'selected' if request.form.get('nivel_educativo')=='Universidad'  }}>Universidad</option>
-          <option value="Posgrado"     {{ 'selected' if request.form.get('nivel_educativo')=='Posgrado'     }}>Posgrado</option>
-          <option value="Otro"         {{ 'selected' if request.form.get('nivel_educativo')=='Otro'         }}>Otro</option>
+          <option value="Universidad"  {{ 'selected' if request.form.get('nivel_educativo')=='Universidad' }}>Universidad</option>
+          <option value="Posgrado"     {{ 'selected' if request.form.get('nivel_educativo')=='Posgrado' }}>Posgrado</option>
+          <option value="Otro"         {{ 'selected' if request.form.get('nivel_educativo')=='Otro' }}>Otro</option>
         </select>
       </div>
 
-      <!-- ===== SECCIÓN BACHILLERATO (Chihuahua) ===== -->
+      <!-- Bachillerato Chihuahua -->
       <div class="mb-3 text-start" id="bachi_chihuahua_section" style="display:none;">
         <label class="form-label" for="bachillerato">Plantel de procedencia</label>
         <select class="form-select" id="bachillerato" name="bachillerato" onchange="onBachiChange()">
@@ -254,15 +152,15 @@
         </select>
       </div>
 
-      <!-- Campo visible cuando seleccionan "Otro" en el select de Chihuahua -->
+      <!-- Otro bachillerato (campo texto) -->
       <div class="mb-3 text-start" id="bachi_otro_section" style="display:none;">
-        <label class="form-label" for="bachillerato_otro">Especifica el nombre de la escuela</label>
+        <label class="form-label" for="bachillerato_otro">Especifica el nombre de tu escuela</label>
         <input type="text" class="form-control" id="bachillerato_otro" name="bachillerato_otro"
                placeholder="Nombre de tu bachillerato"
                value="{{ request.form.get('bachillerato_otro','') }}">
       </div>
 
-      <!-- ===== SECCIÓN BACHILLERATO (otro estado) ===== -->
+      <!-- Bachillerato otro estado -->
       <div class="mb-3 text-start" id="bachi_otro_estado_section" style="display:none;">
         <label class="form-label" for="bachillerato_otro_estado">Nombre del bachillerato de procedencia</label>
         <input type="text" class="form-control" id="bachillerato_otro_estado" name="bachillerato"
@@ -270,7 +168,7 @@
                value="{{ request.form.get('bachillerato','') }}">
       </div>
 
-      <!-- ===== INSTITUCIÓN (solo para niveles que NO sean Bachillerato) ===== -->
+      <!-- Institución (solo para no-bachillerato) -->
       <div class="mb-3 text-start" id="institucion_section" style="display:none;">
         <label class="form-label" for="institucion">Institución de procedencia</label>
         <input type="text" class="form-control" id="institucion" name="institucion"
@@ -278,16 +176,15 @@
                value="{{ request.form.get('institucion','') }}">
       </div>
 
-      <!-- Resto del formulario -->
       <div class="mb-3 text-start">
         <label class="form-label" for="numero_alumnos">Número estimado de alumnos</label>
         <input type="number" class="form-control" id="numero_alumnos" name="numero_alumnos" min="1" required
                value="{{ request.form.get('numero_alumnos','') }}">
       </div>
       <div class="mb-3 text-start">
-        <label class="form-label" for="fechas_preferidas">Fechas y horarios propuestos (Fecha y hora)</label>
+        <label class="form-label" for="fechas_preferidas">Fechas y horarios propuestos</label>
         <textarea class="form-control" id="fechas_preferidas" name="fechas_preferidas" rows="3" required
-                  placeholder="Ejemplo: 20 de Junio del 2026, 10:00 AM, 22 de Junio del 2026, 10:00 AM, etc.">{{ request.form.get('fechas_preferidas','') }}</textarea>
+                  placeholder="Ejemplo: 20 de Junio del 2025, 10:00 AM">{{ request.form.get('fechas_preferidas','') }}</textarea>
       </div>
       <div class="mb-3 text-start">
         <label class="form-label" for="comentarios">Comentarios adicionales (opcional)</label>
@@ -301,159 +198,116 @@
   </div>
 
   <script>
-    // ─── Ciudades por estado ────────────────────────────────────────────────
+    /* ── Ciudades por estado ── */
     const ciudadesPorEstado = {
-      "Chihuahua": [
-        "Ahumada","Balleza","Camargo","Casas Grandes","Chihuahua",
-        "Cuauhtémoc","Delicias","Guadalupe","Hidalgo del Parral",
-        "Jiménez","Ciudad Juárez","Meoqui","Nuevo Casas Grandes",
-        "Ojinaga","Saucillo","Valle de Zaragoza","Guachochi","Bocoyna",
-        "Guerrero","Madera"
-      ],
-      "Ciudad de México": ["Benito Juárez","Coyoacán","Cuauhtémoc","Iztapalapa","Tlalpan","Xochimilco"],
-      "Jalisco": ["Guadalajara","Zapopan","Tlaquepaque","Tonalá","Puerto Vallarta"],
-      "Nuevo León": ["Monterrey","San Nicolás de los Garza","Guadalupe","Apodaca","San Pedro Garza García"],
-      "Estado de México": ["Toluca","Ecatepec","Naucalpan","Tlalnepantla","Nezahualcóyotl"],
-      "Sonora": ["Hermosillo","Ciudad Obregón","Nogales","Guaymas","San Luis Río Colorado"],
-      "Baja California": ["Tijuana","Mexicali","Ensenada","Rosarito","Tecate"],
-      "Sinaloa": ["Culiacán","Mazatlán","Los Mochis","Guasave"],
-      "Coahuila": ["Saltillo","Torreón","Monclova","Piedras Negras"],
-      "Tamaulipas": ["Tampico","Reynosa","Matamoros","Nuevo Laredo","Victoria"],
-      "Veracruz": ["Veracruz","Xalapa","Coatzacoalcos","Córdoba","Orizaba"],
-      "Puebla": ["Puebla","Tehuacán","Atlixco","Cholula"],
-      "Guanajuato": ["León","Guanajuato","Irapuato","Celaya","Salamanca"],
+      "Chihuahua": ["Ahumada","Balleza","Bocoyna","Camargo","Casas Grandes","Chihuahua","Ciudad Juárez","Cuauhtémoc","Delicias","Guadalupe","Guachochi","Guerrero","Hidalgo del Parral","Jiménez","Madera","Meoqui","Nuevo Casas Grandes","Ojinaga","Saucillo","Valle de Zaragoza"],
+      "Ciudad de México": ["Azcapotzalco","Álvaro Obregón","Benito Juárez","Coyoacán","Cuauhtémoc","Iztapalapa","Miguel Hidalgo","Tlalpan","Xochimilco"],
+      "Jalisco": ["Guadalajara","Lagos de Moreno","Puerto Vallarta","Tlaquepaque","Tonalá","Zapopan"],
+      "Nuevo León": ["Apodaca","Guadalupe","Monterrey","San Nicolás de los Garza","San Pedro Garza García"],
+      "Estado de México": ["Ecatepec","Naucalpan","Nezahualcóyotl","Tlalnepantla","Toluca"],
+      "Sonora": ["Ciudad Obregón","Guaymas","Hermosillo","Nogales","San Luis Río Colorado"],
+      "Baja California": ["Ensenada","Mexicali","Rosarito","Tecate","Tijuana"],
+      "Sinaloa": ["Culiacán","Guasave","Los Mochis","Mazatlán"],
+      "Coahuila": ["Acuña","Monclova","Piedras Negras","Saltillo","Torreón"],
+      "Tamaulipas": ["Matamoros","Nuevo Laredo","Reynosa","Tampico","Victoria"],
+      "Veracruz": ["Coatzacoalcos","Córdoba","Orizaba","Veracruz","Xalapa"],
+      "Puebla": ["Atlixco","Cholula","Puebla","Tehuacán"],
+      "Guanajuato": ["Celaya","Guanajuato","Irapuato","León","Salamanca"],
       "Guerrero": ["Acapulco","Chilpancingo","Iguala","Zihuatanejo"],
-      "Oaxaca": ["Oaxaca de Juárez","Salina Cruz","Juchitán"],
-      "Michoacán": ["Morelia","Uruapan","Zamora","Lázaro Cárdenas"],
+      "Oaxaca": ["Juchitán","Oaxaca de Juárez","Salina Cruz"],
+      "Michoacán": ["Lázaro Cárdenas","Morelia","Uruapan","Zamora"],
       "Hidalgo": ["Pachuca","Tula","Tulancingo"],
       "Querétaro": ["Querétaro","San Juan del Río"],
-      "Yucatán": ["Mérida","Valladolid","Progreso"],
-      "Quintana Roo": ["Cancún","Playa del Carmen","Chetumal","Cozumel"],
-      "Tabasco": ["Villahermosa","Cárdenas","Comalcalco"],
-      "Chiapas": ["Tuxtla Gutiérrez","San Cristóbal de las Casas","Tapachula"],
+      "Yucatán": ["Mérida","Progreso","Valladolid"],
+      "Quintana Roo": ["Cancún","Chetumal","Cozumel","Playa del Carmen"],
+      "Tabasco": ["Cárdenas","Comalcalco","Villahermosa"],
+      "Chiapas": ["San Cristóbal de las Casas","Tapachula","Tuxtla Gutiérrez"],
       "Durango": ["Durango","Gómez Palacio","Lerdo"],
       "Aguascalientes": ["Aguascalientes","Jesús María"],
-      "Zacatecas": ["Zacatecas","Fresnillo","Guadalupe"],
+      "Zacatecas": ["Fresnillo","Guadalupe","Zacatecas"],
       "Campeche": ["Campeche","Ciudad del Carmen"],
       "Colima": ["Colima","Manzanillo","Tecomán"],
-      "Nayarit": ["Tepic","Bahía de Banderas"],
-      "San Luis Potosí": ["San Luis Potosí","Matehuala","Ciudad Valles"],
+      "Nayarit": ["Bahía de Banderas","Tepic"],
+      "San Luis Potosí": ["Ciudad Valles","Matehuala","San Luis Potosí"],
       "Baja California Sur": ["La Paz","Los Cabos"],
-      "Morelos": ["Cuernavaca","Jiutepec","Cuautla"],
-      "Tlaxcala": ["Tlaxcala","Apizaco","Huamantla"]
+      "Morelos": ["Cuautla","Cuernavaca","Jiutepec"],
+      "Tlaxcala": ["Apizaco","Huamantla","Tlaxcala"]
     };
 
-    // ─── Planteles COBACH por ciudad ────────────────────────────────────────
-    // Formato: "COBACH Plantel [Número]" + "Otro" al final
+    /* ── Planteles COBACH por ciudad ── */
     const cobachPorCiudad = {
-      "Ahumada":            ["COBACH Plantel 17", "Otro"],
-      "Balleza":            ["COBACH Plantel 27", "Otro"],
-      "Camargo":            ["COBACH Plantel 15", "Otro"],
-      "Casas Grandes":      ["COBACH Plantel 24", "Otro"],
-      "Chihuahua": [
-        "COBACH Plantel 1",
-        "COBACH Plantel 2",
-        "COBACH Plantel 3",
-        "COBACH Plantel 4",
-        "COBACH Plantel 8",
-        "COBACH Plantel 10",
-        "COBACH Plantel 21",
-        "COBACH SEA Chihuahua",
-        "Otro"
-      ],
-      "Cuauhtémoc":         ["COBACH Plantel 14", "Otro"],
-      "Delicias":           ["COBACH Plantel 13", "Otro"],
-      "Guadalupe":          ["COBACH Plantel 23", "Otro"],
-      "Hidalgo del Parral": ["COBACH Plantel 12", "Otro"],
-      "Jiménez":            ["COBACH Plantel 20", "Otro"],
-      "Ciudad Juárez": [
-        "COBACH Plantel 5",
-        "COBACH Plantel 6",
-        "COBACH Plantel 7",
-        "COBACH Plantel 9",
-        "COBACH Plantel 11",
-        "COBACH Plantel 16",
-        "COBACH Plantel 19",
-        "COBACH SEA Juárez",
-        "Otro"
-      ],
-      "Meoqui":             ["COBACH Plantel 26", "COBACH Plantel 28", "Otro"],
-      "Nuevo Casas Grandes":["COBACH Plantel 18", "Otro"],
-      "Ojinaga":            ["COBACH Plantel 22", "Otro"],
-      "Saucillo":           ["COBACH Plantel 25", "Otro"],
-      "Valle de Zaragoza":  ["COBACH Extensión Plantel 12", "Otro"]
+      "Ahumada":            ["COBACH Plantel 17","Otro"],
+      "Balleza":            ["COBACH Plantel 27","Otro"],
+      "Camargo":            ["COBACH Plantel 15","Otro"],
+      "Casas Grandes":      ["COBACH Plantel 24","Otro"],
+      "Chihuahua":          ["COBACH Plantel 1","COBACH Plantel 2","COBACH Plantel 3","COBACH Plantel 4","COBACH Plantel 8","COBACH Plantel 10","COBACH Plantel 21","COBACH SEA Chihuahua","Otro"],
+      "Cuauhtémoc":         ["COBACH Plantel 14","Otro"],
+      "Delicias":           ["COBACH Plantel 13","Otro"],
+      "Guadalupe":          ["COBACH Plantel 23","Otro"],
+      "Hidalgo del Parral": ["COBACH Plantel 12","Otro"],
+      "Jiménez":            ["COBACH Plantel 20","Otro"],
+      "Ciudad Juárez":      ["COBACH Plantel 5","COBACH Plantel 6","COBACH Plantel 7","COBACH Plantel 9","COBACH Plantel 11","COBACH Plantel 16","COBACH Plantel 19","COBACH SEA Juárez","Otro"],
+      "Meoqui":             ["COBACH Plantel 26","COBACH Plantel 28","Otro"],
+      "Nuevo Casas Grandes":["COBACH Plantel 18","Otro"],
+      "Ojinaga":            ["COBACH Plantel 22","Otro"],
+      "Saucillo":           ["COBACH Plantel 25","Otro"],
+      "Valle de Zaragoza":  ["COBACH Extensión Plantel 12","Otro"]
     };
 
-    // ─── Helpers ────────────────────────────────────────────────────────────
-
-    function setRequired(id, isRequired) {
+    /* ── Helpers ── */
+    function setRequired(id, req) {
       const el = document.getElementById(id);
       if (!el) return;
-      if (isRequired) {
-        el.setAttribute('required', '');
-      } else {
-        el.removeAttribute('required');
-        el.value = '';
-      }
+      if (req) { el.setAttribute('required',''); } else { el.removeAttribute('required'); el.value=''; }
     }
-
     function showSection(id, visible) {
       const el = document.getElementById(id);
-      if (!el) return;
-      el.style.display = visible ? 'block' : 'none';
+      if (el) el.style.display = visible ? 'block' : 'none';
     }
 
-    // ─── Filtrar ciudades ────────────────────────────────────────────────────
-    function filtrarCiudades() {
-      const estado = document.getElementById('estado_republica').value;
-      const datalist = document.getElementById('ciudades_list');
-      document.getElementById('ciudad').value = '';
-      datalist.innerHTML = '';
+    function actualizarCiudades(idEstado, idCiudad, valorGuardado) {
+      const estado = document.getElementById(idEstado).value;
+      const sel    = document.getElementById(idCiudad);
+      sel.innerHTML = '<option value="" disabled selected>Selecciona una ciudad</option>';
       (ciudadesPorEstado[estado] || []).forEach(c => {
         const opt = document.createElement('option');
-        opt.value = c;
-        datalist.appendChild(opt);
+        opt.value = c; opt.textContent = c;
+        if (c === valorGuardado) opt.selected = true;
+        sel.appendChild(opt);
       });
     }
 
-    // ─── Lógica principal: actualiza todos los campos dinámicos ─────────────
     function actualizarFormulario() {
-      const nivel  = document.getElementById('nivel_educativo').value;
-      const estado = document.getElementById('estado_republica').value;
-      const ciudad = document.getElementById('ciudad').value.trim();
-      const esBachi    = nivel === 'Bachillerato';
-      const esChihuahua = estado === 'Chihuahua';
+      const nivel   = document.getElementById('nivel_educativo').value;
+      const estado  = document.getElementById('estado_republica').value;
+      const ciudad  = document.getElementById('ciudad').value.trim();
+      const esBachi = nivel === 'Bachillerato';
+      const esChih  = estado === 'Chihuahua';
 
-      // ── 1. Institución: solo visible si NO es Bachillerato
+      // Institución: solo para no-bachillerato
       showSection('institucion_section', !esBachi && nivel !== '');
       setRequired('institucion', !esBachi && nivel !== '');
 
-      // ── 2. Bachillerato secciones
-      if (esBachi && esChihuahua) {
-        // Mostrar selector de planteles COBACH
+      if (esBachi && esChih) {
         showSection('bachi_chihuahua_section', true);
         showSection('bachi_otro_estado_section', false);
         setRequired('bachillerato_otro_estado', false);
 
-        // Rellenar opciones según ciudad
         const sel = document.getElementById('bachillerato');
-        const planteles = cobachPorCiudad[ciudad] || ["Otro"];
+        const planteles = cobachPorCiudad[ciudad] || ['Otro'];
         sel.innerHTML = '<option value="" disabled selected>Selecciona tu plantel</option>';
         planteles.forEach(p => {
           const opt = document.createElement('option');
-          opt.value = p;
-          opt.textContent = p;
+          opt.value = p; opt.textContent = p;
           sel.appendChild(opt);
         });
         setRequired('bachillerato', true);
 
-        // Mostrar/ocultar campo "Otro"
-        const selVal = sel.value;
-        const mostrarOtro = selVal === 'Otro';
+        const mostrarOtro = sel.value === 'Otro';
         showSection('bachi_otro_section', mostrarOtro);
         setRequired('bachillerato_otro', mostrarOtro);
 
-      } else if (esBachi && !esChihuahua) {
+      } else if (esBachi && !esChih) {
         showSection('bachi_chihuahua_section', false);
         showSection('bachi_otro_section', false);
         showSection('bachi_otro_estado_section', true);
@@ -462,7 +316,6 @@
         setRequired('bachillerato_otro_estado', true);
 
       } else {
-        // No es bachillerato
         showSection('bachi_chihuahua_section', false);
         showSection('bachi_otro_section', false);
         showSection('bachi_otro_estado_section', false);
@@ -472,82 +325,48 @@
       }
     }
 
-    // ─── Cuando cambia el select de bachillerato (Chihuahua) ────────────────
     function onBachiChange() {
-      const bachi = document.getElementById('bachillerato').value;
-      const mostrarOtro = bachi === 'Otro';
-      showSection('bachi_otro_section', mostrarOtro);
-      setRequired('bachillerato_otro', mostrarOtro);
+      const val = document.getElementById('bachillerato').value;
+      const mostrar = val === 'Otro';
+      showSection('bachi_otro_section', mostrar);
+      setRequired('bachillerato_otro', mostrar);
     }
-
-    // ─── Eventos de campos padre ─────────────────────────────────────────────
     function onEstadoChange() {
-      filtrarCiudades();
+      actualizarCiudades('estado_republica','ciudad','');
       actualizarFormulario();
     }
+    function onCiudadChange() { actualizarFormulario(); }
+    function onNivelChange()  { actualizarFormulario(); }
 
-    function onCiudadChange() {
-      actualizarFormulario();
-    }
-
-    function onNivelChange() {
-      actualizarFormulario();
-    }
-
-    // ─── Deshabilitar botón al enviar ────────────────────────────────────────
     function disableVisitaButton() {
       document.getElementById('progressBar').style.width = '100%';
       const btn = document.getElementById('visitaBtn');
-      btn.disabled = true;
-      btn.textContent = 'Procesando...';
+      btn.disabled = true; btn.textContent = 'Procesando...';
     }
-
-    // ─── Validación al enviar ────────────────────────────────────────────────
     function validarVisitaGrupal() {
-      const correo    = document.getElementById('correo_encargado').value.trim();
-      const confirmar = document.getElementById('confirmar_correo_encargado').value.trim();
-      if (correo !== confirmar) {
-        alert('Los correos no coinciden.');
-        return false;
-      }
+      const c1 = document.getElementById('correo_encargado').value.trim();
+      const c2 = document.getElementById('confirmar_correo_encargado').value.trim();
+      if (c1 !== c2) { alert('Los correos no coinciden.'); return false; }
       disableVisitaButton();
       return true;
     }
 
-    // ─── Init ────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
-      // Restaurar estado guardado (en caso de error de formulario)
-      const estadoGuardado = "{{ request.form.get('estado_republica', '') | safe }}";
-      if (estadoGuardado) {
-        document.getElementById('estado_republica').value = estadoGuardado;
-      } else {
-        document.getElementById('estado_republica').value = 'Chihuahua';
-      }
-      filtrarCiudades();
-
+      const estadoGuardado = "{{ request.form.get('estado_republica', 'Chihuahua') | safe }}";
       const ciudadGuardada = "{{ request.form.get('ciudad', '') | safe }}";
-      if (ciudadGuardada) document.getElementById('ciudad').value = ciudadGuardada;
+      const nivelGuardado  = "{{ request.form.get('nivel_educativo', '') | safe }}";
+      const bachiGuardado  = "{{ request.form.get('bachillerato', '') | safe }}";
 
-      // Escuchar cambios en ciudad
-      document.getElementById('ciudad').addEventListener('input',  onCiudadChange);
-      document.getElementById('ciudad').addEventListener('change', onCiudadChange);
+      document.getElementById('estado_republica').value = estadoGuardado;
+      actualizarCiudades('estado_republica', 'ciudad', ciudadGuardada);
 
-      // Restaurar nivel
-      const nivelGuardado = "{{ request.form.get('nivel_educativo', '') | safe }}";
-      if (nivelGuardado) {
-        document.getElementById('nivel_educativo').value = nivelGuardado;
-      }
+      if (nivelGuardado) document.getElementById('nivel_educativo').value = nivelGuardado;
 
       actualizarFormulario();
 
-      // Restaurar bachillerato seleccionado
-      const bachiGuardado = "{{ request.form.get('bachillerato', '') | safe }}";
       if (bachiGuardado) {
         const sel = document.getElementById('bachillerato');
-        if (sel) {
-          sel.value = bachiGuardado;
-          onBachiChange();
-        }
+        if (sel) { sel.value = bachiGuardado; onBachiChange(); }
       }
     });
   </script>
