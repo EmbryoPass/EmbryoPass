@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Museo de Embriología</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <!-- Google Fonts: Roboto para body y Nunito para headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #fdf9f3;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+      min-height: 100vh;
+    }
+    .main-logo {
+      display: block;
+      margin: 1.5rem auto;
+      height: 60px;
+    }
+    .title-text {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .title-text h1 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4a3526;
+      margin: 0;
+    }
+    .title-text h5 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: #555;
+      margin: .5rem 0 1rem;
+      font-variant: small-caps;
+      letter-spacing: 0.02em;
+    }
+    .section-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .btn-cafe {
+      background-color: #8B4513;
+      color: white;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+    .btn-cafe:hover {
+      background-color: #6e3610;
+    }
+    #loginCard {
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      background: white;
+    }
+    @media (max-width: 576px) {
+      .main-logo { height: 50px; }
+      .title-text h1 { font-size: 1.5rem; }
+      .title-text h5 { font-size: 0.85rem; }
+      .section-title { font-size: 1.25rem; }
+      #loginCard { padding: 1rem; }
+    }
+  </style>
+</head>
+<body class="d-flex align-items-center">
+
+  <div class="container text-center pb-5">
+    <!-- Logo principal -->
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo">
+
+    <!-- Título -->
+    <div class="title-text">
+      <h1>"Museo de Embriología</h1>
+      <h5>Panel Administrativo – Dra. Dora Virginia Chávez Corral</h5>
+    </div>
+
+    <!-- Sección -->
+    <h2 class="section-title">Iniciar Sesión</h2>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Card de login -->
+    <div id="loginCard">
+      <form method="POST">
+        <div class="mb-3 text-start">
+          <label for="usuario" class="form-label">Usuario</label>
+          <input type="text" class="form-control" id="usuario" name="usuario" required>
+        </div>
+        <div class="mb-3 text-start">
+          <label for="password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-cafe w-100">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
