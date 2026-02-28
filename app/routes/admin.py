@@ -207,6 +207,14 @@ def eliminar_horario(id_horario):
     return redirect(url_for('admin.dashboard'))
 
 
+# ── Helper: línea de nivel académico con plantel si aplica ──────────────────
+def _nivel_str(visita):
+    """Devuelve el nivel con el bachillerato/plantel concatenado si existe."""
+    if visita.nivel == 'Bachillerato' and visita.bachillerato:
+        return f"{visita.nivel} – {visita.bachillerato}"
+    return visita.nivel or '—'
+
+
 @admin_bp.route('/aceptar_visita/<int:id>')
 @login_required
 def aceptar_visita(id):
@@ -228,8 +236,8 @@ def aceptar_visita(id):
     <p>Hola <strong>{visita.encargado}</strong>,</p>
     <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>aceptada</strong>. En breve recibirás un correo con la fecha y hora confirmadas.</p>
     <ul style="line-height:1.6;">
-      <li><strong>Institución:</strong> {visita.institucion}</li>
-      <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+      <li><strong>Institución / Plantel:</strong> {visita.institucion}</li>
+      <li><strong>Nivel académico:</strong> {_nivel_str(visita)}</li>
       <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
     </ul>
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
@@ -309,8 +317,8 @@ def asignar_fecha_visita(id):
     <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>confirmada</strong> para:</p>
     <p style="font-size:18px;font-weight:bold;margin:12px 0;">{fecha}</p>
     <ul style="line-height:1.6;">
-      <li><strong>Institución:</strong> {visita.institucion}</li>
-      <li><strong>Nivel académico:</strong> {visita.nivel}</li>
+      <li><strong>Institución / Plantel:</strong> {visita.institucion}</li>
+      <li><strong>Nivel académico:</strong> {_nivel_str(visita)}</li>
       <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
     </ul>
     <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
