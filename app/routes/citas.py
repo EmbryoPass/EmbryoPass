@@ -111,7 +111,7 @@ def agendar():
       <li><strong>Nombre:</strong> {nombre}</li>
       <li><strong>Correo:</strong> {correo}</li>
       <li><strong>Teléfono:</strong> {telefono}</li>
-      <li><strong>Ciudad:</strong> {ciudad}, {estado_republica}</li>
+      <li><strong>Ciudad y estado:</strong> {ciudad}, {estado_republica}</li>
       <li><strong>Institución:</strong> {institucion}</li>
       <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
     </ul>
