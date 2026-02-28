@@ -131,7 +131,8 @@ def dashboard():
                 'telefono': c.telefono, 'fecha_hora': c.fecha_hora,
                 'estado': c.estado,
                 'asistio': c.asistio if c.asistio in ['sí', 'no'] else None,
-                'institucion': c.institucion, 'nivel': c.nivel_educativo
+                'institucion': c.institucion, 'nivel': c.nivel_educativo,
+                'ciudad': c.ciudad, 'estado_rep': c.estado_republica,
             })
 
     horarios = []
@@ -153,12 +154,27 @@ def dashboard():
             })
     horarios.sort(key=lambda x: datetime.strptime(x['fecha_hora'], "%d/%m/%Y %I:%M %p"))
 
-    if tipo == 'individual':
-        historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
-    elif tipo == 'grupal':
-        historial_completo = [r for r in historial_completo if r['tipo'] == 'Grupal']
+    # ── Historial de visitas grupales (con fecha confirmada en el pasado) ─────
+    historial_grupales = []
+    for v in VisitaGrupal.query.filter(
+        VisitaGrupal.fecha_confirmada.isnot(None),
+        VisitaGrupal.estado == 'aceptada'
+    ).order_by(VisitaGrupal.id.desc()).all():
+        try:
+            fecha_v = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+        except ValueError:
+            try:
+                fecha_v = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %H:%M")
+            except ValueError:
+                continue
+        fecha_v = zona.localize(fecha_v)
+        if fecha_v < ahora and fecha_v >= inicio_rango:
+            historial_grupales.append(v)
 
-    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+    # Visitas activas/pendientes (tabla superior, sin filtro de rango)
+    visitas_grupales = VisitaGrupal.query.filter(
+        VisitaGrupal.estado.in_(['pendiente', 'aceptada', 'rechazada', 'cancelada'])
+    ).order_by(VisitaGrupal.id.desc()).all()
 
     secret = AdminSecret.query.get(1)
     admin_password = secret.password if secret else None
@@ -173,6 +189,7 @@ def dashboard():
     return render_template(
         'dashboard.html',
         historial_completo=historial_completo,
+        historial_grupales=historial_grupales,
         horarios=horarios,
         rango=rango,
         admin_password=admin_password,
@@ -429,10 +446,19 @@ def asignar_fecha_visita(id):
                 '{intro}',
                 '<p>Tu solicitud de visita grupal ha sido <strong>confirmada</strong> para:</p>'
             )
+            datos_grupo = {
+                'institucion':    visita.institucion,
+                'nivel':          _nivel_str(visita),
+                'ciudad':         visita.ciudad or '—',
+                'estado':         visita.estado_republica or '—',
+                'fecha':          fecha,
+                'encargado':      visita.encargado,
+                'numero_alumnos': visita.numero_alumnos,
+            }
             enviar_correo_con_excel(
                 visita.correo,
                 f'Confirmación de visita grupal — {NOMBRE_MUSEO}',
-                cuerpo, nombre_excel
+                cuerpo, nombre_excel, datos_grupo=datos_grupo
             )
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
@@ -446,10 +472,19 @@ def asignar_fecha_visita(id):
                 f'La fecha anterior era <strong>{fecha_anterior}</strong>. '
                 f'La nueva fecha confirmada es:</p>'
             )
+            datos_grupo = {
+                'institucion':    visita.institucion,
+                'nivel':          _nivel_str(visita),
+                'ciudad':         visita.ciudad or '—',
+                'estado':         visita.estado_republica or '—',
+                'fecha':          fecha,
+                'encargado':      visita.encargado,
+                'numero_alumnos': visita.numero_alumnos,
+            }
             enviar_correo_con_excel(
                 visita.correo,
                 f'Actualización de fecha — {NOMBRE_MUSEO}',
-                cuerpo, nombre_excel
+                cuerpo, nombre_excel, datos_grupo=datos_grupo
             )
             flash('📅 Fecha actualizada y nuevo correo con Excel enviado.', 'success')
 
@@ -539,11 +574,13 @@ def generar_password():
 @admin_bp.route('/descargar_historial')
 @login_required
 def descargar_historial():
-    zona = pytz.timezone('America/Chihuahua')
+    import io as _io
+    zona  = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
     tipo  = request.args.get('tipo',  default='todas')
 
+    # ── Calcular rango ────────────────────────────────────────────────────────
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
     elif rango == '30':
@@ -555,48 +592,120 @@ def descargar_historial():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    historial = []
-    for c in Cita.query.all():
-        try:
-            fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
-        except ValueError:
-            fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
-        fecha = zona.localize(fecha)
-        if fecha < ahora and fecha >= inicio_rango:
-            historial.append({
-                'tipo': 'Individual', 'id': c.id, 'nombre': c.nombre,
-                'correo': c.correo, 'telefono': c.telefono, 'edad': c.edad,
-                'sexo': c.sexo, 'fecha': c.fecha_hora, 'estado': c.estado,
-                'asistio': c.asistio, 'institucion': c.institucion,
-                'nivel': c.nivel_educativo, 'ciudad': c.ciudad,
-                'estado_rep': c.estado_republica
-            })
+    fecha_str    = ahora.strftime("%Y-%m-%d_%H-%M")
+    buffer       = _io.BytesIO()
+    content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    # ── Datos individuales ────────────────────────────────────────────────────
+    def _datos_individuales():
+        rows = []
+        for c in Cita.query.all():
+            try:
+                fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
+            except ValueError:
+                fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+            fecha = zona.localize(fecha)
+            if fecha < ahora and fecha >= inicio_rango and c.estado != 'cancelada':
+                rows.append({
+                    'ID':              c.id,
+                    'Nombre':          c.nombre,
+                    'Correo':          c.correo,
+                    'Teléfono':        c.telefono,
+                    'Edad':            c.edad,
+                    'Sexo':            c.sexo,
+                    'Ciudad':          c.ciudad,
+                    'Estado':          c.estado_republica,
+                    'Institución':     c.institucion,
+                    'Nivel Académico': c.nivel_educativo,
+                    'Fecha y Hora':    c.fecha_hora,
+                    'Asistió':         c.asistio,
+                })
+        return rows
+
+    # ── Datos grupales (una fila por alumno) ──────────────────────────────────
+    def _datos_grupales():
+        rows = []
+        for v in VisitaGrupal.query.filter(
+            VisitaGrupal.fecha_confirmada.isnot(None),
+            VisitaGrupal.estado == 'aceptada'
+        ).all():
+            try:
+                fecha_v = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+            except ValueError:
+                try:
+                    fecha_v = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %H:%M")
+                except ValueError:
+                    continue
+            fecha_v = zona.localize(fecha_v)
+            if not (fecha_v < ahora and fecha_v >= inicio_rango):
+                continue
+
+            if v.estudiantes:
+                for est in v.estudiantes:
+                    rows.append({
+                        'Visita ID':           v.id,
+                        'Institución':         v.institucion,
+                        'Nivel Académico':     v.nivel,
+                        'Ciudad':              v.ciudad or '—',
+                        'Estado':              v.estado_republica or '—',
+                        'Encargado':           v.encargado,
+                        'Fecha de visita':     v.fecha_confirmada,
+                        'Alumnos estimados':   v.numero_alumnos,
+                        'Nombre alumno':       est.nombre,
+                        'Edad alumno':         est.edad,
+                        'Sexo alumno':         est.sexo,
+                    })
+            else:
+                # Visita sin alumnos registrados aún
+                rows.append({
+                    'Visita ID':           v.id,
+                    'Institución':         v.institucion,
+                    'Nivel Académico':     v.nivel,
+                    'Ciudad':              v.ciudad or '—',
+                    'Estado':              v.estado_republica or '—',
+                    'Encargado':           v.encargado,
+                    'Fecha de visita':     v.fecha_confirmada,
+                    'Alumnos estimados':   v.numero_alumnos,
+                    'Nombre alumno':       '(sin lista subida)',
+                    'Edad alumno':         None,
+                    'Sexo alumno':         None,
+                })
+        return rows
+
+    # ── Construir Excel ───────────────────────────────────────────────────────
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        if tipo in ('todas', 'individual'):
+            df_ind = pd.DataFrame(_datos_individuales())
+            if df_ind.empty:
+                df_ind = pd.DataFrame(columns=[
+                    'ID','Nombre','Correo','Teléfono','Edad','Sexo',
+                    'Ciudad','Estado','Institución','Nivel Académico',
+                    'Fecha y Hora','Asistió'
+                ])
+            df_ind.to_excel(writer, sheet_name='Citas Individuales', index=False)
+
+        if tipo in ('todas', 'grupal'):
+            df_grp = pd.DataFrame(_datos_grupales())
+            if df_grp.empty:
+                df_grp = pd.DataFrame(columns=[
+                    'Visita ID','Institución','Nivel Académico','Ciudad','Estado',
+                    'Encargado','Fecha de visita','Alumnos estimados',
+                    'Nombre alumno','Edad alumno','Sexo alumno'
+                ])
+            df_grp.to_excel(writer, sheet_name='Visitas Grupales', index=False)
+
+    buffer.seek(0)
 
     if tipo == 'individual':
-        historial = [h for h in historial if h['tipo'] == 'Individual']
+        nombre_archivo = f"historial_individual_{fecha_str}.xlsx"
+    elif tipo == 'grupal':
+        nombre_archivo = f"historial_grupal_{fecha_str}.xlsx"
+    else:
+        nombre_archivo = f"historial_completo_{fecha_str}.xlsx"
 
-    data = [{
-        'ID': h['id'], 'Nombre': h['nombre'], 'Correo': h['correo'],
-        'Teléfono': h['telefono'], 'Edad': h['edad'], 'Sexo': h['sexo'],
-        'Ciudad': h.get('ciudad'), 'Estado': h.get('estado_rep'),
-        'Institución': h['institucion'], 'Nivel Académico': h['nivel'],
-        'Fecha y Hora': h['fecha'], 'Tipo de Cita': h['tipo'],
-        'Estado': h['estado'], 'Asistió': h['asistio']
-    } for h in historial]
-
-    df = pd.DataFrame(data)
-    fecha_str = ahora.strftime("%Y-%m-%d_%H-%M")
-    nombre_archivo = f"historial_citas_{fecha_str}.xlsx"
-    df.to_excel(nombre_archivo, index=False)
-
-    with open(nombre_archivo, 'rb') as f:
-        excel_data = f.read()
-
-    response = make_response(excel_data)
+    response = make_response(buffer.read())
     response.headers['Content-Disposition'] = f'attachment; filename={nombre_archivo}'
-    response.headers['Content-Type'] = (
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+    response.headers['Content-Type'] = content_type
     return response
 
 
@@ -608,3 +717,86 @@ def db_ping():
         return "ok", 200
     except Exception as e:
         return f"db error: {e}", 500
+
+
+@admin_bp.route('/subir_excel_visita/<int:id>', methods=['POST'])
+@login_required
+def subir_excel_visita(id):
+    """Recibe el Excel lleno por el encargado, parsea los estudiantes y los guarda en DB."""
+    from app.models import EstudianteGrupal
+    import openpyxl
+    import pytz
+
+    visita = VisitaGrupal.query.get(id)
+    if not visita:
+        flash('❌ Visita no encontrada.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    archivo = request.files.get('excel_estudiantes')
+    if not archivo or not archivo.filename.endswith('.xlsx'):
+        flash('❌ Debes subir un archivo .xlsx válido.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    try:
+        wb = openpyxl.load_workbook(archivo)
+        ws = wb.active
+
+        # ── Detectar la fila de encabezados de la tabla ───────────────────────
+        # Buscamos la fila que tenga "No." en la columna A y "Nombre completo" en B
+        fila_encabezado = None
+        for row in ws.iter_rows():
+            valores = [str(c.value).strip() if c.value else '' for c in row]
+            if valores[0] == 'No.' and 'Nombre completo' in valores[1]:
+                fila_encabezado = row[0].row
+                break
+
+        if fila_encabezado is None:
+            flash('❌ No se encontró la tabla de alumnos en el Excel. '
+                  'Asegúrate de no modificar los encabezados.', 'danger')
+            return redirect(url_for('admin.dashboard'))
+
+        # ── Borrar estudiantes anteriores de esta visita (re-subida) ─────────
+        for est in visita.estudiantes:
+            db.session.delete(est)
+        db.session.flush()
+
+        # ── Parsear filas de alumnos ──────────────────────────────────────────
+        zona    = pytz.timezone('America/Chihuahua')
+        ahora   = datetime.now(zona).strftime("%d/%m/%Y %I:%M %p")
+        guardados = 0
+
+        for row in ws.iter_rows(min_row=fila_encabezado + 1, values_only=True):
+            # Columnas: No. | Nombre completo | Edad | Sexo
+            _, nombre, edad, sexo = (row[i] if i < len(row) else None for i in range(4))
+
+            nombre = str(nombre).strip() if nombre else ''
+            if not nombre or nombre.lower() in ('none', '—', '-', ''):
+                continue  # fila vacía, saltar
+
+            try:
+                edad_int = int(edad) if edad else None
+            except (ValueError, TypeError):
+                edad_int = None
+
+            sexo_str = str(sexo).strip() if sexo else None
+
+            est = EstudianteGrupal(
+                nombre        = nombre,
+                edad          = edad_int,
+                sexo          = sexo_str,
+                hora_registro = ahora,
+                visita_id     = visita.id,
+            )
+            db.session.add(est)
+            guardados += 1
+
+        db.session.commit()
+        flash(f'✅ Excel procesado: {guardados} alumno(s) registrado(s) '
+              f'para la visita de {visita.institucion}.', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"[EXCEL] Error al procesar: {e}")
+        flash('❌ Error al procesar el Excel. Verifica que el archivo no esté dañado.', 'danger')
+
+    return redirect(url_for('admin.dashboard'))
