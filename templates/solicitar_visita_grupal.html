@@ -230,6 +230,7 @@
         <label class="form-label" for="ciudad">Ciudad de procedencia</label>
         <input type="text" class="form-control" id="ciudad" name="ciudad"
                list="ciudades_list" required autocomplete="off"
+               oninput="onCiudadChange()" onchange="onCiudadChange()"
                placeholder="Escribe tu ciudad..."
                value="{{ request.form.get('ciudad','') }}">
         <datalist id="ciudades_list"></datalist>
@@ -368,6 +369,49 @@
       "Tlaxcala": ["Tlaxcala","Apizaco","Huamantla"]
     };
 
+    // Bachilleratos por ciudad de Chihuahua
+    const bachilleratosPorCiudad = {
+      "Chihuahua": [
+        "COBACH Plantel Chihuahua 1","COBACH Plantel Chihuahua 2","COBACH Plantel Chihuahua 3",
+        "CBTis 67 – Chihuahua","CETis 31 – Chihuahua",
+        "CONALEP Chihuahua","CECyTE Chihuahua",
+        "Preparatoria UACH Campus Chihuahua",
+        "Preparatoria Federal Lázaro Cárdenas","Bachillerato General Oficial (BGO)",
+        "Tec de Monterrey Preparatoria Chihuahua","UVM Preparatoria Chihuahua",
+        "Colegio Americano de Chihuahua","Instituto del Desierto",
+        "Colegio Humanístico","Instituto Juárez","CETAC","Otro"
+      ],
+      "Ciudad Juárez": [
+        "COBACH Plantel Ciudad Juárez 1","COBACH Plantel Ciudad Juárez 2",
+        "CBTis 114 – Ciudad Juárez","CETis 100 – Ciudad Juárez",
+        "CONALEP Ciudad Juárez","CECyTE Ciudad Juárez",
+        "Preparatoria UACH Campus Ciudad Juárez","Preparatoria UACJ",
+        "Tec de Monterrey Preparatoria Juárez","UVM Preparatoria Juárez",
+        "Colegio de Bachilleres Juárez","Otro"
+      ],
+      "Cuauhtémoc": [
+        "COBACH Plantel Cuauhtémoc","CONALEP Cuauhtémoc",
+        "Preparatoria UACH Campus Cuauhtémoc","CBTis Cuauhtémoc","Otro"
+      ],
+      "Parral": [
+        "COBACH Plantel Parral","CBTis 41 – Parral",
+        "Preparatoria UACH Campus Parral","CONALEP Parral","Otro"
+      ],
+      "Delicias": [
+        "COBACH Plantel Delicias","CBTis 128 – Delicias",
+        "CONALEP Delicias","CECyTE Delicias","Otro"
+      ],
+      "Camargo": ["COBACH Plantel Camargo","CBTis Camargo","Otro"],
+      "Nuevo Casas Grandes": ["COBACH Plantel Nuevo Casas Grandes","CBTis Nuevo Casas Grandes","Otro"],
+      "Jiménez": ["COBACH Plantel Jiménez","CBTis Jiménez","Otro"],
+      "Ojinaga": ["COBACH Plantel Ojinaga","Otro"],
+      "Madera": ["COBACH Plantel Madera","Otro"],
+      "Meoqui": ["COBACH Plantel Meoqui","Otro"],
+      "Guerrero": ["COBACH Plantel Guerrero","Otro"],
+      "Bocoyna": ["COBACH Plantel Bocoyna","Otro"],
+      "Guachochi": ["COBACH Plantel Guachochi","Otro"]
+    };
+
     function filtrarCiudades() {
       const estado = document.getElementById('estado_republica').value;
       const datalist = document.getElementById('ciudades_list');
@@ -383,19 +427,46 @@
     function toggleBachi() {
       const nivel = document.getElementById('nivel_educativo').value;
       const estado = document.getElementById('estado_republica').value;
+      const ciudad = document.getElementById('ciudad').value;
       const esChihuahua = estado === 'Chihuahua';
       const esBachi = nivel === 'Bachillerato';
 
-      document.getElementById('bachi_chihuahua_section').style.display  = (esBachi && esChihuahua) ? 'block' : 'none';
-      document.getElementById('bachi_otro_estado_section').style.display = (esBachi && !esChihuahua) ? 'block' : 'none';
+      const bachiChihSection = document.getElementById('bachi_chihuahua_section');
+      const bachiOtroEstadoSection = document.getElementById('bachi_otro_estado_section');
 
-      if (!esBachi) {
+      if (esBachi && esChihuahua) {
+        bachiChihSection.style.display = 'block';
+        bachiOtroEstadoSection.style.display = 'none';
+        // Llenar opciones según ciudad
+        const sel = document.getElementById('bachillerato');
+        const valorActual = sel.value;
+        sel.innerHTML = '<option value="" disabled selected>Selecciona tu bachillerato</option>';
+        const bachis = bachilleratosPorCiudad[ciudad] || ["Otro"];
+        bachis.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b;
+          opt.textContent = b;
+          sel.appendChild(opt);
+        });
+        // Restaurar valor si sigue siendo válido
+        if (valorActual && bachis.includes(valorActual)) sel.value = valorActual;
+      } else if (esBachi && !esChihuahua) {
+        bachiChihSection.style.display = 'none';
+        bachiOtroEstadoSection.style.display = 'block';
+      } else {
+        bachiChihSection.style.display = 'none';
+        bachiOtroEstadoSection.style.display = 'none';
         document.getElementById('bachi_otro_section').style.display = 'none';
       }
+      if (!esBachi) onBachiChange();
     }
 
     function onEstadoChange() {
       filtrarCiudades();
+      toggleBachi();
+    }
+
+    function onCiudadChange() {
       toggleBachi();
     }
 
@@ -405,8 +476,7 @@
 
     function onBachiChange() {
       const bachi = document.getElementById('bachillerato').value;
-      const otroSection = document.getElementById('bachi_otro_section');
-      otroSection.style.display = (bachi === 'Otro') ? 'block' : 'none';
+      document.getElementById('bachi_otro_section').style.display = (bachi === 'Otro') ? 'block' : 'none';
     }
 
     function disableVisitaButton() {
@@ -425,7 +495,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      // Restaurar estado seleccionado (postback)
       const estadoGuardado = "{{ request.form.get('estado_republica', '') | safe }}";
       if (estadoGuardado) {
         document.getElementById('estado_republica').value = estadoGuardado;
@@ -435,6 +504,10 @@
       filtrarCiudades();
       const ciudadGuardada = "{{ request.form.get('ciudad', '') | safe }}";
       if (ciudadGuardada) document.getElementById('ciudad').value = ciudadGuardada;
+
+      // Escuchar cambios en ciudad (datalist no tiene evento change confiable, usamos input)
+      document.getElementById('ciudad').addEventListener('input', onCiudadChange);
+      document.getElementById('ciudad').addEventListener('change', onCiudadChange);
 
       toggleBachi();
 
