@@ -35,32 +35,84 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     servidor.quit()
 
 
-def enviar_correo_con_excel(destinatario, asunto, cuerpo_html, nombre_archivo_excel):
-    """Envía un correo HTML con un Excel provisional adjunto para llenar datos de estudiantes."""
+def enviar_correo_con_excel(destinatario, asunto, cuerpo_html, nombre_archivo_excel,
+                            datos_grupo=None):
+    """Envía un correo HTML con un Excel adjunto para llenar datos de estudiantes.
+
+    datos_grupo (dict opcional) con claves:
+        institucion, nivel, ciudad, estado, fecha, encargado
+    Si se pasa, se agrega una sección de encabezado en el Excel con esos datos
+    para que el encargado no tenga que repetirlos por alumno.
+    """
     if not GMAIL_USER or not GMAIL_PASSWORD:
         print("⚠️ GMAIL_USER/GMAIL_PASSWORD no configurados; no se envía correo.")
         return
 
-    # Crear Excel en memoria
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Estudiantes"
+    ws.title = "Lista de Asistencia"
 
-    # Encabezados provisionales
-    encabezados = ["No.", "Nombre completo", "Edad", "Sexo (Hombre/Mujer)", "Correo electrónico", "Teléfono"]
-    ws.append(encabezados)
+    cafe        = PatternFill("solid", fgColor="8B4513")
+    cafe_claro  = PatternFill("solid", fgColor="D4956A")
+    gris        = PatternFill("solid", fgColor="F2EBE3")
+    bold_white  = Font(bold=True, color="FFFFFF", size=11)
+    bold_dark   = Font(bold=True, color="3B2008", size=11)
+    center      = Alignment(horizontal="center", vertical="center")
+    left        = Alignment(horizontal="left",   vertical="center")
 
-    # Estilo de encabezados
-    from openpyxl.styles import Font, PatternFill, Alignment
-    for col, celda in enumerate(ws[1], start=1):
-        celda.font = Font(bold=True, color="FFFFFF")
-        celda.fill = PatternFill("solid", fgColor="8B4513")
-        celda.alignment = Alignment(horizontal="center")
-        ws.column_dimensions[celda.column_letter].width = 25
+    fila = 1  # cursor de fila
 
-    # Filas vacías numeradas (10 alumnos máx)
-    for i in range(1, 11):
-        ws.append([i, "", "", "", "", ""])
+    # ── Sección de datos del grupo (pre-llenada) ──────────────────────────────
+    if datos_grupo:
+        # Título de sección
+        ws.merge_cells(f"A{fila}:D{fila}")
+        c = ws.cell(fila, 1, "DATOS DEL GRUPO")
+        c.font = bold_white; c.fill = cafe; c.alignment = center
+        ws.row_dimensions[fila].height = 20
+        fila += 1
+
+        campos = [
+            ("Institución",     datos_grupo.get("institucion", "")),
+            ("Nivel académico", datos_grupo.get("nivel", "")),
+            ("Ciudad",          datos_grupo.get("ciudad", "")),
+            ("Estado",          datos_grupo.get("estado", "")),
+            ("Fecha de visita", datos_grupo.get("fecha", "")),
+            ("Encargado",       datos_grupo.get("encargado", "")),
+        ]
+        for etiqueta, valor in campos:
+            ws.merge_cells(f"A{fila}:D{fila}")
+            c_lbl = ws.cell(fila, 1)
+            c_lbl.fill = gris
+            c_lbl.alignment = left
+            c_lbl.font = Font(bold=False, color="3B2008", size=10)
+            c_lbl.value = f"  {etiqueta}:   {valor}"
+            ws.row_dimensions[fila].height = 18
+            fila += 1
+
+        # Fila en blanco separadora
+        fila += 1
+
+    # ── Encabezados de la tabla de alumnos ────────────────────────────────────
+    # NOTA IMPORTANTE PARA EL PARSER: la fila de encabezados siempre
+    # tiene exactamente estos 4 valores; se usa para detectar dónde
+    # empiezan los datos al procesar el Excel subido.
+    encabezados_tabla = ["No.", "Nombre completo", "Edad", "Sexo (Hombre/Mujer)"]
+    for col_idx, titulo in enumerate(encabezados_tabla, start=1):
+        c = ws.cell(fila, col_idx, titulo)
+        c.font = bold_white; c.fill = cafe_claro; c.alignment = center
+        ws.column_dimensions[get_column_letter(col_idx)].width = 28
+    ws.row_dimensions[fila].height = 22
+    fila += 1
+
+    # ── Filas vacías numeradas ────────────────────────────────────────────────
+    alumnos_estimados = datos_grupo.get("numero_alumnos", 20) if datos_grupo else 20
+    filas_vacias = max(int(alumnos_estimados) + 5, 15)  # margen extra
+    for i in range(1, filas_vacias + 1):
+        ws.cell(fila, 1, i).alignment = center
+        fila += 1
 
     # Guardar en buffer
     buffer = io.BytesIO()
