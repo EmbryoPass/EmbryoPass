@@ -62,7 +62,6 @@ def dashboard():
     else:
         inicio_rango = ahora - timedelta(days=30)
 
-    citas_futuras = []
     historial_completo = []
 
     for c in Cita.query.all():
@@ -75,12 +74,7 @@ def dashboard():
                 continue
         fecha = zona.localize(fecha)
 
-        tupla = (c.id, c.nombre, c.correo, c.telefono, c.fecha_hora,
-                 c.estado, c.asistio, c.edad, c.sexo, c.institucion, c.nivel_educativo)
-
-        if fecha >= ahora and c.estado == 'activa':
-            citas_futuras.append(tupla)
-        elif (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
+        if (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
             historial_completo.append({
                 'tipo': 'Individual', 'id': c.id, 'nombre': c.nombre,
                 'edad': c.edad, 'sexo': c.sexo, 'correo': c.correo,
@@ -89,16 +83,29 @@ def dashboard():
                 'institucion': c.institucion, 'nivel': c.nivel_educativo
             })
 
+    # ── Horarios futuros con sus citas activas embebidas ─────────────────────
+    # Se incluyen TODOS los horarios (incluso llenos) para que el admin
+    # siempre vea las citas reservadas dentro de cada uno.
     horarios = []
-    for h in Horario.query.filter(Horario.disponibles > 0).all():
+    for h in Horario.query.all():
         try:
             fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
             fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
+
         if fecha >= ahora:
-            total = h.disponibles + Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').count()
-            horarios.append((h.id, fecha.strftime("%d/%m/%Y %I:%M %p"), h.disponibles, total))
+            citas_activas = Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').all()
+            total = h.disponibles + len(citas_activas)
+            horarios.append({
+                'id':          h.id,
+                'fecha_hora':  fecha.strftime("%d/%m/%Y %I:%M %p"),
+                'disponibles': h.disponibles,
+                'total':       total,
+                'citas':       citas_activas,
+            })
+
+    horarios.sort(key=lambda x: datetime.strptime(x['fecha_hora'], "%d/%m/%Y %I:%M %p"))
 
     if tipo == 'individual':
         historial_completo = [r for r in historial_completo if r['tipo'] == 'Individual']
@@ -116,9 +123,13 @@ def dashboard():
 
     return render_template(
         'dashboard.html',
-        citas=citas_futuras, historial_completo=historial_completo,
-        horarios=horarios, rango=rango, admin_password=admin_password,
-        admin_password_at=admin_password_at, tipo=tipo, tipo_filtro=tipo,
+        historial_completo=historial_completo,
+        horarios=horarios,
+        rango=rango,
+        admin_password=admin_password,
+        admin_password_at=admin_password_at,
+        tipo=tipo,
+        tipo_filtro=tipo,
         visitas_grupales=visitas_grupales
     )
 
@@ -207,9 +218,8 @@ def eliminar_horario(id_horario):
     return redirect(url_for('admin.dashboard'))
 
 
-# ── Helper: línea de nivel académico con plantel si aplica ──────────────────
+# ── Helper: nivel con plantel ────────────────────────────────────────────────
 def _nivel_str(visita):
-    """Devuelve el nivel con el bachillerato/plantel concatenado si existe."""
     if visita.nivel == 'Bachillerato' and visita.bachillerato:
         return f"{visita.nivel} – {visita.bachillerato}"
     return visita.nivel or '—'
@@ -308,7 +318,6 @@ def asignar_fecha_visita(id):
         nombre_excel = f"Lista_estudiantes_{visita.institucion.replace(' ','_')}_{fecha.replace('/','-').replace(' ','_')}.xlsx"
 
         if not fecha_anterior:
-            # Primera confirmación: enviar con Excel adjunto
             cuerpo = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
@@ -340,7 +349,6 @@ def asignar_fecha_visita(id):
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
         elif fecha_anterior != fecha:
-            # Reprogramación: correo simple sin Excel
             enviar_correo(visita.correo, f'Actualización de fecha — {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
