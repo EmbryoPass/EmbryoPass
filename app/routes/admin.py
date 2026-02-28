@@ -360,9 +360,13 @@ def asignar_fecha_visita(id):
       <li><strong>Nueva fecha:</strong> {fecha}</li>
     </ul>
     <p>Si hay algún inconveniente, responde a este correo para reprogramar.</p>
+    <p>📎 Se adjunta una lista en Excel para que registres los datos de los estudiantes que asistirán. Por favor, envíala de vuelta llena antes de la visita.</p>
+    <p>Le recomendamos llegar 15 minutos antes del horario programado.</p>
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>""")
+
+            enviar_correo_con_excel(visita.correo, f'Visita grupal reprogramada — {NOMBRE_MUSEO}', cuerpo, nombre_excel)
             flash('📅 Fecha actualizada y correo de reprogramación enviado.', 'success')
         else:
             flash('📅 Fecha confirmada.', 'success')
