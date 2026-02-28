@@ -91,8 +91,8 @@ def solicitar_visita_grupal():
       <li><strong>Teléfono:</strong> {telefono}</li>
       <li><strong>Ciudad:</strong> {ciudad}</li>
       <li><strong>Estado:</strong> {estado_republica}</li>
-      <li><strong>Institución / Plantel:</strong> {nombre_institucion}</li>
       <li><strong>Nivel académico:</strong> {nivel}{(' – ' + bachillerato) if nivel == 'Bachillerato' and bachillerato else ''}</li>
+      <li><strong>Institución / Plantel:</strong> {nombre_institucion}</li>
       <li><strong>Alumnos estimados:</strong> {numero_alumnos}</li>
       <li><strong>Fechas propuestas:</strong> {fechas}</li>
       <li><strong>Comentarios:</strong> {comentarios or '—'}</li>
