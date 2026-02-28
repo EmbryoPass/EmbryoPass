@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Registrar asistencia grupal – Museo de Embriología</title>
+
+  <!-- Google Fonts: Roboto para body y Nunito para headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #fdf9f3;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* Progress bar top */
+    #progressBar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: #8B4513;
+      width: 0;
+      transition: width .4s ease;
+      z-index: 9999;
+    }
+
+    /* Typewriter effect */
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes blink-caret {
+      50% { border-color: transparent; }
+    }
+    .section-title {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .1em solid #4a3526;
+      width: 0;
+      animation:
+        typewriter 1.5s steps(30) forwards,
+        blink-caret .75s step-end infinite;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Logo principal centrado */
+    .main-logo {
+      display: block;
+      margin: 1.5rem auto;
+      height: 60px;
+    }
+
+    /* Título del sitio */
+    .title-text {
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .title-text h1 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #4a3526;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(0,0,0,0.1);
+      display: inline-block;
+      margin: 0;
+    }
+    .title-text small {
+      display: block;
+      margin-top: 0.5rem;
+      font-variant: small-caps;
+      letter-spacing: 0.02em;
+      color: #555;
+      font-size: 1rem;
+    }
+
+    /* Card de formulario */
+    #formAsistencia {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Inputs & select focus */
+    #formAsistencia .form-control:focus,
+    #formAsistencia .form-select:focus {
+      border-color: #8B4513;
+      box-shadow: 0 0 0 .2rem rgba(139,69,19,0.25);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    /* Botón café con micro-interacción */
+    .btn-cafe {
+      background-color: #8B4513;
+      color: white;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .btn-cafe:hover {
+      background-color: #6e3610;
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Responsividad */
+    @media (max-width: 576px) {
+      .main-logo { height: 50px; }
+      .title-text h1 { font-size: 1.75rem; }
+      .title-text small { font-size: 0.9rem; }
+      .section-title { font-size: 1.5rem; }
+      #formAsistencia { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div id="progressBar"></div>
+  {# registrar_asistencia_grupal.html #}
+  {% include "_menu_btn.html" %}
+
+
+  <div class="container text-center pb-5">
+    <!-- Logo -->
+    <img src="{{ url_for('static', filename='logo.png') }}"
+         alt="Logo Facultad"
+         class="main-logo">
+
+    <!-- Título del sitio -->
+    <div class="title-text">
+      <h1>Museo de Embriología</h1>
+      <small>Dra. Dora Virginia Chávez Corral</small>
+    </div>
+
+    <!-- Título de sección con typewriter -->
+    <h2 class="section-title">Registrar asistencia a cita grupal</h2>
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Formulario -->
+ <form method="POST" id="formAsistencia" onsubmit="return handleSubmit();">
+  <div class="mb-3 text-start">
+    <label class="form-label" for="nombre">Nombre completo</label>
+    <input
+      type="text"
+      class="form-control {% if request.method=='POST' and not request.form.get('nombre') %}is-invalid{% endif %}"
+      id="nombre" name="nombre" required
+      value="{{ request.form.get('nombre','') }}">
+    <div class="invalid-feedback">El nombre es obligatorio.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="correo">Correo electrónico (opcional)</label>
+    <input type="email" class="form-control" id="correo" name="correo"
+           value="{{ request.form.get('correo','') }}">
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="telefono">Teléfono (opcional)</label>
+    <input
+      type="text"
+      class="form-control {% if request.method=='POST' and request.form.get('telefono') and not (request.form.get('telefono')|length == 10 and request.form.get('telefono').isdigit()) %}is-invalid{% endif %}"
+      id="telefono" name="telefono"
+      pattern="^\d{10}$" inputmode="numeric" title="Debe contener 10 dígitos"
+      value="{{ request.form.get('telefono','') }}">
+    <div class="invalid-feedback">Deben ser exactamente 10 dígitos.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="edad">Edad</label>
+    <input
+      type="number"
+      class="form-control {% if request.method=='POST' and not request.form.get('edad') %}is-invalid{% endif %}"
+      id="edad" name="edad" min="1" step="1" required
+      value="{{ request.form.get('edad','') }}">
+    <div class="invalid-feedback">La edad es obligatoria.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="sexo">Sexo</label>
+    <select
+      class="form-select {% if request.method=='POST' and not request.form.get('sexo') %}is-invalid{% endif %}"
+      id="sexo" name="sexo" required>
+      <option value="" disabled {% if not request.form.get('sexo') %}selected{% endif %}>Selecciona una opción</option>
+      <option value="Mujer"  {% if request.form.get('sexo')=='Mujer' %}selected{% endif %}>Mujer</option>
+      <option value="Hombre" {% if request.form.get('sexo')=='Hombre' %}selected{% endif %}>Hombre</option>
+    </select>
+    <div class="invalid-feedback">Selecciona una opción.</div>
+  </div>
+
+  <div class="mb-3 text-start">
+    <label class="form-label" for="visita_id">Selecciona tu institución y fecha</label>
+    <select
+      class="form-select {% if request.method=='POST' and not request.form.get('visita_id') %}is-invalid{% endif %}"
+      id="visita_id" name="visita_id" required>
+      <option value="" disabled {% if not request.form.get('visita_id') %}selected{% endif %}>Selecciona una visita</option>
+      {% for id, institucion, fecha in visitas %}
+        <option value="{{ id }}" {% if request.form.get('visita_id')==id|string %}selected{% endif %}>
+          {{ institucion }} – {{ fecha }}
+        </option>
+      {% endfor %}
+    </select>
+    <div class="invalid-feedback">Selecciona tu visita.</div>
+  </div>
+
+  <div class="text-center">
+    <button type="submit" id="btnEnviar" class="btn btn-cafe w-100">Registrar asistencia</button>
+  </div>
+</form>
+  </div>
+
+ <script>
+  function handleSubmit() {
+    const form = document.getElementById('formAsistencia');
+
+    if (!form.checkValidity()) {
+      form.classList.add('was-validated');  // 👈 activa mensajes .invalid-feedback
+      form.reportValidity();                // tooltips nativos
+      return false;
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.textContent = 'Procesando…';
+    return true;
+  }
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
