@@ -12,6 +12,9 @@ admin_bp = Blueprint('admin', __name__)
 ENCARGADO_USER = 'admin'
 ENCARGADO_PASS = '1234'
 
+# URL pública del sitio (usada en los botones de correos)
+URL_SITIO = 'https://embryopass.onrender.com'
+
 
 def login_required(f):
     from functools import wraps
@@ -22,6 +25,55 @@ def login_required(f):
             return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated
+
+
+# ── Helper: nivel con plantel ────────────────────────────────────────────────
+def _nivel_str(visita):
+    if visita.nivel == 'Bachillerato' and visita.bachillerato:
+        return f"{visita.nivel} – {visita.bachillerato}"
+    return visita.nivel or '—'
+
+
+# ── Helper: bloque HTML del botón de re-agendar (cita individual) ────────────
+def _btn_agendar():
+    return f"""
+    <div style="text-align:center;margin-top:20px;">
+      <a href="{URL_SITIO}/agendar-cita"
+         style="background:#4a90e2;color:white;padding:12px 24px;
+                text-decoration:none;border-radius:6px;font-weight:bold;
+                display:inline-block;">
+        Agendar nueva cita
+      </a>
+    </div>"""
+
+
+# ── Helper: bloque HTML del botón de re-solicitar (visita grupal) ────────────
+def _btn_solicitar():
+    return f"""
+    <div style="text-align:center;margin-top:20px;">
+      <a href="{URL_SITIO}/solicitar-visita-grupal"
+         style="background:#4a90e2;color:white;padding:12px 24px;
+                text-decoration:none;border-radius:6px;font-weight:bold;
+                display:inline-block;">
+        Solicitar nueva visita grupal
+      </a>
+    </div>"""
+
+
+# ── Helper: indicaciones de visita (bloque HTML reutilizable) ────────────────
+def _indicaciones():
+    return """
+    <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
+    <p><strong>Indicaciones durante la visita:</strong></p>
+    <ul style="line-height:1.6;">
+      <li>No tocar las exhibiciones.</li>
+      <li>No comer ni beber dentro del museo.</li>
+      <li>No hablar en voz alta.</li>
+      <li>No tomar fotos ni videos.</li>
+      <li>No correr ni empujar dentro del museo.</li>
+      <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
+    </ul>
+    <p>Le recomendamos llegar 15 minutos antes del horario programado.</p>"""
 
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
@@ -49,7 +101,7 @@ def dashboard():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
-    tipo = request.args.get('tipo', default='todas')
+    tipo  = request.args.get('tipo',  default='todas')
 
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
@@ -63,7 +115,6 @@ def dashboard():
         inicio_rango = ahora - timedelta(days=30)
 
     historial_completo = []
-
     for c in Cita.query.all():
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
@@ -73,19 +124,16 @@ def dashboard():
             except ValueError:
                 continue
         fecha = zona.localize(fecha)
-
         if (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
             historial_completo.append({
                 'tipo': 'Individual', 'id': c.id, 'nombre': c.nombre,
                 'edad': c.edad, 'sexo': c.sexo, 'correo': c.correo,
                 'telefono': c.telefono, 'fecha_hora': c.fecha_hora,
-                'estado': c.estado, 'asistio': c.asistio if c.asistio in ['sí', 'no'] else None,
+                'estado': c.estado,
+                'asistio': c.asistio if c.asistio in ['sí', 'no'] else None,
                 'institucion': c.institucion, 'nivel': c.nivel_educativo
             })
 
-    # ── Horarios futuros con sus citas activas embebidas ─────────────────────
-    # Se incluyen TODOS los horarios (incluso llenos) para que el admin
-    # siempre vea las citas reservadas dentro de cada uno.
     horarios = []
     for h in Horario.query.all():
         try:
@@ -93,7 +141,6 @@ def dashboard():
         except ValueError:
             fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
         fecha = zona.localize(fecha)
-
         if fecha >= ahora:
             citas_activas = Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').all()
             total = h.disponibles + len(citas_activas)
@@ -104,7 +151,6 @@ def dashboard():
                 'total':       total,
                 'citas':       citas_activas,
             })
-
     horarios.sort(key=lambda x: datetime.strptime(x['fecha_hora'], "%d/%m/%Y %I:%M %p"))
 
     if tipo == 'individual':
@@ -119,7 +165,10 @@ def dashboard():
     admin_password_at = None
     if secret and secret.created_at:
         chih = pytz.timezone('America/Chihuahua')
-        admin_password_at = secret.created_at.replace(tzinfo=pytz.utc).astimezone(chih).strftime("%d/%m/%Y %I:%M %p")
+        admin_password_at = (secret.created_at
+                             .replace(tzinfo=pytz.utc)
+                             .astimezone(chih)
+                             .strftime("%d/%m/%Y %I:%M %p"))
 
     return render_template(
         'dashboard.html',
@@ -151,23 +200,34 @@ def marcar_asistencia(id_cita, estado):
 @login_required
 def cancelar_cita(id_cita):
     cita = Cita.query.get(id_cita)
-    if cita:
-        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
-        cita.estado = "cancelada"
-        if horario:
-            horario.disponibles += 1
-        db.session.commit()
+    if not cita:
+        flash('❌ Cita no encontrada.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
+    cita.estado = "cancelada"
+    if horario:
+        horario.disponibles += 1
+    db.session.commit()  # Commit ANTES del correo; si el correo falla la DB ya está actualizada
+
+    try:
         enviar_correo(cita.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #f5c6cb;border-radius:10px;">
     <h2 style="color:#d9534f;">Cancelación de Cita</h2>
     <p>Hola <strong>{cita.nombre}</strong>,</p>
-    <p>Tu cita al {NOMBRE_MUSEO} del <strong>{cita.fecha_hora}</strong> ha sido cancelada debido a un imprevisto.</p>
-    <p>Te invitamos a agendar una nueva cita cuando lo desees.</p>
-    <p>Gracias por tu comprensión.</p>
+    <p>Tu cita al {NOMBRE_MUSEO} del <strong>{cita.fecha_hora}</strong> ha sido cancelada
+       debido a un imprevisto.</p>
+    <p>Puedes agendar una nueva cita cuando lo desees.</p>
+    {_btn_agendar()}
+    <p style="margin-top:16px;">Gracias por tu comprensión.</p>
   </div>
 </body></html>""")
         flash('✅ Cita cancelada, correo enviado y espacio liberado.', 'success')
+    except Exception as e:
+        print(f"[EMAIL] Error al notificar cancelación de cita: {e}")
+        flash('✅ Cita cancelada y espacio liberado (no se pudo enviar el correo).', 'warning')
+
     return redirect(url_for('admin.dashboard'))
 
 
@@ -185,8 +245,8 @@ def eliminar_cita(id_cita):
 @admin_bp.route('/agregar_horario', methods=['POST'])
 @login_required
 def agregar_horario():
-    fecha_hora = request.form['fecha_hora']
-    disponibles = int(request.form['disponibles'])
+    fecha_hora   = request.form['fecha_hora']
+    disponibles  = int(request.form['disponibles'])
     if disponibles > 10:
         disponibles = 10
     db.session.add(Horario(fecha_hora=fecha_hora, disponibles=disponibles))
@@ -199,30 +259,46 @@ def agregar_horario():
 @login_required
 def eliminar_horario(id_horario):
     horario = Horario.query.get(id_horario)
-    if horario:
-        citas = Cita.query.filter_by(fecha_hora=horario.fecha_hora, estado='activa').all()
-        for c in citas:
-            c.estado = "cancelada"
+    if not horario:
+        flash('❌ Horario no encontrado.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    # Cancelar citas activas del horario
+    citas = Cita.query.filter_by(fecha_hora=horario.fecha_hora, estado='activa').all()
+    for c in citas:
+        c.estado = "cancelada"
+
+    # Borrar horario y confirmar en DB ANTES de mandar correos
+    db.session.delete(horario)
+    db.session.commit()
+
+    # Notificar por correo (errores de email no deshacen la operación)
+    errores_email = 0
+    for c in citas:
+        try:
             enviar_correo(c.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #f5c6cb;border-radius:10px;">
     <h2 style="color:#d9534f;">Cancelación de Cita</h2>
     <p>Hola <strong>{c.nombre}</strong>,</p>
-    <p>Tu cita del <strong>{c.fecha_hora}</strong> ha sido cancelada por cambios de disponibilidad en el {NOMBRE_MUSEO}.</p>
-    <p>Te invitamos a agendar una nueva cita.</p>
+    <p>Tu cita del <strong>{c.fecha_hora}</strong> ha sido cancelada por cambios de
+       disponibilidad en el {NOMBRE_MUSEO}.</p>
+    <p>Puedes agendar una nueva cita cuando lo desees.</p>
+    {_btn_agendar()}
+    <p style="margin-top:16px;">Gracias por tu comprensión.</p>
   </div>
 </body></html>""")
-        db.session.delete(horario)
-        db.session.commit()
+        except Exception as e:
+            print(f"[EMAIL] Error al notificar a {c.correo}: {e}")
+            errores_email += 1
+
+    if errores_email:
+        flash(f'✅ Horario eliminado. {len(citas)} cita(s) cancelada(s) '
+              f'({errores_email} notificación(es) no enviada(s)).', 'warning')
+    else:
         flash('✅ Horario eliminado y notificaciones enviadas.', 'success')
+
     return redirect(url_for('admin.dashboard'))
-
-
-# ── Helper: nivel con plantel ────────────────────────────────────────────────
-def _nivel_str(visita):
-    if visita.nivel == 'Bachillerato' and visita.bachillerato:
-        return f"{visita.nivel} – {visita.bachillerato}"
-    return visita.nivel or '—'
 
 
 @admin_bp.route('/aceptar_visita/<int:id>')
@@ -239,12 +315,14 @@ def aceptar_visita(id):
 
     if not ya_aceptada and visita.correo:
         try:
-            enviar_correo(visita.correo, f'Solicitud de visita grupal aceptada — {NOMBRE_MUSEO}', f"""
+            enviar_correo(visita.correo,
+                          f'Solicitud de visita grupal aceptada — {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
     <h2 style="color:#4a90e2;">Solicitud aceptada</h2>
     <p>Hola <strong>{visita.encargado}</strong>,</p>
-    <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>aceptada</strong>. En breve recibirás un correo con la fecha y hora confirmadas.</p>
+    <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>aceptada</strong>.
+       En breve recibirás un correo con la fecha y hora confirmadas.</p>
     <ul style="line-height:1.6;">
       <li><strong>Institución / Plantel:</strong> {visita.institucion}</li>
       <li><strong>Nivel académico:</strong> {_nivel_str(visita)}</li>
@@ -275,14 +353,17 @@ def rechazar_visita(id):
     db.session.commit()
 
     try:
-        enviar_correo(visita.correo, f'Solicitud de visita grupal rechazada — {NOMBRE_MUSEO}', f"""
+        enviar_correo(visita.correo,
+                      f'Solicitud de visita grupal rechazada — {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
     <h2 style="color:#d9534f;">Solicitud rechazada</h2>
     <p>Hola <strong>{visita.encargado}</strong>,</p>
-    <p>Lamentamos informarte que tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>rechazada</strong>.</p>
+    <p>Lamentamos informarte que tu solicitud de visita grupal al {NOMBRE_MUSEO}
+       ha sido <strong>rechazada</strong>.</p>
     <p>Si lo deseas, puedes presentar una nueva solicitud con otras fechas.</p>
-    <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
+    {_btn_solicitar()}
+    <p style="margin-top:16px;">Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>""")
         flash('✅ Visita rechazada y correo enviado.', 'success')
@@ -314,58 +395,66 @@ def asignar_fecha_visita(id):
     visita.fecha_confirmada = fecha
     db.session.commit()
 
-    try:
-        nombre_excel = f"Lista_estudiantes_{visita.institucion.replace(' ','_')}_{fecha.replace('/','-').replace(' ','_')}.xlsx"
+    nombre_excel = (
+        f"Lista_estudiantes_{visita.institucion.replace(' ','_')}_"
+        f"{fecha.replace('/','-').replace(' ','_')}.xlsx"
+    )
 
-        if not fecha_anterior:
-            cuerpo = f"""
+    # Cuerpo común con indicaciones (se usa en confirmación Y en reprogramación)
+    cuerpo_confirmacion = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-    <h2 style="color:#4a90e2;">Confirmación de visita grupal – {NOMBRE_MUSEO}</h2>
+    <h2 style="color:#4a90e2;">{{titulo}} – {NOMBRE_MUSEO}</h2>
     <p>Hola <strong>{visita.encargado}</strong>,</p>
-    <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>confirmada</strong> para:</p>
+    {{intro}}
     <p style="font-size:18px;font-weight:bold;margin:12px 0;">{fecha}</p>
     <ul style="line-height:1.6;">
       <li><strong>Institución / Plantel:</strong> {visita.institucion}</li>
       <li><strong>Nivel académico:</strong> {_nivel_str(visita)}</li>
       <li><strong>Alumnos estimados:</strong> {visita.numero_alumnos}</li>
     </ul>
-    <p><strong>Duración estimada de la visita:</strong> 10 a 15 minutos.</p>
-    <p><strong>Indicaciones durante la visita:</strong></p>
-    <ul style="line-height:1.6;">
-      <li>No tocar las exhibiciones.</li>
-      <li>No comer ni beber dentro del museo.</li>
-      <li>No hablar en voz alta.</li>
-      <li>No tomar fotos ni videos.</li>
-      <li>No correr ni empujar dentro del museo.</li>
-      <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
-    </ul>
-    <p>📎 Se adjunta una lista en Excel para que registres los datos de los estudiantes que asistirán. Por favor, envíala de vuelta llena antes de la visita.</p>
-    <p>Le recomendamos llegar 15 minutos antes del horario programado.</p>
+    {_indicaciones()}
+    <p>📎 Se adjunta una lista en Excel para que registres los datos de los estudiantes
+       que asistirán. Por favor, envíala de vuelta llena antes de la visita.</p>
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>"""
-            enviar_correo_con_excel(visita.correo, f'Confirmación de visita grupal — {NOMBRE_MUSEO}', cuerpo, nombre_excel)
+
+    try:
+        if not fecha_anterior:
+            # ── Primera confirmación ──────────────────────────────────────────
+            cuerpo = cuerpo_confirmacion.replace(
+                '{titulo}', 'Confirmación de visita grupal'
+            ).replace(
+                '{intro}',
+                '<p>Tu solicitud de visita grupal ha sido <strong>confirmada</strong> para:</p>'
+            )
+            enviar_correo_con_excel(
+                visita.correo,
+                f'Confirmación de visita grupal — {NOMBRE_MUSEO}',
+                cuerpo, nombre_excel
+            )
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
         elif fecha_anterior != fecha:
-            enviar_correo(visita.correo, f'Actualización de fecha — {NOMBRE_MUSEO}', f"""
-<html><body style="font-family:Arial,sans-serif;color:#333;">
-  <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-    <h2 style="color:#4a90e2;">Actualización de fecha</h2>
-    <p>Hola <strong>{visita.encargado}</strong>,</p>
-    <p>La fecha de tu visita grupal ha sido <strong>actualizada</strong>:</p>
-    <ul style="line-height:1.6;">
-      <li><strong>Fecha anterior:</strong> {fecha_anterior}</li>
-      <li><strong>Nueva fecha:</strong> {fecha}</li>
-    </ul>
-    <p>Si hay algún inconveniente, responde a este correo para reprogramar.</p>
-    <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
-  </div>
-</body></html>""")
-            flash('📅 Fecha actualizada y correo de reprogramación enviado.', 'success')
+            # ── Reprogramación: se envía Excel e instrucciones igual que en la primera ──
+            cuerpo = cuerpo_confirmacion.replace(
+                '{titulo}', 'Actualización de fecha – visita grupal'
+            ).replace(
+                '{intro}',
+                f'<p>La fecha de tu visita grupal ha sido <strong>actualizada</strong>. '
+                f'La fecha anterior era <strong>{fecha_anterior}</strong>. '
+                f'La nueva fecha confirmada es:</p>'
+            )
+            enviar_correo_con_excel(
+                visita.correo,
+                f'Actualización de fecha — {NOMBRE_MUSEO}',
+                cuerpo, nombre_excel
+            )
+            flash('📅 Fecha actualizada y nuevo correo con Excel enviado.', 'success')
+
         else:
-            flash('📅 Fecha confirmada.', 'success')
+            flash('📅 Fecha confirmada (sin cambios).', 'info')
 
     except Exception as e:
         print(f"[EMAIL] Error: {e}")
@@ -390,14 +479,16 @@ def cancelar_visita_grupal(id):
     db.session.commit()
 
     try:
-        enviar_correo(visita.correo, f'Cancelación de visita grupal – {NOMBRE_MUSEO}', f"""
+        enviar_correo(visita.correo,
+                      f'Cancelación de visita grupal – {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
     <h2 style="color:#d9534f;">Cancelación de visita grupal</h2>
     <p>Hola <strong>{visita.encargado}</strong>,</p>
     <p>Tu solicitud de visita grupal al {NOMBRE_MUSEO} ha sido <strong>cancelada</strong>.</p>
     <p>Puedes solicitar una nueva visita cuando lo desees.</p>
-    <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
+    {_btn_solicitar()}
+    <p style="margin-top:16px;">Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>""")
         flash('✅ Visita cancelada y notificación enviada.', 'success')
@@ -451,7 +542,7 @@ def descargar_historial():
     zona = pytz.timezone('America/Chihuahua')
     ahora = datetime.now(zona)
     rango = request.args.get('rango', default='30')
-    tipo = request.args.get('tipo', default='todas')
+    tipo  = request.args.get('tipo',  default='todas')
 
     if rango == '7':
         inicio_rango = ahora - timedelta(days=7)
@@ -503,7 +594,9 @@ def descargar_historial():
 
     response = make_response(excel_data)
     response.headers['Content-Disposition'] = f'attachment; filename={nombre_archivo}'
-    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    response.headers['Content-Type'] = (
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
     return response
 
 
