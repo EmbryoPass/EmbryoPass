@@ -349,33 +349,23 @@ def asignar_fecha_visita(id):
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
         elif fecha_anterior != fecha:
-
-    cuerpo = f"""
+            enviar_correo(visita.correo, f'Actualización de fecha — {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-    <h2 style="color:#4a90e2;">Visita grupal reprogramada – {NOMBRE_MUSEO}</h2>
+    <h2 style="color:#4a90e2;">Actualización de fecha</h2>
     <p>Hola <strong>{visita.encargado}</strong>,</p>
-    <p>La fecha de tu visita ha sido <strong>actualizada</strong>:</p>
+    <p>La fecha de tu visita grupal ha sido <strong>actualizada</strong>:</p>
     <ul style="line-height:1.6;">
       <li><strong>Fecha anterior:</strong> {fecha_anterior}</li>
       <li><strong>Nueva fecha:</strong> {fecha}</li>
     </ul>
-    <p>📎 Se adjunta nuevamente la lista en Excel para registrar a los estudiantes.</p>
-    <p>Le recomendamos llegar 15 minutos antes del horario programado.</p>
+    <p>Si hay algún inconveniente, responde a este correo para reprogramar.</p>
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
-</body></html>"""
-
-    enviar_correo_con_excel(
-        visita.correo,
-        f'Visita grupal reprogramada — {NOMBRE_MUSEO}',
-        cuerpo,
-        nombre_excel
-    )
-
-    flash('📅 Fecha actualizada y correo de reprogramación enviado.', 'success')
-else:
-    flash('📅 Fecha confirmada.', 'success')
+</body></html>""")
+            flash('📅 Fecha actualizada y correo de reprogramación enviado.', 'success')
+        else:
+            flash('📅 Fecha confirmada.', 'success')
 
     except Exception as e:
         print(f"[EMAIL] Error: {e}")
