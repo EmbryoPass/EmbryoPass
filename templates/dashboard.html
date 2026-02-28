@@ -162,6 +162,8 @@
                           <th>Nombre</th>
                           <th>Edad</th>
                           <th>Sexo</th>
+                          <th>Ciudad</th>
+                          <th>Estado</th>
                           <th>Institución</th>
                           <th>Nivel Académico</th>
                           <th>Correo</th>
@@ -175,6 +177,8 @@
                           <td>{{ cita.nombre }}</td>
                           <td>{{ cita.edad or '—' }}</td>
                           <td>{{ cita.sexo or '—' }}</td>
+                          <td>{{ cita.ciudad or '—' }}</td>
+                          <td>{{ cita.estado_republica or '—' }}</td>
                           <td>{{ cita.institucion or '—' }}</td>
                           <td>{{ cita.nivel_educativo or '—' }}</td>
                           <td>{{ cita.correo }}</td>
@@ -224,11 +228,13 @@
           <th>Correo</th>
           <th>Teléfono</th>
           <th>Nivel Académico</th>
-          <th>Alumnos</th>
+          <th>Alumnos estimados</th>
+          <th>Alumnos registrados</th>
           <th>Fechas Propuestas</th>
           <th>Comentarios</th>
           <th>Estado</th>
           <th>Fecha confirmada</th>
+          <th>Lista de alumnos</th>
           <th>Acciones</th>
           <th>Cancelar</th>
           <th>Eliminar</th>
@@ -247,7 +253,15 @@
               <br><small class="text-muted">{{ visita.bachillerato }}</small>
             {% endif %}
           </td>
-          <td>{{ visita.numero_alumnos }}</td>
+          <td class="text-center">{{ visita.numero_alumnos }}</td>
+          <td class="text-center">
+            {% set n_est = visita.estudiantes | length %}
+            {% if n_est > 0 %}
+              <span class="badge bg-success">{{ n_est }}</span>
+            {% else %}
+              <span class="badge bg-secondary">0</span>
+            {% endif %}
+          </td>
           <td>{{ visita.fechas_preferidas }}</td>
           <td>{{ visita.comentarios or '—' }}</td>
           <td>
@@ -262,6 +276,32 @@
             {% endif %}
           </td>
           <td>{{ visita.fecha_confirmada or '—' }}</td>
+
+          {# ── Columna: subir Excel de alumnos ── #}
+          <td>
+            {% if visita.fecha_confirmada and visita.estado == 'aceptada' %}
+              <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
+                    method="POST" enctype="multipart/form-data"
+                    class="d-flex flex-column gap-1">
+                <input type="file" name="excel_estudiantes" accept=".xlsx"
+                       class="form-control form-control-sm" required>
+                <button type="submit" class="btn btn-sm btn-pastel-primary">
+                  📤 Subir lista
+                </button>
+              </form>
+              {% if visita.estudiantes | length > 0 %}
+                <small class="text-muted d-block mt-1">
+                  Última subida: {{ visita.estudiantes[-1].hora_registro }}
+                </small>
+              {% endif %}
+            {% elif visita.estado == 'aceptada' %}
+              <small class="text-muted">Asigna fecha primero</small>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+
+          {# ── Acciones: aceptar/rechazar o asignar fecha ── #}
           <td>
             {% if visita.estado == 'pendiente' %}
               <a href="{{ url_for('admin.aceptar_visita', id=visita.id) }}"
@@ -280,6 +320,7 @@
               </form>
             {% endif %}
           </td>
+
           <td>
             {% set puede_cancelar = visita.estado in ['pendiente', 'aceptada'] %}
             {% if puede_cancelar %}
@@ -352,22 +393,20 @@
       </select>
     </div>
     <div class="col-auto">
-      <label for="tipo" class="form-label fw-bold mb-0">Tipo de cita:</label>
-    </div>
-    <div class="col-auto">
-      <select name="tipo" id="tipo" class="form-select form-select-sm">
-        <option value="todas"     {% if tipo == 'todas'     %}selected{% endif %}>Todas</option>
-        <option value="individual"{% if tipo == 'individual'%}selected{% endif %}>Individual</option>
-        <option value="grupal"    {% if tipo == 'grupal'    %}selected{% endif %}>Grupal</option>
-      </select>
-    </div>
-    <div class="col-auto">
       <button type="submit" class="btn btn-pastel-primary btn-sm">Aplicar</button>
     </div>
-    <div class="col-auto">
-      <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo=tipo_filtro) }}"
+    <div class="col-12 col-md-auto mt-2 mt-md-0 d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='todas') }}"
          class="btn btn-pastel-success btn-sm">
-        📥 Descargar historial en Excel
+        📥 Descargar ambos
+      </a>
+      <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='individual') }}"
+         class="btn btn-pastel-secondary btn-sm">
+        📥 Solo individuales
+      </a>
+      <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='grupal') }}"
+         class="btn btn-pastel-secondary btn-sm">
+        📥 Solo grupales
       </a>
     </div>
   </form>
@@ -379,6 +418,8 @@
           <th>Nombre</th>
           <th>Edad</th>
           <th>Sexo</th>
+          <th>Ciudad</th>
+          <th>Estado</th>
           <th>Institución</th>
           <th>Nivel Académico</th>
           <th>Correo</th>
@@ -394,6 +435,8 @@
           <td>{{ registro.nombre }}</td>
           <td>{{ registro.edad or '—' }}</td>
           <td>{{ registro.sexo or '—' }}</td>
+          <td>{{ registro.ciudad or '—' }}</td>
+          <td>{{ registro.estado_rep or '—' }}</td>
           <td>{{ registro.institucion or '—' }}</td>
           <td>{{ registro.nivel or '—' }}</td>
           <td>{{ registro.correo or '—' }}</td>
@@ -404,6 +447,109 @@
             <span class="badge" style="background-color:#b9e4c9;color:#2e6e4c;">Finalizada</span>
           </td>
         </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       HISTORIAL DE VISITAS GRUPALES
+       ══════════════════════════════════════════════════════ -->
+  <h2 class="section-title mt-5">Historial de Visitas Grupales</h2>
+
+  <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:0.3rem;">
+    <table class="table table-bordered table-hover shadow-sm align-middle"
+           style="background-color:#fdf9f3;">
+      <thead class="table-light">
+        <tr>
+          <th></th>
+          <th>Institución / Plantel</th>
+          <th>Nivel</th>
+          <th>Ciudad</th>
+          <th>Estado</th>
+          <th>Encargado</th>
+          <th>Fecha de visita</th>
+          <th>Alumnos estimados</th>
+          <th>Alumnos registrados</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visita in historial_grupales %}
+          {% set coll_id = 'hg-' ~ visita.id %}
+          {# Fila principal clickeable #}
+          <tr class="horario-toggle-row"
+              data-bs-toggle="collapse"
+              data-bs-target="#{{ coll_id }}"
+              aria-expanded="false">
+            <td class="text-center"><span class="toggle-arrow">▼</span></td>
+            <td><strong>{{ visita.institucion }}</strong></td>
+            <td>
+              {{ visita.nivel }}
+              {% if visita.nivel == 'Bachillerato' and visita.bachillerato %}
+                <br><small class="text-muted">{{ visita.bachillerato }}</small>
+              {% endif %}
+            </td>
+            <td>{{ visita.ciudad or '—' }}</td>
+            <td>{{ visita.estado_republica or '—' }}</td>
+            <td>{{ visita.encargado }}</td>
+            <td>{{ visita.fecha_confirmada }}</td>
+            <td class="text-center">{{ visita.numero_alumnos }}</td>
+            <td class="text-center">
+              {% set n = visita.estudiantes | length %}
+              {% if n > 0 %}
+                <span class="badge bg-success">{{ n }}</span>
+              {% else %}
+                <span class="badge bg-secondary">0</span>
+              {% endif %}
+            </td>
+          </tr>
+
+          {# Fila expandible con lista de alumnos #}
+          <tr class="citas-collapse collapse" id="{{ coll_id }}">
+            <td colspan="9">
+              <div class="citas-inner-wrap">
+                {% if visita.estudiantes %}
+                  <p class="mb-2 fw-bold text-muted small">
+                    Lista de alumnos – {{ visita.institucion }} ({{ visita.fecha_confirmada }})
+                  </p>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Nombre</th>
+                          <th>Edad</th>
+                          <th>Sexo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for est in visita.estudiantes %}
+                        <tr>
+                          <td>{{ loop.index }}</td>
+                          <td>{{ est.nombre }}</td>
+                          <td>{{ est.edad or '—' }}</td>
+                          <td>{{ est.sexo or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="text-muted mb-0 small">
+                    No se ha subido la lista de alumnos para esta visita.
+                  </p>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+
+        {% else %}
+          <tr>
+            <td colspan="9" class="text-center text-muted">
+              No hay visitas grupales en el período seleccionado.
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
