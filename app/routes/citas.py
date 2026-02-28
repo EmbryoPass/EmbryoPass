@@ -107,16 +107,13 @@ def agendar():
     <h2 style="color:#4a90e2;">Confirmación de Cita – {NOMBRE_MUSEO}</h2>
     <p>Hola <strong>{nombre}</strong>, tu cita ha sido agendada exitosamente.</p>
     <ul style="line-height:1.6;">
+      <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       <li><strong>Nombre:</strong> {nombre}</li>
       <li><strong>Correo:</strong> {correo}</li>
       <li><strong>Teléfono:</strong> {telefono}</li>
-      <li><strong>Edad:</strong> {edad}</li>
-      <li><strong>Sexo:</strong> {sexo}</li>
+      <li><strong>Ciudad:</strong> {ciudad}, {estado_republica}</li>
       <li><strong>Institución:</strong> {institucion}</li>
       <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
-      <li><strong>Ciudad:</strong> {ciudad}</li>
-      <li><strong>Estado:</strong> {estado_republica}</li>
-      <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
     </ul>
     <p><strong>Duración estimada:</strong> 10 a 15 minutos.</p>
     <p><strong>Indicaciones durante la visita:</strong></p>
@@ -141,12 +138,11 @@ def agendar():
 <html><body style="font-family:Arial,sans-serif;">
   <h3>🧬 Nueva cita agendada</h3>
   <ul>
+    <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
     <li><strong>Nombre:</strong> {nombre}</li>
     <li><strong>Correo:</strong> {correo}</li>
     <li><strong>Teléfono:</strong> {telefono}</li>
-    <li><strong>Edad:</strong> {edad} | <strong>Sexo:</strong> {sexo}</li>
-    <li><strong>Ciudad:</strong> {ciudad}, {estado_republica}</li>
-    <li><strong>Fecha:</strong> {horario.fecha_hora}</li>
+    <li><strong>Institución:</strong> {institucion}</li>
   </ul>
 </body></html>""")
 
