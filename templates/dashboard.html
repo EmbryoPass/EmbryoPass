@@ -386,7 +386,6 @@
           <th>Fecha y Hora</th>
           <th>Tipo</th>
           <th>Estado</th>
-          <th>Eliminar</th>
         </tr>
       </thead>
       <tbody>
@@ -402,21 +401,7 @@
           <td>{{ registro.fecha_hora }}</td>
           <td><span class="badge bg-info text-dark">{{ registro.tipo }}</span></td>
           <td>
-            {% if registro.estado == 'cancelada' %}
-              <span class="badge bg-secondary">Cancelada</span>
-            {% else %}
-              <span class="badge" style="background-color:#b9e4c9;color:#2e6e4c;">Finalizada</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if registro.tipo == 'Individual' %}
-              <a href="{{ url_for('admin.eliminar_cita', id_cita=registro.id) }}"
-                 class="btn btn-outline-danger btn-sm" title="Eliminar cita">🗑️</a>
-            {% else %}
-              <a href="{{ url_for('admin.eliminar_estudiante_grupal', id=registro.id) }}"
-                 class="btn btn-outline-danger btn-sm"
-                 title="Eliminar estudiante de visita grupal">🗑️</a>
-            {% endif %}
+            <span class="badge" style="background-color:#b9e4c9;color:#2e6e4c;">Finalizada</span>
           </td>
         </tr>
         {% endfor %}
