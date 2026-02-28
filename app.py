@@ -33,6 +33,8 @@ elif uri.startswith("postgresql://") and "+psycopg2" not in uri:
 if "sslmode=" not in uri:
     uri += ("&" if "?" in uri else "?") + "sslmode=require"
 
+# Eliminar channel_binding si está presente (no compatible con psycopg2)
+uri = uri.replace("&channel_binding=require", "").replace("?channel_binding=require", "")
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -1444,6 +1446,7 @@ if __name__ == "__main__":
         verificar_y_agregar_columnas_postgresql()
     # Ejecuta la app una sola vez
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
