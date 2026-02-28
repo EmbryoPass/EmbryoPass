@@ -535,10 +535,34 @@
                       </tbody>
                     </table>
                   </div>
+                  {# Botón para re-subir si necesitan actualizar la lista #}
+                  <div class="mt-2">
+                    <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
+                          method="POST" enctype="multipart/form-data"
+                          class="d-flex align-items-center gap-2">
+                      <input type="file" name="excel_estudiantes" accept=".xlsx"
+                             class="form-control form-control-sm" style="max-width:260px;" required>
+                      <button type="submit" class="btn btn-sm btn-pastel-primary text-nowrap">
+                        🔄 Actualizar lista
+                      </button>
+                    </form>
+                    <small class="text-muted">
+                      Última subida: {{ visita.estudiantes[-1].hora_registro }}
+                    </small>
+                  </div>
                 {% else %}
-                  <p class="text-muted mb-0 small">
+                  <p class="text-muted mb-2 small">
                     No se ha subido la lista de alumnos para esta visita.
                   </p>
+                  <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
+                        method="POST" enctype="multipart/form-data"
+                        class="d-flex align-items-center gap-2">
+                    <input type="file" name="excel_estudiantes" accept=".xlsx"
+                           class="form-control form-control-sm" style="max-width:260px;" required>
+                    <button type="submit" class="btn btn-sm btn-pastel-primary text-nowrap">
+                      📤 Subir lista
+                    </button>
+                  </form>
                 {% endif %}
               </div>
             </td>
