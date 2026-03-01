@@ -10,11 +10,12 @@
   <style>
     body { background-color:#fdf9f3; font-family:'Roboto',sans-serif; color:#333; min-height:100vh; }
     #progressBar { position:fixed;top:0;left:0;width:0;height:3px;background:#8B4513;transition:width .4s ease;z-index:9999; }
-    @keyframes typewriter { from{width:0} to{width:100%} }
-    @keyframes blink-caret { 50%{border-color:transparent} }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { opacity: 0; animation: fadeSlideIn .8s ease-out forwards; }
     .section-title {
-      overflow:hidden;white-space:nowrap;border-right:.1em solid #4a3526;width:0;
-      animation:typewriter 1.5s steps(30) forwards,blink-caret .75s step-end infinite;
       font-family:'Nunito',sans-serif;font-size:1.75rem;font-weight:700;
       margin-bottom:1.5rem;text-align:center;
     }
@@ -38,20 +39,31 @@
   </style>
 </head>
 <body>
+
+  <div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);
+       z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+    <div style="width:52px;height:52px;border:5px solid #e0cfc4;border-top-color:#8B4513;
+                border-radius:50%;animation:spin .8s linear infinite;"></div>
+    <p style="font-family:'Nunito',sans-serif;font-weight:700;color:#4a3526;font-size:1.1rem;margin:0;">
+      Enviando solicitud…
+    </p>
+  </div>
+  <style> @keyframes spin { to { transform: rotate(360deg); } } </style>
+
   <div id="progressBar"></div>
   {# solicitar_visita_grupal.html #}
   {% include "_menu_btn.html" %}
 
   <div class="container text-center pb-5">
-    <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mb-1">
+    <div class="d-flex align-items-center justify-content-center gap-3 fade-in" style="animation-delay:.1s;margin-top:1.5rem;">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" style="height:60px;">
       <img src="{{ url_for('static', filename='isotipo.png') }}" alt="Isotipo Museo" style="height:60px;">
     </div>
-    <div class="title-text">
+    <div class="title-text fade-in" style="animation-delay:.25s;">
       <h1>"Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral"</small>
     </div>
-    <h2 class="section-title">Solicitar visita grupal</h2>
+    <h2 class="section-title fade-in" style="animation-delay:.4s;">Solicitar visita grupal</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}{% for category, message in messages %}
@@ -59,7 +71,7 @@
       {% endfor %}{% endif %}
     {% endwith %}
 
-    <form method="POST" id="visitaForm" onsubmit="return validarVisitaGrupal();">
+    <form method="POST" id="visitaForm" onsubmit="return validarVisitaGrupal();" class="fade-in" style="animation-delay:.55s;">
 
       <!-- Datos del encargado -->
       <div class="mb-3 text-start">
@@ -344,7 +356,8 @@
     function disableVisitaButton() {
       document.getElementById('progressBar').style.width = '100%';
       const btn = document.getElementById('visitaBtn');
-      btn.disabled = true; btn.textContent = 'Procesando...';
+      btn.disabled = true; btn.textContent = 'Procesando…';
+      document.getElementById('loadingOverlay').style.display = 'flex';
     }
     function validarVisitaGrupal() {
       const c1 = document.getElementById('correo_encargado').value.trim();

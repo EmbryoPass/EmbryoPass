@@ -25,21 +25,15 @@
       z-index: 9999;
     }
 
-    @keyframes typewriter {
-      from { width: 0; }
-      to   { width: 100%; }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes blink-caret {
-      50% { border-color: transparent; }
+    .fade-in {
+      opacity: 0;
+      animation: fadeSlideIn .8s ease-out forwards;
     }
     .section-title {
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: .1em solid #4a3526;
-      width: 0;
-      animation:
-        typewriter 1.5s steps(30) forwards,
-        blink-caret .75s step-end infinite;
       font-family: 'Nunito', sans-serif;
       font-size: 1.75rem;
       font-weight: 700;
@@ -135,17 +129,17 @@
   {% include "_menu_btn.html" %}
 
   <div class="container text-center pb-5">
-    <div class="logo-container">
+    <div class="logo-container fade-in" style="animation-delay:.1s;">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" class="main-logo">
       <img src="{{ url_for('static', filename='isotipo.png') }}" alt="Isotipo Museo" class="isotipo">
     </div>
 
-    <div class="title-text">
+    <div class="title-text fade-in" style="animation-delay:.25s;">
       <h1>"Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral"</small>
     </div>
 
-    <h2 class="section-title">Agendar visita</h2>
+    <h2 class="section-title fade-in" style="animation-delay:.4s;">Agendar visita</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -155,7 +149,7 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST" id="agendarForm" onsubmit="return validarCorreos();">
+    <form method="POST" id="agendarForm" onsubmit="return validarCorreos();" class="fade-in" style="animation-delay:.55s;">
       <div class="mb-3 text-start">
         <label for="nombre" class="form-label">Nombre completo</label>
         <input type="text" class="form-control" id="nombre" name="nombre" required
