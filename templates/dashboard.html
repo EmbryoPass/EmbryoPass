@@ -9,92 +9,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
 
   <style>
-    body {
-      background-color: #fdf9f3;
-      font-family: 'Roboto', sans-serif;
-      color: #333;
-      min-height: 100vh;
-    }
-    .container {
-      background-color: transparent !important;
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-    }
-    h1, h2, h3 { font-weight: 700; color: #222; }
+    body { background-color:#fdf9f3; font-family:'Roboto',sans-serif; color:#333; min-height:100vh; }
+    .container { background-color:transparent !important; padding-top:2rem; padding-bottom:2rem; }
+    h1,h2,h3 { font-weight:700; color:#222; }
 
-    .btn-pastel-primary  { background-color: #a7dffb; border-color: #a7dffb; color: #004e6b; }
-    .btn-pastel-primary:hover  { background-color: #8fd3f5; border-color: #8fd3f5; }
-    .btn-pastel-success  { background-color: #b9e4c9; border-color: #b9e4c9; color: #2e6e4c; }
-    .btn-pastel-success:hover  { background-color: #a0d8b6; border-color: #a0d8b6; }
-    .btn-pastel-danger   { background-color: #f7c6c7; border-color: #f7c6c7; color: #842029; }
-    .btn-pastel-danger:hover   { background-color: #f3b0b2; border-color: #f3b0b2; }
-    .btn-pastel-secondary{ background-color: #eaeaea; border-color: #eaeaea; color: #555; }
-    .btn-pastel-secondary:hover{ background-color: #dcdcdc; border-color: #dcdcdc; }
-    .btn-disabled {
-      background-color: #f0f0f0; border-color: #f0f0f0; color: #999;
-      cursor: not-allowed; pointer-events: none; opacity: 0.7;
-    }
+    .btn-pastel-primary   { background-color:#a7dffb; border-color:#a7dffb; color:#004e6b; }
+    .btn-pastel-primary:hover  { background-color:#8fd3f5; border-color:#8fd3f5; }
+    .btn-pastel-success   { background-color:#b9e4c9; border-color:#b9e4c9; color:#2e6e4c; }
+    .btn-pastel-success:hover  { background-color:#a0d8b6; border-color:#a0d8b6; }
+    .btn-pastel-danger    { background-color:#f7c6c7; border-color:#f7c6c7; color:#842029; }
+    .btn-pastel-danger:hover   { background-color:#f3b0b2; border-color:#f3b0b2; }
+    .btn-pastel-secondary { background-color:#eaeaea; border-color:#eaeaea; color:#555; }
+    .btn-pastel-secondary:hover{ background-color:#dcdcdc; border-color:#dcdcdc; }
+    .btn-disabled { background-color:#f0f0f0; border-color:#f0f0f0; color:#999;
+                    cursor:not-allowed; pointer-events:none; opacity:.7; }
 
-    .main-logo { display: block; margin: 1.5rem auto; height: 80px; }
-
-    .title-text { text-align: center; margin: 2rem 0; }
+    .main-logo { display:block; margin:1.5rem auto; height:80px; }
+    .title-text { text-align:center; margin:2rem 0; }
     .title-text h1 {
-      font-family: 'Nunito', sans-serif; font-size: 2.25rem; font-weight: 700;
-      letter-spacing: 0.05em; color: #4a3526;
-      padding-bottom: 0.5rem; border-bottom: 2px solid rgba(0,0,0,0.1);
-      display: inline-block;
+      font-family:'Nunito',sans-serif; font-size:2.25rem; font-weight:700;
+      letter-spacing:.05em; color:#4a3526;
+      padding-bottom:.5rem; border-bottom:2px solid rgba(0,0,0,.1); display:inline-block;
     }
-    .title-text small { display: block; margin-top: 0.5rem; font-variant: small-caps; letter-spacing: 0.02em; color: #555; }
+    .title-text small { display:block; margin-top:.5rem; font-variant:small-caps; letter-spacing:.02em; color:#555; }
 
-    .section-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; }
-    @media (max-width: 576px) {
-      .section-title { font-size: 1.25rem; margin-bottom: 0.75rem; }
-    }
+    .section-title { font-size:1.75rem; font-weight:700; margin-bottom:1rem; }
+    @media(max-width:576px){ .section-title{ font-size:1.25rem; margin-bottom:.75rem; } }
 
-    .table thead { background-color: #e9ecef; }
+    .table thead { background-color:#e9ecef; }
 
-    /* Horario row que actúa de toggle */
-    .horario-toggle-row { cursor: pointer; }
-    .horario-toggle-row:hover td { background-color: #f0ebe3 !important; }
+    .horario-toggle-row { cursor:pointer; }
+    .horario-toggle-row:hover td { background-color:#f0ebe3 !important; }
 
-    /* Sub-tabla de citas */
-    .citas-collapse { background-color: #fdf9f3; }
-    .citas-collapse td { padding: 0 !important; }
+    .citas-collapse { background-color:#fdf9f3; }
+    .citas-collapse td { padding:0 !important; }
     .citas-inner-wrap {
-      padding: 0.75rem 1.5rem;
-      border-left: 3px solid #a7dffb;
-      background-color: #f7f3ee;
+      padding:.75rem 1.5rem;
+      border-left:3px solid #a7dffb;
+      background-color:#f7f3ee;
     }
-    .citas-inner-wrap .table { margin-bottom: 0; background-color: transparent; }
-    .citas-inner-wrap .table thead tr { background-color: #e0f0fb; }
+    .citas-inner-wrap .table { margin-bottom:0; background-color:transparent; }
+    .citas-inner-wrap .table thead tr { background-color:#e0f0fb; }
 
-    /* Flecha indicadora */
-    .toggle-arrow { transition: transform .2s; display: inline-block; }
-    .collapsed .toggle-arrow { transform: rotate(-90deg); }
+    .toggle-arrow { transition:transform .2s; display:inline-block; }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Logo y título -->
   <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" class="main-logo">
   <div class="title-text">
     <h1>"Museo de Embriología</h1>
     <small>Dra. Dora Virginia Chávez Corral"</small>
   </div>
-
   <h1 class="text-center mb-4">Panel de Administración</h1>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} text-center">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
+    {% if messages %}{% for category, message in messages %}
+      <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+    {% endfor %}{% endif %}
   {% endwith %}
 
+
   <!-- ══════════════════════════════════════════════════════
-       HORARIOS PROGRAMADOS (con citas desplegables dentro)
+       HORARIOS PROGRAMADOS
        ══════════════════════════════════════════════════════ -->
   <h2 class="section-title mt-4">Horarios Programados</h2>
 
@@ -104,7 +82,7 @@
         <tr>
           <th></th>
           <th>Fecha y Hora</th>
-          <th>Lugares disponibles</th>
+          <th>Disponibles</th>
           <th>Capacidad total</th>
           <th>Citas agendadas</th>
           <th>Eliminar horario</th>
@@ -112,17 +90,10 @@
       </thead>
       <tbody>
         {% for horario in horarios %}
-
-          {# Fila principal del horario – hace toggle al collapse #}
-          {% set collapse_id = 'citas-horario-' ~ horario.id %}
+          {% set cid = 'h-' ~ horario.id %}
           <tr class="horario-toggle-row"
-              data-bs-toggle="collapse"
-              data-bs-target="#{{ collapse_id }}"
-              aria-expanded="false"
-              aria-controls="{{ collapse_id }}">
-            <td class="text-center">
-              <span class="toggle-arrow">▼</span>
-            </td>
+              data-bs-toggle="collapse" data-bs-target="#{{ cid }}" aria-expanded="false">
+            <td class="text-center"><span class="toggle-arrow">▼</span></td>
             <td><strong>{{ horario.fecha_hora }}</strong></td>
             <td>
               {% if horario.disponibles == 0 %}
@@ -138,55 +109,42 @@
               </span>
             </td>
             <td>
-              {# Stopropagation via onclick para que el link no dispare el toggle #}
               <a href="{{ url_for('admin.eliminar_horario', id_horario=horario.id) }}"
-                 class="btn btn-pastel-danger btn-sm"
-                 onclick="event.stopPropagation();">
+                 class="btn btn-pastel-danger btn-sm" onclick="event.stopPropagation();">
                 Eliminar
               </a>
             </td>
           </tr>
-
-          {# Fila colapsable con las citas de este horario #}
-          <tr class="citas-collapse collapse" id="{{ collapse_id }}">
+          <tr class="citas-collapse collapse" id="{{ cid }}">
             <td colspan="6">
               <div class="citas-inner-wrap">
                 {% if horario.citas %}
-                  <p class="mb-2 fw-bold text-muted small">
-                    Citas agendadas para {{ horario.fecha_hora }}
-                  </p>
+                  <p class="mb-2 fw-bold text-muted small">Citas para {{ horario.fecha_hora }}</p>
                   <div class="table-responsive">
                     <table class="table table-sm table-bordered">
                       <thead>
                         <tr>
-                          <th>Nombre</th>
-                          <th>Edad</th>
-                          <th>Sexo</th>
-                          <th>Ciudad</th>
-                          <th>Estado</th>
-                          <th>Institución</th>
-                          <th>Nivel Académico</th>
-                          <th>Correo</th>
-                          <th>Teléfono</th>
-                          <th>Cancelar</th>
+                          <th>Nombre</th><th>Edad</th><th>Sexo</th>
+                          <th>Ciudad</th><th>Estado</th>
+                          <th>Institución</th><th>Nivel</th>
+                          <th>Correo</th><th>Teléfono</th><th>Cancelar</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {% for cita in horario.citas %}
+                        {% for c in horario.citas %}
                         <tr>
-                          <td>{{ cita.nombre }}</td>
-                          <td>{{ cita.edad or '—' }}</td>
-                          <td>{{ cita.sexo or '—' }}</td>
-                          <td>{{ cita.ciudad or '—' }}</td>
-                          <td>{{ cita.estado_republica or '—' }}</td>
-                          <td>{{ cita.institucion or '—' }}</td>
-                          <td>{{ cita.nivel_educativo or '—' }}</td>
-                          <td>{{ cita.correo }}</td>
-                          <td>{{ cita.telefono }}</td>
+                          <td>{{ c.nombre }}</td>
+                          <td>{{ c.edad or '—' }}</td>
+                          <td>{{ c.sexo or '—' }}</td>
+                          <td>{{ c.ciudad or '—' }}</td>
+                          <td>{{ c.estado_republica or '—' }}</td>
+                          <td>{{ c.institucion or '—' }}</td>
+                          <td>{{ c.nivel_educativo or '—' }}</td>
+                          <td>{{ c.correo }}</td>
+                          <td>{{ c.telefono }}</td>
                           <td>
-                            <a href="{{ url_for('admin.cancelar_cita', id_cita=cita.id) }}"
-                               class="btn btn-pastel-danger btn-sm"
-                               onclick="event.stopPropagation();">
+                            <a href="{{ url_for('admin.cancelar_cita', id_cita=c.id) }}"
+                               class="btn btn-pastel-danger btn-sm" onclick="event.stopPropagation();">
                               Cancelar
                             </a>
                           </td>
@@ -196,18 +154,13 @@
                     </table>
                   </div>
                 {% else %}
-                  <p class="text-muted mb-0 small">
-                    Sin citas agendadas para este horario.
-                  </p>
+                  <p class="text-muted mb-0 small">Sin citas agendadas para este horario.</p>
                 {% endif %}
               </div>
             </td>
           </tr>
-
         {% else %}
-          <tr>
-            <td colspan="6" class="text-center text-muted">No hay horarios programados.</td>
-          </tr>
+          <tr><td colspan="6" class="text-center text-muted">No hay horarios programados.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -227,7 +180,7 @@
           <th>Encargado</th>
           <th>Correo</th>
           <th>Teléfono</th>
-          <th>Nivel Académico</th>
+          <th>Nivel</th>
           <th>Alumnos estimados</th>
           <th>Alumnos registrados</th>
           <th>Fechas Propuestas</th>
@@ -256,11 +209,9 @@
           <td class="text-center">{{ visita.numero_alumnos }}</td>
           <td class="text-center">
             {% set n_est = visita.estudiantes | length %}
-            {% if n_est > 0 %}
-              <span class="badge bg-success">{{ n_est }}</span>
-            {% else %}
-              <span class="badge bg-secondary">0</span>
-            {% endif %}
+            <span class="badge {% if n_est > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ n_est }}
+            </span>
           </td>
           <td>{{ visita.fechas_preferidas }}</td>
           <td>{{ visita.comentarios or '—' }}</td>
@@ -277,19 +228,16 @@
           </td>
           <td>{{ visita.fecha_confirmada or '—' }}</td>
 
-          {# ── Columna: subir Excel de alumnos ── #}
+          {# ── Lista alumnos ── #}
           <td>
             {% if visita.fecha_confirmada and visita.estado == 'aceptada' %}
               <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
-                    method="POST" enctype="multipart/form-data"
-                    class="d-flex flex-column gap-1">
+                    method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-1">
                 <input type="file" name="excel_estudiantes" accept=".xlsx,.xls"
                        class="form-control form-control-sm" required>
-                <button type="submit" class="btn btn-sm btn-pastel-primary">
-                  📤 Subir lista
-                </button>
+                <button type="submit" class="btn btn-sm btn-pastel-primary">📤 Subir lista</button>
               </form>
-              {% if visita.estudiantes | length > 0 %}
+              {% if visita.estudiantes %}
                 <small class="text-muted d-block mt-1">
                   Última subida: {{ visita.estudiantes[-1].hora_registro }}
                 </small>
@@ -301,7 +249,7 @@
             {% endif %}
           </td>
 
-          {# ── Acciones: aceptar/rechazar o asignar fecha ── #}
+          {# ── Acciones ── #}
           <td>
             {% if visita.estado == 'pendiente' %}
               <a href="{{ url_for('admin.aceptar_visita', id=visita.id) }}"
@@ -311,26 +259,20 @@
             {% elif visita.estado == 'aceptada' %}
               <form action="{{ url_for('admin.asignar_fecha_visita', id=visita.id) }}"
                     method="POST" class="d-flex flex-column">
-                <input type="text" name="fecha_confirmada"
-                       placeholder="dd/mm/aaaa hh:mm"
+                <input type="text" name="fecha_confirmada" placeholder="dd/mm/aaaa hh:mm"
                        class="form-control form-control-sm mb-1 fecha-confirmada" required>
-                <button type="submit"
-                        class="btn btn-sm btn-pastel-primary btn-asignar-fecha"
+                <button type="submit" class="btn btn-sm btn-pastel-primary btn-asignar-fecha"
                         disabled>Asignar Fecha</button>
               </form>
             {% endif %}
           </td>
 
           <td>
-            {% set puede_cancelar = visita.estado in ['pendiente', 'aceptada'] %}
-            {% if puede_cancelar %}
+            {% if visita.estado in ['pendiente', 'aceptada'] %}
               <a href="{{ url_for('admin.cancelar_visita_grupal', id=visita.id) }}"
-                 class="btn btn-sm btn-pastel-danger cancelar-visita-btn">
-                Cancelar
-              </a>
+                 class="btn btn-sm btn-pastel-danger cancelar-visita-btn">Cancelar</a>
             {% elif visita.estado == 'rechazada' %}
-              <button class="btn btn-sm btn-disabled" disabled
-                      title="No disponible para solicitudes rechazadas">Cancelar</button>
+              <button class="btn btn-sm btn-disabled" disabled>Cancelar</button>
             {% else %}
               <span class="badge bg-secondary">Cancelada</span>
             {% endif %}
@@ -338,11 +280,10 @@
           <td>
             {% if visita.estado in ['cancelada', 'rechazada'] %}
               <a href="{{ url_for('admin.eliminar_visita_grupal', id=visita.id) }}"
-                 class="btn btn-sm btn-outline-danger eliminar-visita-btn"
-                 title="Eliminar visita {{ visita.estado }}">🗑️</a>
+                 class="btn btn-sm btn-outline-danger eliminar-visita-btn">🗑️</a>
             {% else %}
               <button class="btn btn-sm btn-disabled"
-                      title="Solo se puede eliminar si la visita está cancelada o rechazada">🗑️</button>
+                      title="Solo se puede eliminar si está cancelada o rechazada">🗑️</button>
             {% endif %}
           </td>
         </tr>
@@ -365,7 +306,7 @@
              placeholder="Selecciona fecha y hora" required>
     </div>
     <div class="mb-3">
-      <label for="disponibles" class="form-label fw-bold">Número de espacios disponibles</label>
+      <label for="disponibles" class="form-label fw-bold">Espacios disponibles</label>
       <input type="number" class="form-control" id="disponibles" name="disponibles"
              min="1" max="10" required>
     </div>
@@ -376,9 +317,9 @@
 
 
   <!-- ══════════════════════════════════════════════════════
-       HISTORIAL DE CITAS
+       HISTORIAL DE CITAS INDIVIDUALES
        ══════════════════════════════════════════════════════ -->
-  <h2 class="section-title mt-5">Historial de Citas</h2>
+  <h2 class="section-title mt-5">Historial de Citas Individuales</h2>
 
   <form method="get" class="row g-2 align-items-center mb-3">
     <div class="col-auto">
@@ -386,10 +327,10 @@
     </div>
     <div class="col-auto">
       <select name="rango" id="rango" class="form-select form-select-sm">
-        <option value="7"   {% if rango == '7'   %}selected{% endif %}>Últimos 7 días</option>
-        <option value="30"  {% if rango == '30'  %}selected{% endif %}>Últimos 30 días</option>
-        <option value="mes" {% if rango == 'mes' %}selected{% endif %}>Este mes</option>
-        <option value="todo"{% if rango == 'todo'%}selected{% endif %}>Todo el historial</option>
+        <option value="7"   {% if rango=='7'   %}selected{% endif %}>Últimos 7 días</option>
+        <option value="30"  {% if rango=='30'  %}selected{% endif %}>Últimos 30 días</option>
+        <option value="mes" {% if rango=='mes' %}selected{% endif %}>Este mes</option>
+        <option value="todo"{% if rango=='todo'%}selected{% endif %}>Todo el historial</option>
       </select>
     </div>
     <div class="col-auto">
@@ -397,56 +338,40 @@
     </div>
     <div class="col-12 col-md-auto mt-2 mt-md-0 d-flex gap-2 flex-wrap">
       <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='todas') }}"
-         class="btn btn-pastel-success btn-sm">
-        📥 Descargar ambos
-      </a>
+         class="btn btn-pastel-success btn-sm">📥 Descargar ambos</a>
       <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='individual') }}"
-         class="btn btn-pastel-secondary btn-sm">
-        📥 Solo individuales
-      </a>
+         class="btn btn-pastel-secondary btn-sm">📥 Solo individuales</a>
       <a href="{{ url_for('admin.descargar_historial', rango=rango, tipo='grupal') }}"
-         class="btn btn-pastel-secondary btn-sm">
-        📥 Solo grupales
-      </a>
+         class="btn btn-pastel-secondary btn-sm">📥 Solo grupales</a>
     </div>
   </form>
 
-  <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:0.3rem;">
+  <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:.3rem;">
     <table class="table table-bordered table-hover shadow-sm" style="background-color:#fdf9f3;">
       <thead class="table-light">
         <tr>
-          <th>Nombre</th>
-          <th>Edad</th>
-          <th>Sexo</th>
-          <th>Ciudad</th>
-          <th>Estado</th>
-          <th>Institución</th>
-          <th>Nivel Académico</th>
-          <th>Correo</th>
-          <th>Teléfono</th>
-          <th>Fecha y Hora</th>
-          <th>Tipo</th>
-          <th>Estado</th>
+          <th>Nombre</th><th>Edad</th><th>Sexo</th>
+          <th>Ciudad</th><th>Estado</th>
+          <th>Institución</th><th>Nivel Académico</th>
+          <th>Correo</th><th>Teléfono</th><th>Fecha y Hora</th>
         </tr>
       </thead>
       <tbody>
-        {% for registro in historial_completo %}
+        {% for r in historial_completo %}
         <tr>
-          <td>{{ registro.nombre }}</td>
-          <td>{{ registro.edad or '—' }}</td>
-          <td>{{ registro.sexo or '—' }}</td>
-          <td>{{ registro.ciudad or '—' }}</td>
-          <td>{{ registro.estado_rep or '—' }}</td>
-          <td>{{ registro.institucion or '—' }}</td>
-          <td>{{ registro.nivel or '—' }}</td>
-          <td>{{ registro.correo or '—' }}</td>
-          <td>{{ registro.telefono or '—' }}</td>
-          <td>{{ registro.fecha_hora }}</td>
-          <td><span class="badge bg-info text-dark">{{ registro.tipo }}</span></td>
-          <td>
-            <span class="badge" style="background-color:#b9e4c9;color:#2e6e4c;">Finalizada</span>
-          </td>
+          <td>{{ r.nombre }}</td>
+          <td>{{ r.edad or '—' }}</td>
+          <td>{{ r.sexo or '—' }}</td>
+          <td>{{ r.ciudad or '—' }}</td>
+          <td>{{ r.estado_rep or '—' }}</td>
+          <td>{{ r.institucion or '—' }}</td>
+          <td>{{ r.nivel or '—' }}</td>
+          <td>{{ r.correo or '—' }}</td>
+          <td>{{ r.telefono or '—' }}</td>
+          <td>{{ r.fecha_hora }}</td>
         </tr>
+        {% else %}
+          <tr><td colspan="10" class="text-center text-muted">Sin registros en este período.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -457,8 +382,9 @@
        HISTORIAL DE VISITAS GRUPALES
        ══════════════════════════════════════════════════════ -->
   <h2 class="section-title mt-5">Historial de Visitas Grupales</h2>
+  <p class="text-muted small mb-3">Período aplicado: igual que el filtro de arriba.</p>
 
-  <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:0.3rem;">
+  <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:.3rem;">
     <table class="table table-bordered table-hover shadow-sm align-middle"
            style="background-color:#fdf9f3;">
       <thead class="table-light">
@@ -476,12 +402,9 @@
       </thead>
       <tbody>
         {% for visita in historial_grupales %}
-          {% set coll_id = 'hg-' ~ visita.id %}
-          {# Fila principal clickeable #}
+          {% set hg_id = 'hg-' ~ visita.id %}
           <tr class="horario-toggle-row"
-              data-bs-toggle="collapse"
-              data-bs-target="#{{ coll_id }}"
-              aria-expanded="false">
+              data-bs-toggle="collapse" data-bs-target="#{{ hg_id }}" aria-expanded="false">
             <td class="text-center"><span class="toggle-arrow">▼</span></td>
             <td><strong>{{ visita.institucion }}</strong></td>
             <td>
@@ -497,16 +420,11 @@
             <td class="text-center">{{ visita.numero_alumnos }}</td>
             <td class="text-center">
               {% set n = visita.estudiantes | length %}
-              {% if n > 0 %}
-                <span class="badge bg-success">{{ n }}</span>
-              {% else %}
-                <span class="badge bg-secondary">0</span>
-              {% endif %}
+              <span class="badge {% if n > 0 %}bg-success{% else %}bg-secondary{% endif %}">{{ n }}</span>
             </td>
           </tr>
 
-          {# Fila expandible con lista de alumnos #}
-          <tr class="citas-collapse collapse" id="{{ coll_id }}">
+          <tr class="citas-collapse collapse" id="{{ hg_id }}">
             <td colspan="9">
               <div class="citas-inner-wrap">
                 {% if visita.estudiantes %}
@@ -516,12 +434,7 @@
                   <div class="table-responsive">
                     <table class="table table-sm table-bordered mb-0">
                       <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Nombre</th>
-                          <th>Edad</th>
-                          <th>Sexo</th>
-                        </tr>
+                        <tr><th>#</th><th>Nombre</th><th>Edad</th><th>Sexo</th></tr>
                       </thead>
                       <tbody>
                         {% for est in visita.estudiantes %}
@@ -535,7 +448,6 @@
                       </tbody>
                     </table>
                   </div>
-                  {# Botón para re-subir si necesitan actualizar la lista #}
                   <div class="mt-2">
                     <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
                           method="POST" enctype="multipart/form-data"
@@ -551,9 +463,7 @@
                     </small>
                   </div>
                 {% else %}
-                  <p class="text-muted mb-2 small">
-                    No se ha subido la lista de alumnos para esta visita.
-                  </p>
+                  <p class="text-muted mb-2 small">No se ha subido la lista de alumnos.</p>
                   <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
                         method="POST" enctype="multipart/form-data"
                         class="d-flex align-items-center gap-2">
@@ -567,7 +477,6 @@
               </div>
             </td>
           </tr>
-
         {% else %}
           <tr>
             <td colspan="9" class="text-center text-muted">
@@ -611,105 +520,72 @@
     <a href="{{ url_for('admin.logout') }}" class="btn btn-pastel-danger">Cerrar sesión</a>
   </div>
 
-</div>{# /container #}
+</div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // ── Flatpickr: nuevo horario ───────────────────────────────────────────────
+  // Flatpickr: nuevo horario
   flatpickr("#fecha_hora", {
-    enableTime: true, dateFormat: "d/m/Y h:i K",
-    time_24hr: false, minDate: "today"
+    enableTime:true, dateFormat:"d/m/Y h:i K", time_24hr:false, minDate:"today"
   });
-
-  // ── Flatpickr: asignar fecha a visitas aceptadas ──────────────────────────
+  // Flatpickr: asignar fecha visita
   flatpickr("input[name='fecha_confirmada']", {
-    enableTime: true, dateFormat: "d/m/Y h:i K",
-    time_24hr: false, minDate: "today"
+    enableTime:true, dateFormat:"d/m/Y h:i K", time_24hr:false, minDate:"today"
   });
 
-  // ── Habilitar botón "Asignar Fecha" solo cuando el input tiene valor ───────
+  // Habilitar botón Asignar Fecha solo cuando tiene valor
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('form.d-flex.flex-column').forEach(function (form) {
-      const inputFecha = form.querySelector('.fecha-confirmada');
-      const btnAsignar = form.querySelector('.btn-asignar-fecha');
-      if (inputFecha && btnAsignar) {
-        inputFecha.addEventListener('input', function () {
-          btnAsignar.disabled = inputFecha.value.trim() === '';
-        });
-      }
+      const inp = form.querySelector('.fecha-confirmada');
+      const btn = form.querySelector('.btn-asignar-fecha');
+      if (inp && btn) inp.addEventListener('input', () => btn.disabled = inp.value.trim() === '');
     });
   });
 
-  // ── Rotar flecha al abrir / cerrar collapse ────────────────────────────────
+  // Rotar flechas en collapse
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (trigger) {
       const arrow = trigger.querySelector('.toggle-arrow');
       if (!arrow) return;
-
-      const targetId = trigger.getAttribute('data-bs-target');
-      const collapseEl = document.querySelector(targetId);
-      if (!collapseEl) return;
-
-      collapseEl.addEventListener('show.bs.collapse', function () {
-        arrow.style.transform = 'rotate(0deg)';
-      });
-      collapseEl.addEventListener('hide.bs.collapse', function () {
-        arrow.style.transform = 'rotate(-90deg)';
-      });
-      // Estado inicial: cerrado → flecha apuntando a la derecha
+      const target = document.querySelector(trigger.getAttribute('data-bs-target'));
+      if (!target) return;
+      target.addEventListener('show.bs.collapse', () => arrow.style.transform = 'rotate(0deg)');
+      target.addEventListener('hide.bs.collapse', () => arrow.style.transform = 'rotate(-90deg)');
       arrow.style.transform = 'rotate(-90deg)';
     });
   });
 
-  // ── Confirmaciones para acciones destructivas ─────────────────────────────
+  // Confirmaciones destructivas
   document.addEventListener("DOMContentLoaded", function () {
-    const enlaces = document.querySelectorAll(
-      "a.btn-pastel-danger, a.btn-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn"
-    );
-    enlaces.forEach(function (enlace) {
-      enlace.addEventListener("click", function (e) {
-        const texto = (enlace.textContent || "").toLowerCase().trim();
-        let mensaje = "¿Estás seguro de que deseas continuar?";
-        if (texto.includes("cancelar") && texto.includes("visita")) {
-          mensaje = "¿Deseas cancelar esta visita grupal?";
-        } else if (texto.includes("eliminar") || texto.includes("🗑")) {
-          mensaje = "¿Deseas eliminar este registro permanentemente?";
-        } else if (texto.includes("cancelar")) {
-          mensaje = "¿Deseas cancelar esta cita u horario?";
-        }
-        if (!confirm(mensaje)) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+    document.querySelectorAll(
+      "a.btn-pastel-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn"
+    ).forEach(function (el) {
+      el.addEventListener("click", function (e) {
+        const txt = (el.textContent || "").toLowerCase().trim();
+        let msg = "¿Estás seguro de que deseas continuar?";
+        if (txt.includes("cancelar") && txt.includes("visita")) msg = "¿Deseas cancelar esta visita grupal?";
+        else if (txt.includes("eliminar") || txt.includes("🗑"))  msg = "¿Deseas eliminar este registro permanentemente?";
+        else if (txt.includes("cancelar"))                        msg = "¿Deseas cancelar esta cita u horario?";
+        if (!confirm(msg)) { e.preventDefault(); e.stopPropagation(); }
       });
     });
   });
 
-  // ── Contraseña: mostrar / copiar ──────────────────────────────────────────
+  // Mostrar / copiar contraseña
   (function () {
-    const pwField = document.getElementById('pwField');
-    const toggle  = document.getElementById('togglePw');
-    const copy    = document.getElementById('copyPw');
-    if (toggle && pwField) {
-      toggle.addEventListener('click', () => {
-        const isHidden = pwField.type === 'password';
-        pwField.type = isHidden ? 'text' : 'password';
-        toggle.textContent = isHidden ? 'Ocultar' : 'Mostrar';
-      });
-    }
-    if (copy && pwField) {
-      copy.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(pwField.value);
-          copy.textContent = '¡Copiado!';
-          setTimeout(() => (copy.textContent = 'Copiar'), 1200);
-        } catch (e) {
-          alert('No se pudo copiar al portapapeles.');
-        }
-      });
-    }
+    const pw  = document.getElementById('pwField');
+    const tog = document.getElementById('togglePw');
+    const cop = document.getElementById('copyPw');
+    if (tog && pw) tog.addEventListener('click', () => {
+      const h = pw.type === 'password';
+      pw.type = h ? 'text' : 'password';
+      tog.textContent = h ? 'Ocultar' : 'Mostrar';
+    });
+    if (cop && pw) cop.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(pw.value); cop.textContent='¡Copiado!'; setTimeout(()=>cop.textContent='Copiar',1200); }
+      catch(e){ alert('No se pudo copiar.'); }
+    });
   })();
 </script>
 </body>
