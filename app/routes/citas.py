@@ -1,3 +1,4 @@
+import os
 import re
 import uuid
 import pytz
@@ -10,6 +11,8 @@ from app.models import Cita, Horario
 from app.utils import enviar_correo, GMAIL_USER, NOMBRE_MUSEO
 
 citas_bp = Blueprint('citas', __name__)
+
+URL_SITIO = os.environ.get('URL_SITIO', 'http://localhost:5000')
 
 
 @citas_bp.route('/agendar-cita', methods=['GET', 'POST'])
@@ -33,18 +36,23 @@ def agendar():
             flash('❌ Actualmente no hay citas disponibles.', 'danger')
             return redirect(url_for('citas.agendar'))
 
-        nombre = request.form['nombre'].strip()
-        correo = request.form['correo']
-        confirmar_correo = request.form['confirmar_correo']
-        telefono = request.form['telefono']
-        horario_id = request.form['horario']
-        edad = request.form['edad']
-        sexo = request.form['sexo']
-        institucion = request.form.get('institucion', '').strip()
-        nivel_educativo = request.form.get('nivel', '').strip()
-        ciudad = request.form.get('ciudad', '').strip()
+        nombre           = request.form['nombre'].strip()
+        correo           = request.form['correo'].strip().lower()
+        confirmar_correo = request.form['confirmar_correo'].strip().lower()
+        telefono         = request.form['telefono'].strip()
+        horario_id       = request.form['horario']
+        edad_raw         = request.form.get('edad', '').strip()
+        sexo             = request.form['sexo']
+        institucion      = request.form.get('institucion', '').strip()
+        nivel            = request.form.get('nivel', '').strip()
+        nivel_otro       = request.form.get('nivel_otro', '').strip()
+        ciudad           = request.form.get('ciudad', '').strip()
         estado_republica = request.form.get('estado_republica', '').strip()
 
+        # Si nivel es "Otro", usar el campo de texto libre
+        nivel_educativo = nivel_otro if nivel == 'Otro' and nivel_otro else nivel
+
+        # ── Validaciones ─────────────────────────────────────────────────────
         if not institucion or not nivel_educativo:
             flash('❌ Institución y nivel académico son obligatorios.', 'danger')
             return redirect(url_for('citas.agendar'))
@@ -65,7 +73,16 @@ def agendar():
             flash('❌ El teléfono debe tener exactamente 10 dígitos numéricos.', 'danger')
             return redirect(url_for('citas.agendar'))
 
-        horario = Horario.query.get(horario_id)
+        try:
+            edad = int(edad_raw)
+            if edad < 1 or edad > 120:
+                raise ValueError
+        except (ValueError, TypeError):
+            flash('❌ La edad debe ser un número válido (1–120).', 'danger')
+            return redirect(url_for('citas.agendar'))
+
+        # Usar db.session.get() — forma correcta en SQLAlchemy 2.0
+        horario = db.session.get(Horario, int(horario_id))
         if not horario:
             flash('❌ El horario seleccionado no existe.', 'danger')
             return redirect(url_for('citas.agendar'))
@@ -78,6 +95,7 @@ def agendar():
             return redirect(url_for('citas.agendar'))
 
         try:
+            # UPDATE atómico para evitar condiciones de carrera
             rows_updated = db.session.execute(
                 update(Horario)
                 .where(Horario.id == horario_id)
@@ -86,7 +104,7 @@ def agendar():
             ).rowcount
 
             if rows_updated == 0:
-                flash('❌ El horario ya está lleno.', 'danger')
+                flash('❌ El horario ya está lleno. Por favor elige otro.', 'danger')
                 db.session.rollback()
                 return redirect(url_for('citas.agendar'))
 
@@ -104,18 +122,18 @@ def agendar():
             cuerpo = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-    <h2 style="color:#4a90e2;">Confirmación de Cita – {NOMBRE_MUSEO}</h2>
+    <h2 style="color:#4a90e2;">Confirmacion de Cita - {NOMBRE_MUSEO}</h2>
     <p>Hola <strong>{nombre}</strong>, tu cita ha sido agendada exitosamente.</p>
     <ul style="line-height:1.6;">
       <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
       <li><strong>Nombre:</strong> {nombre}</li>
       <li><strong>Correo:</strong> {correo}</li>
-      <li><strong>Teléfono:</strong> {telefono}</li>
+      <li><strong>Telefono:</strong> {telefono}</li>
       <li><strong>Ciudad y estado de procedencia:</strong> {ciudad}, {estado_republica}</li>
-      <li><strong>Institución:</strong> {institucion}</li>
+      <li><strong>Institucion:</strong> {institucion}</li>
       <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
     </ul>
-    <p><strong>Duración estimada:</strong> 10 a 15 minutos.</p>
+    <p><strong>Duracion estimada:</strong> 10 a 15 minutos.</p>
     <p><strong>Indicaciones durante la visita:</strong></p>
     <ul style="line-height:1.6;">
       <li>No tocar las exhibiciones.</li>
@@ -123,38 +141,38 @@ def agendar():
       <li>No hablar en voz alta.</li>
       <li>No tomar fotos ni videos.</li>
       <li>No correr ni empujar dentro del museo.</li>
-      <li>No manipular etiquetas, carteles o información sobre las piezas.</li>
+      <li>No manipular etiquetas, carteles o informacion sobre las piezas.</li>
     </ul>
     <p>Si necesitas cancelar tu cita:</p>
-    <a href="https://quixotic-veronika-uach-98c1e80d.koyeb.app/cancelar_usuario/{nueva_cita.id}/{token}"
+    <a href="{URL_SITIO}/cancelar_usuario/{nueva_cita.id}/{token}"
        style="background:#d9534f;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
        Cancelar mi cita
     </a>
-    <p style="margin-top:20px;">Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
+    <p style="margin-top:20px;">Gracias por tu interes en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>"""
-            enviar_correo(correo, f'Confirmación de Cita – {NOMBRE_MUSEO}', cuerpo)
+            enviar_correo(correo, f'Confirmacion de Cita - {NOMBRE_MUSEO}', cuerpo)
             enviar_correo(GMAIL_USER, 'Nueva Cita Agendada', f"""
 <html><body style="font-family:Arial,sans-serif;">
-  <h3>🧬 Nueva cita agendada</h3>
+  <h3>Nueva cita agendada</h3>
   <ul>
     <li><strong>Fecha y hora:</strong> {horario.fecha_hora}</li>
-      <li><strong>Nombre:</strong> {nombre}</li>
-      <li><strong>Correo:</strong> {correo}</li>
-      <li><strong>Teléfono:</strong> {telefono}</li>
-      <li><strong>Ciudad y estado de procedencia:</strong> {ciudad}, {estado_republica}</li>
-      <li><strong>Institución:</strong> {institucion}</li>
-      <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
+    <li><strong>Nombre:</strong> {nombre}</li>
+    <li><strong>Correo:</strong> {correo}</li>
+    <li><strong>Telefono:</strong> {telefono}</li>
+    <li><strong>Ciudad y estado de procedencia:</strong> {ciudad}, {estado_republica}</li>
+    <li><strong>Institucion:</strong> {institucion}</li>
+    <li><strong>Nivel educativo:</strong> {nivel_educativo}</li>
   </ul>
 </body></html>""")
 
-            flash('✅ Cita agendada correctamente. Revisa tu correo.', 'success')
+            flash('Cita agendada correctamente. Revisa tu correo.', 'success')
             return redirect(url_for('citas.agendar'))
 
         except Exception as e:
             db.session.rollback()
-            flash('❌ Error al agendar cita. Intenta nuevamente.', 'danger')
-            print(f"Error al agendar cita: {e}")
+            flash('Error al agendar cita. Intenta nuevamente.', 'danger')
+            print(f"[ERROR agendar]: {type(e).__name__}: {e}")
 
     hay_disponibles = len(horarios) > 0
     return render_template('agendar.html', horarios=horarios, hay_disponibles=hay_disponibles)
@@ -167,7 +185,7 @@ def cancelar_usuario(id_cita, token):
 
     cita = Cita.query.filter_by(id=id_cita, token_cancelacion=token, estado='activa').first()
     if not cita:
-        flash('❌ Enlace inválido o cita ya cancelada.', 'danger')
+        flash('Enlace invalido o cita ya cancelada.', 'danger')
         return redirect(url_for('citas.agendar'))
 
     try:
@@ -177,17 +195,32 @@ def cancelar_usuario(id_cita, token):
     fecha = zona.localize(fecha)
 
     if ahora > fecha:
-        flash('⚠️ No puedes cancelar una cita pasada.', 'warning')
+        flash('No puedes cancelar una cita pasada.', 'warning')
         return redirect(url_for('citas.agendar'))
 
-    cita.estado = 'cancelada'
-    horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
-    if horario:
-        horario.disponibles += 1
-    db.session.commit()
+    try:
+        cita.estado = 'cancelada'
+        horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
+        if horario:
+            citas_activas_restantes = Cita.query.filter_by(
+                fecha_hora=cita.fecha_hora, estado='activa'
+            ).count() - 1
+            total_original = horario.disponibles + Cita.query.filter_by(
+                fecha_hora=cita.fecha_hora, estado='activa'
+            ).count()
+            horario.disponibles = max(0, total_original - citas_activas_restantes)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash('Error al cancelar la cita. Intenta de nuevo.', 'danger')
+        print(f"[ERROR cancelar_usuario]: {type(e).__name__}: {e}")
+        return redirect(url_for('citas.agendar'))
 
-    enviar_correo('museoembriologia@gmail.com', f'Cancelación de Cita – {NOMBRE_MUSEO}',
-        f'<p>{cita.nombre} canceló su cita del {cita.fecha_hora}.</p>')
+    try:
+        enviar_correo(GMAIL_USER, f'Cancelacion de Cita - {NOMBRE_MUSEO}',
+            f'<p>{cita.nombre} cancelo su cita del {cita.fecha_hora}.</p>')
+    except Exception as e:
+        print(f"[EMAIL cancelar_usuario]: {e}")
 
-    flash('✅ Tu cita fue cancelada correctamente.', 'success')
+    flash('Tu cita fue cancelada correctamente.', 'success')
     return redirect(url_for('citas.agendar'))

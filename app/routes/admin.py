@@ -1,3 +1,4 @@
+import os
 import pytz
 import pandas as pd
 from datetime import datetime, timedelta
@@ -10,8 +11,8 @@ from app.utils import enviar_correo, enviar_correo_con_excel, generar_password_s
 admin_bp = Blueprint('admin', __name__)
 
 ENCARGADO_USER = 'admin'
-ENCARGADO_PASS = '1234'
-URL_SITIO = 'https://quixotic-veronika-uach-98c1e80d.koyeb.app'
+ENCARGADO_PASS = os.environ.get('ADMIN_PASSWORD', 'admin_local')
+URL_SITIO      = os.environ.get('URL_SITIO', 'http://localhost:5000')
 
 
 def login_required(f):
@@ -147,19 +148,6 @@ def dashboard():
     )
 
 
-@admin_bp.route('/marcar_asistencia/<int:id_cita>/<estado>')
-@login_required
-def marcar_asistencia(id_cita, estado):
-    cita = db.session.get(Cita, id_cita)
-    if cita and estado in ['sí', 'no']:
-        cita.asistio = estado
-        db.session.commit()
-        flash('✅ Asistencia registrada.', 'success')
-    else:
-        flash('❌ Error al actualizar asistencia.', 'danger')
-    return redirect(url_for('admin.dashboard'))
-
-
 @admin_bp.route('/cancelar_cita/<int:id_cita>')
 @login_required
 def cancelar_cita(id_cita):
@@ -171,7 +159,15 @@ def cancelar_cita(id_cita):
     horario = Horario.query.filter_by(fecha_hora=cita.fecha_hora).first()
     cita.estado = 'cancelada'
     if horario:
-        horario.disponibles += 1
+        # Recalculamos cuántas citas activas quedan para no exceder la capacidad original
+        citas_activas_restantes = Cita.query.filter_by(
+            fecha_hora=cita.fecha_hora, estado='activa'
+        ).count() - 1  # -1 porque la actual aún no se commitó
+        total_original = horario.disponibles + Cita.query.filter_by(
+            fecha_hora=cita.fecha_hora, estado='activa'
+        ).count()
+        nuevo_disponibles = total_original - citas_activas_restantes
+        horario.disponibles = max(0, nuevo_disponibles)
     db.session.commit()
 
     try:
@@ -219,6 +215,15 @@ def agregar_horario():
     disponibles = int(request.form['disponibles'])
     if disponibles > 10:
         disponibles = 10
+    if disponibles < 1:
+        disponibles = 1
+
+    # Evitar duplicados
+    existente = Horario.query.filter_by(fecha_hora=fecha_hora).first()
+    if existente:
+        flash('⚠️ Ya existe un horario para esa fecha y hora.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+
     db.session.add(Horario(fecha_hora=fecha_hora, disponibles=disponibles))
     db.session.commit()
     flash('✅ Horario agregado.', 'success')
