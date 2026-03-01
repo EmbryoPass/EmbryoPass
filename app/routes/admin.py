@@ -733,13 +733,25 @@ def subir_excel_visita(id):
         return redirect(url_for('admin.dashboard'))
 
     archivo = request.files.get('excel_estudiantes')
-    if not archivo or not archivo.filename.endswith('.xlsx'):
-        flash('❌ Debes subir un archivo .xlsx válido.', 'danger')
+    if not archivo or not (archivo.filename.endswith('.xlsx') or archivo.filename.endswith('.xls')):
+        flash('❌ Debes subir un archivo Excel válido (.xlsx o .xls).', 'danger')
         return redirect(url_for('admin.dashboard'))
 
     try:
-        wb = openpyxl.load_workbook(archivo)
-        ws = wb.active
+        # openpyxl solo soporta .xlsx; para .xls usamos xlrd vía pandas
+        if archivo.filename.endswith('.xls'):
+            import io as _io
+            df_raw = pd.read_excel(_io.BytesIO(archivo.read()), header=None, engine='xlrd')
+            # Convertir a openpyxl workbook para reutilizar el mismo parser
+            import openpyxl
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            for row in df_raw.itertuples(index=False):
+                ws.append(list(row))
+        else:
+            import openpyxl
+            wb = openpyxl.load_workbook(archivo)
+            ws = wb.active
 
         # ── Detectar la fila de encabezados de la tabla ───────────────────────
         # Buscamos la fila que tenga "No." en la columna A y "Nombre completo" en B
