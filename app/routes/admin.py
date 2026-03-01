@@ -74,7 +74,8 @@ def dashboard():
                 continue
         fecha = zona.localize(fecha)
 
-        if (fecha < ahora and fecha >= inicio_rango) or c.estado == 'cancelada':
+       
+        if fecha < ahora and fecha >= inicio_rango and c.estado != 'cancelada':
             historial_completo.append({
                 'tipo': 'Individual', 'id': c.id, 'nombre': c.nombre,
                 'edad': c.edad, 'sexo': c.sexo, 'correo': c.correo,
