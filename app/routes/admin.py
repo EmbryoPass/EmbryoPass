@@ -228,48 +228,54 @@ def agregar_horario():
 @admin_bp.route('/eliminar_horario/<int:id_horario>')
 @login_required
 def eliminar_horario(id_horario):
-    # 1. Buscamos el horario por su ID único (esto es infalible)
+    # 1. Buscamos el horario por su ID único para no fallar por temas de texto
     horario = Horario.query.get(id_horario)
     if not horario:
         flash('❌ Horario no encontrado.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # 2. Buscamos TODAS las citas que tengan esta misma fecha_hora
-    # Se eliminó el filtro de estado='activa' para limpiar también las canceladas
-    # y evitar que la base de datos bloquee el borrado.
+    # 2. LIMPIEZA TOTAL: Buscamos TODAS las citas con esta fecha, sin importar el estado
+    # Esto es vital porque incluso las citas 'canceladas' que tengan esa fecha
+    # pueden estar bloqueando el registro en el motor de la base de datos.
     citas_relacionadas = Cita.query.filter_by(fecha_hora=horario.fecha_hora).all()
     
-    # Guardamos cuáles estaban activas para saber a quién notificar
-    citas_a_notificar = [c for c in citas_relacionadas if c.estado == 'activa']
+    # Identificamos las que realmente vamos a cancelar y notificar
+    citas_activas = [c for c in citas_relacionadas if c.estado == 'activa']
 
     try:
-        # 3. Marcamos las activas como canceladas
+        # 3. Desvinculamos las citas: les cambiamos el estado y limpiamos el campo fecha_hora
+        # para que la base de datos vea que el Horario ya no tiene 'hijos' vinculados.
         for c in citas_relacionadas:
             if c.estado == 'activa':
                 c.estado = 'cancelada'
+            # Importante: al ser una relación basada en texto, 'rompemos' el vínculo
+            # añadiendo un prefijo para que el DELETE del horario no se bloquee.
+            c.fecha_hora = f"ELIMINADO_{c.fecha_hora}"
         
-        # Forzamos la actualización de las citas antes de borrar el horario
+        # Sincronizamos estos cambios en las citas antes de proceder
         db.session.flush()
 
-        # 4. Eliminamos el horario físicamente
+        # 4. Ahora sí, borramos el horario físicamente
         db.session.delete(horario)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
         print(f"[ERROR DB]: {e}")
-        flash('❌ Error técnico: No se pudo eliminar el horario. Verifique la integridad de los datos.', 'danger')
+        flash('❌ Error técnico: No se pudo eliminar el horario. Contacte a soporte.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # 5. Notificaciones (solo a los que tenían cita activa)
+    # 5. Notificaciones (Solo a las que estaban activas originalmente)
     errores_email = 0
-    for c in citas_a_notificar:
+    for c in citas_activas:
         try:
+            # Reconstruimos la fecha real para el correo (quitando el prefijo de limpieza)
+            fecha_real = c.fecha_hora.replace("ELIMINADO_", "")
             enviar_correo(c.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #f5c6cb;border-radius:10px;">
     <h2 style="color:#d9534f;">Cancelación de Cita</h2>
     <p>Hola <strong>{c.nombre}</strong>,</p>
-    <p>Tu cita del <strong>{c.fecha_hora}</strong> ha sido cancelada por cambios de
+    <p>Tu cita del <strong>{fecha_real}</strong> ha sido cancelada por cambios de
        disponibilidad en el {NOMBRE_MUSEO}.</p>
     <p>Puedes agendar una nueva cita cuando lo desees.</p>
     <div style="text-align:center;margin-top:20px;">
@@ -288,10 +294,10 @@ def eliminar_horario(id_horario):
             errores_email += 1
 
     if errores_email:
-        flash(f'✅ Horario eliminado. {len(citas_a_notificar)} cita(s) cancelada(s) '
+        flash(f'✅ Horario eliminado. {len(citas_activas)} cita(s) cancelada(s) '
               f'({errores_email} notificación(es) no enviada(s)).', 'warning')
     else:
-        flash('✅ Horario eliminado y notificaciones enviadas.', 'success')
+        flash('✅ Horario eliminado correctamente y notificaciones enviadas.', 'success')
         
     return redirect(url_for('admin.dashboard'))
     
