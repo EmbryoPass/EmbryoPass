@@ -67,6 +67,8 @@ def dashboard():
     historial_completo = []
 
     for c in Cita.query.all():
+        if c.fecha_hora.startswith('ELIMINADO_'):
+            continue
         try:
             fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
         except ValueError:
@@ -632,10 +634,16 @@ def descargar_historial():
     def _datos_individuales():
         rows = []
         for c in Cita.query.all():
+            # Ignorar citas de horarios eliminados
+            if c.fecha_hora.startswith('ELIMINADO_'):
+                continue
             try:
                 fecha = datetime.strptime(c.fecha_hora, "%d/%m/%Y %I:%M %p")
             except ValueError:
-                fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+                try:
+                    fecha = datetime.strptime(c.fecha_hora, "%Y-%m-%d %H:%M")
+                except ValueError:
+                    continue  # formato desconocido, saltar
             fecha = zona.localize(fecha)
             if fecha < ahora and fecha >= inicio_rango and c.estado != 'cancelada':
                 rows.append({
