@@ -395,6 +395,8 @@
           <th>Ciudad</th>
           <th>Estado</th>
           <th>Encargado</th>
+          <th>Correo encargado</th>
+          <th>Teléfono encargado</th>
           <th>Fecha de visita</th>
           <th>Alumnos estimados</th>
           <th>Alumnos registrados</th>
@@ -416,6 +418,8 @@
             <td>{{ visita.ciudad or '—' }}</td>
             <td>{{ visita.estado_republica or '—' }}</td>
             <td>{{ visita.encargado }}</td>
+            <td>{{ visita.correo }}</td>
+            <td>{{ visita.telefono }}</td>
             <td>{{ visita.fecha_confirmada }}</td>
             <td class="text-center">{{ visita.numero_alumnos }}</td>
             <td class="text-center">
@@ -425,7 +429,7 @@
           </tr>
 
           <tr class="citas-collapse collapse" id="{{ hg_id }}">
-            <td colspan="9">
+            <td colspan="11">
               <div class="citas-inner-wrap">
                 {% if visita.estudiantes %}
                   <p class="mb-2 fw-bold text-muted small">
@@ -479,7 +483,7 @@
           </tr>
         {% else %}
           <tr>
-            <td colspan="9" class="text-center text-muted">
+            <td colspan="11" class="text-center text-muted">
               No hay visitas grupales en el período seleccionado.
             </td>
           </tr>
