@@ -18,8 +18,6 @@ def create_app():
     # Sesión expira al cerrar el navegador; en producción las cookies son seguras
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    from datetime import timedelta
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 
     # Configuración de base de datos
     uri = os.environ.get('DATABASE_URL')
