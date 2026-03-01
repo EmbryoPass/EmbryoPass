@@ -125,7 +125,22 @@ def dashboard():
         if fecha_v < ahora and fecha_v >= inicio_rango:
             historial_grupales.append(v)
 
-    visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+    # Solicitudes: excluir las aceptadas cuya fecha confirmada ya pasó (ya están en historial)
+    visitas_grupales_raw = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
+    visitas_grupales = []
+    for v in visitas_grupales_raw:
+        if v.estado == 'aceptada' and v.fecha_confirmada:
+            try:
+                fv = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %I:%M %p")
+            except ValueError:
+                try:
+                    fv = datetime.strptime(v.fecha_confirmada, "%d/%m/%Y %H:%M")
+                except ValueError:
+                    visitas_grupales.append(v)
+                    continue
+            if zona.localize(fv) < ahora:
+                continue  # ya pasó, ya está en historial
+        visitas_grupales.append(v)
 
     secret = db.session.get(AdminSecret, 1)
     admin_password = secret.password if secret else None
