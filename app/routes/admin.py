@@ -126,7 +126,7 @@ def dashboard():
 
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
-    secret = AdminSecret.query.get(1)
+    secret = db.session.get(AdminSecret, 1)
     admin_password = secret.password if secret else None
     admin_password_at = None
     if secret and secret.created_at:
@@ -150,7 +150,7 @@ def dashboard():
 @admin_bp.route('/marcar_asistencia/<int:id_cita>/<estado>')
 @login_required
 def marcar_asistencia(id_cita, estado):
-    cita = Cita.query.get(id_cita)
+    cita = db.session.get(Cita, id_cita)
     if cita and estado in ['sí', 'no']:
         cita.asistio = estado
         db.session.commit()
@@ -163,7 +163,7 @@ def marcar_asistencia(id_cita, estado):
 @admin_bp.route('/cancelar_cita/<int:id_cita>')
 @login_required
 def cancelar_cita(id_cita):
-    cita = Cita.query.get(id_cita)
+    cita = db.session.get(Cita, id_cita)
     if not cita:
         flash('❌ Cita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -204,7 +204,7 @@ def cancelar_cita(id_cita):
 @admin_bp.route('/eliminar_cita/<int:id_cita>')
 @login_required
 def eliminar_cita(id_cita):
-    cita = Cita.query.get(id_cita)
+    cita = db.session.get(Cita, id_cita)
     if cita:
         db.session.delete(cita)
         db.session.commit()
@@ -228,40 +228,32 @@ def agregar_horario():
 @admin_bp.route('/eliminar_horario/<int:id_horario>')
 @login_required
 def eliminar_horario(id_horario):
-    # 1. Buscamos el horario por su ID único para no fallar por temas de texto
-    horario = Horario.query.get(id_horario)
+    # 1. db.session.get() es la forma correcta en SQLAlchemy 2.0
+    horario = db.session.get(Horario, id_horario)
     if not horario:
         flash('❌ Horario no encontrado.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # 2. LIMPIEZA TOTAL: Buscamos TODAS las citas con esta fecha, sin importar el estado
-    # Esto es vital porque incluso las citas 'canceladas' que tengan esa fecha
-    # pueden estar bloqueando el registro en el motor de la base de datos.
+    # 2. Buscamos TODAS las citas con esta fecha, sin importar el estado
     citas_relacionadas = Cita.query.filter_by(fecha_hora=horario.fecha_hora).all()
-    
+
     # Identificamos las que realmente vamos a cancelar y notificar
     citas_activas = [c for c in citas_relacionadas if c.estado == 'activa']
 
     try:
-        # 3. Desvinculamos las citas: les cambiamos el estado y limpiamos el campo fecha_hora
-        # para que la base de datos vea que el Horario ya no tiene 'hijos' vinculados.
+        # 3. Desvinculamos las citas cambiando su fecha_hora antes de borrar el horario
         for c in citas_relacionadas:
             if c.estado == 'activa':
                 c.estado = 'cancelada'
-            # Importante: al ser una relación basada en texto, 'rompemos' el vínculo
-            # añadiendo un prefijo para que el DELETE del horario no se bloquee.
             c.fecha_hora = f"ELIMINADO_{c.fecha_hora}"
-        
-        # Sincronizamos estos cambios en las citas antes de proceder
-        db.session.flush()
 
-        # 4. Ahora sí, borramos el horario físicamente
+        # 4. Borramos el horario y confirmamos todo en una sola transacción
         db.session.delete(horario)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        print(f"[ERROR DB]: {e}")
-        flash('❌ Error técnico: No se pudo eliminar el horario. Contacte a soporte.', 'danger')
+        print(f"[ERROR DB eliminar_horario]: {type(e).__name__}: {e}")
+        flash(f'❌ Error técnico al eliminar: {type(e).__name__}. Revisa los logs.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
     # 5. Notificaciones (Solo a las que estaban activas originalmente)
@@ -311,7 +303,7 @@ def _nivel_str(visita):
 @admin_bp.route('/aceptar_visita/<int:id>')
 @login_required
 def aceptar_visita(id):
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -349,7 +341,7 @@ def aceptar_visita(id):
 @admin_bp.route('/rechazar_visita/<int:id>')
 @login_required
 def rechazar_visita(id):
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -387,7 +379,7 @@ def rechazar_visita(id):
 @admin_bp.route('/asignar_fecha_visita/<int:id>', methods=['POST'])
 @login_required
 def asignar_fecha_visita(id):
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -517,7 +509,7 @@ def asignar_fecha_visita(id):
 @admin_bp.route('/cancelar_visita_grupal/<int:id>')
 @login_required
 def cancelar_visita_grupal(id):
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -559,7 +551,7 @@ def cancelar_visita_grupal(id):
 @admin_bp.route('/eliminar_visita_grupal/<int:id>')
 @login_required
 def eliminar_visita_grupal(id):
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
@@ -581,7 +573,7 @@ def eliminar_visita_grupal(id):
 def generar_password():
     nueva = generar_password_segura(14)
     ahora_utc = datetime.utcnow()
-    secret = AdminSecret.query.get(1)
+    secret = db.session.get(AdminSecret, 1)
     if secret:
         secret.password = nueva
         secret.created_at = ahora_utc
@@ -728,7 +720,7 @@ def subir_excel_visita(id):
     from app.models import EstudianteGrupal
     import openpyxl as _openpyxl
 
-    visita = VisitaGrupal.query.get(id)
+    visita = db.session.get(VisitaGrupal, id)
     if not visita:
         flash('❌ Visita no encontrada.', 'danger')
         return redirect(url_for('admin.dashboard'))
