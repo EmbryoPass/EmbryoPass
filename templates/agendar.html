@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agendar visita – Museo de Embriología</title>
 
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -123,10 +121,8 @@
 </head>
 <body>
 
-  <!-- Barra de progreso -->
   <div id="progressBar"></div>
 
-  <!-- Overlay de carga -->
   <div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);
        z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
     <div style="width:52px;height:52px;border:5px solid #e0cfc4;border-top-color:#8B4513;
@@ -138,23 +134,19 @@
   <style>
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  {# agendar.html #}
+
   {% include "_menu_btn.html" %}
 
   <div class="container text-center pb-5">
-    <!-- Logo -->
     <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" class="main-logo">
 
-    <!-- Título del sitio -->
     <div class="title-text">
       <h1>"Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral"</small>
     </div>
 
-    <!-- Título de sección con typewriter -->
     <h2 class="section-title">Agendar visita</h2>
 
-    <!-- Mensajes flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -163,7 +155,6 @@
       {% endif %}
     {% endwith %}
 
-    <!-- Formulario -->
     <form method="POST" id="agendarForm" onsubmit="return validarCorreos();">
       <div class="mb-3 text-start">
         <label for="nombre" class="form-label">Nombre completo</label>
@@ -200,7 +191,6 @@
         </select>
       </div>
 
-      <!-- Estado y Ciudad -->
       <div class="mb-3 text-start">
         <label for="estado_republica" class="form-label">Estado de procedencia</label>
         <select class="form-select" id="estado_republica" name="estado_republica" required onchange="filtrarCiudades()">
@@ -241,14 +231,11 @@
       </div>
       <div class="mb-3 text-start">
         <label for="ciudad" class="form-label">Ciudad de procedencia</label>
-        <input type="text" class="form-control" id="ciudad" name="ciudad"
-               list="ciudades_list" required autocomplete="off"
-               placeholder="Escribe tu ciudad..."
-               value="{{ request.form.get('ciudad','') }}">
-        <datalist id="ciudades_list"></datalist>
+        <select class="form-select" id="ciudad" name="ciudad" required>
+          <option value="" disabled selected>Selecciona una ciudad</option>
+        </select>
       </div>
 
-      <!-- Nivel académico -->
       <div class="mb-3 text-start">
         <label for="nivel" class="form-label">Nivel Académico</label>
         <select class="form-select" id="nivel" name="nivel" required onchange="toggleNivelOtro()">
@@ -265,7 +252,6 @@
                value="{{ request.form.get('nivel_otro','') }}">
       </div>
 
-      <!-- Institución -->
       <div class="mb-3 text-start">
         <label for="institucion" class="form-label">Institución</label>
         <input type="text" class="form-control" id="institucion" name="institucion"
@@ -273,7 +259,6 @@
                value="{{ request.form.get('institucion','') }}" required>
       </div>
 
-      <!-- Horario -->
       <div class="mb-3 text-start">
         <label for="horario" class="form-label">Selecciona un horario</label>
         {% if horarios %}
@@ -305,7 +290,6 @@
       const b = document.getElementById('agendarBtn');
       b.disabled = true;
       b.textContent = 'Procesando…';
-      // Mostrar overlay de carga
       document.getElementById('loadingOverlay').style.display = 'flex';
     }
     function validarCorreos() {
@@ -363,14 +347,13 @@
     };
     function filtrarCiudades() {
       const estado = document.getElementById('estado_republica').value;
-      const ciudadInput = document.getElementById('ciudad');
-      const datalist = document.getElementById('ciudades_list');
-      datalist.innerHTML = '';
-      ciudadInput.value = '';
+      const ciudadSelect = document.getElementById('ciudad');
+      ciudadSelect.innerHTML = '<option value="" disabled selected>Selecciona una ciudad</option>';
       (ciudadesPorEstado[estado] || []).forEach(c => {
         const opt = document.createElement('option');
         opt.value = c;
-        datalist.appendChild(opt);
+        opt.textContent = c;
+        ciudadSelect.appendChild(opt);
       });
     }
     document.addEventListener('DOMContentLoaded', function() {
