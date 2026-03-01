@@ -86,8 +86,6 @@ def dashboard():
             })
 
     # ── Horarios futuros con sus citas activas embebidas ─────────────────────
-    # Se incluyen TODOS los horarios (incluso llenos) para que el admin
-    # siempre vea las citas reservadas dentro de cada uno.
     horarios = []
     for h in Horario.query.all():
         try:
@@ -126,7 +124,6 @@ def dashboard():
         if fecha_v < ahora and fecha_v >= inicio_rango:
             historial_grupales.append(v)
 
-    # Visitas en gestión (tabla superior)
     visitas_grupales = VisitaGrupal.query.order_by(VisitaGrupal.id.desc()).all()
 
     secret = AdminSecret.query.get(1)
@@ -175,7 +172,7 @@ def cancelar_cita(id_cita):
     cita.estado = 'cancelada'
     if horario:
         horario.disponibles += 1
-    db.session.commit()  # Commit ANTES del correo
+    db.session.commit()
 
     try:
         enviar_correo(cita.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
@@ -240,7 +237,6 @@ def eliminar_horario(id_horario):
     for c in citas:
         c.estado = 'cancelada'
 
-    # Commit ANTES de mandar correos — si el email falla, la DB ya está actualizada
     db.session.delete(horario)
     db.session.commit()
 
@@ -278,7 +274,6 @@ def eliminar_horario(id_horario):
     return redirect(url_for('admin.dashboard'))
 
 
-# ── Helper: nivel con plantel ────────────────────────────────────────────────
 def _nivel_str(visita):
     if visita.nivel == 'Bachillerato' and visita.bachillerato:
         return f"{visita.nivel} – {visita.bachillerato}"
@@ -424,7 +419,6 @@ def asignar_fecha_visita(id):
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
         elif fecha_anterior != fecha:
-            # Reprogramación: mismas instrucciones + nuevo Excel
             cuerpo_reagenda = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
@@ -462,7 +456,8 @@ def asignar_fecha_visita(id):
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>"""
-            datos_grupo = {{
+            # SE CORRIGIERON LAS LLAVES DOBLES AQUÍ
+            datos_grupo = {
                 'institucion':    visita.institucion,
                 'nivel':          _nivel_str(visita),
                 'ciudad':         visita.ciudad or '—',
@@ -470,7 +465,7 @@ def asignar_fecha_visita(id):
                 'fecha':          fecha,
                 'encargado':      visita.encargado,
                 'numero_alumnos': visita.numero_alumnos,
-            }}
+            }
             enviar_correo_con_excel(
                 visita.correo,
                 f'Actualización de fecha — {NOMBRE_MUSEO}',
@@ -698,7 +693,6 @@ def descargar_historial():
 @admin_bp.route('/subir_excel_visita/<int:id>', methods=['POST'])
 @login_required
 def subir_excel_visita(id):
-    """Recibe el Excel lleno, parsea alumnos y los guarda en DB."""
     from app.models import EstudianteGrupal
     import openpyxl as _openpyxl
 
@@ -724,7 +718,6 @@ def subir_excel_visita(id):
             wb = _openpyxl.load_workbook(archivo)
             ws = wb.active
 
-        # Detectar fila de encabezados (busca "No." en col A y "Nombre completo" en col B)
         fila_encabezado = None
         for row in ws.iter_rows():
             vals = [str(c.value).strip() if c.value else '' for c in row]
@@ -737,7 +730,6 @@ def subir_excel_visita(id):
                   'No modifiques los encabezados del Excel.', 'danger')
             return redirect(url_for('admin.dashboard'))
 
-        # Borrar alumnos anteriores (re-subida)
         for est in visita.estudiantes:
             db.session.delete(est)
         db.session.flush()
