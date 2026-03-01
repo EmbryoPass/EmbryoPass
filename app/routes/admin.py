@@ -228,39 +228,43 @@ def agregar_horario():
 @admin_bp.route('/eliminar_horario/<int:id_horario>')
 @login_required
 def eliminar_horario(id_horario):
-    # 1. Localizar el horario por su ID único (esto nunca falla)
+    # 1. Buscamos el horario por su ID único (esto es infalible)
     horario = Horario.query.get(id_horario)
     if not horario:
         flash('❌ Horario no encontrado.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # 2. Limpieza de seguridad: quitamos espacios extras de la fecha para la búsqueda
-    fecha_busqueda = horario.fecha_hora.strip()
-
-    # 3. Buscar citas que coincidan con esa fecha exacta
-    # Usamos .strip() en la base de datos para asegurar que coincidan sin errores de espacios
-    citas = Cita.query.filter(Cita.fecha_hora.contains(fecha_busqueda)).all()
+    # 2. Buscamos TODAS las citas que tengan esta misma fecha_hora
+    # Se eliminó el filtro de estado='activa' para limpiar también las canceladas
+    # y evitar que la base de datos bloquee el borrado.
+    citas_relacionadas = Cita.query.filter_by(fecha_hora=horario.fecha_hora).all()
     
-    for c in citas:
-        if c.estado == 'activa':
-            c.estado = 'cancelada'
+    # Guardamos cuáles estaban activas para saber a quién notificar
+    citas_a_notificar = [c for c in citas_relacionadas if c.estado == 'activa']
 
     try:
-        # 4. Borrar el horario y confirmar cambios
+        # 3. Marcamos las activas como canceladas
+        for c in citas_relacionadas:
+            if c.estado == 'activa':
+                c.estado = 'cancelada'
+        
+        # Forzamos la actualización de las citas antes de borrar el horario
+        db.session.flush()
+
+        # 4. Eliminamos el horario físicamente
         db.session.delete(horario)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        print(f"[ERROR CRÍTICO]: {str(e)}")
-        flash('❌ Error al eliminar: Problema de sincronización en la base de datos.', 'danger')
+        print(f"[ERROR DB]: {e}")
+        flash('❌ Error técnico: No se pudo eliminar el horario. Verifique la integridad de los datos.', 'danger')
         return redirect(url_for('admin.dashboard'))
 
-    # 5. Notificaciones (Tus plantillas originales sin cambios)
-    errores = 0
-    for c in citas:
-        if c.estado == 'cancelada':
-            try:
-                enviar_correo(c.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
+    # 5. Notificaciones (solo a los que tenían cita activa)
+    errores_email = 0
+    for c in citas_a_notificar:
+        try:
+            enviar_correo(c.correo, f'Cancelación de Cita – {NOMBRE_MUSEO}', f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #f5c6cb;border-radius:10px;">
     <h2 style="color:#d9534f;">Cancelación de Cita</h2>
@@ -279,14 +283,15 @@ def eliminar_horario(id_horario):
     <p style="margin-top:16px;">Gracias por tu comprensión.</p>
   </div>
 </body></html>""")
-            except Exception as env_err:
-                print(f"[EMAIL ERROR]: {env_err}")
-                errores += 1
+        except Exception as e:
+            print(f"[EMAIL] Error notificando a {c.correo}: {e}")
+            errores_email += 1
 
-    if errores:
-        flash(f'✅ Horario eliminado. {len(citas)} cita(s) cancelada(s) ({errores} fallos de envío).', 'warning')
+    if errores_email:
+        flash(f'✅ Horario eliminado. {len(citas_a_notificar)} cita(s) cancelada(s) '
+              f'({errores_email} notificación(es) no enviada(s)).', 'warning')
     else:
-        flash('✅ Horario eliminado y base de datos actualizada.', 'success')
+        flash('✅ Horario eliminado y notificaciones enviadas.', 'success')
         
     return redirect(url_for('admin.dashboard'))
     
