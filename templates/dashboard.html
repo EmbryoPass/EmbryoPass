@@ -109,10 +109,14 @@
               </span>
             </td>
             <td>
-              <a href="{{ url_for('admin.eliminar_horario', id_horario=horario.id) }}"
-                 class="btn btn-pastel-danger btn-sm" onclick="event.stopPropagation();">
-                Eliminar
-              </a>
+              <form method="GET"
+                    action="{{ url_for('admin.eliminar_horario', id_horario=horario.id) }}"
+                    class="eliminar-horario-form d-inline"
+                    onclick="event.stopPropagation();">
+                <button type="submit" class="btn btn-pastel-danger btn-sm eliminar-horario-btn">
+                  Eliminar
+                </button>
+              </form>
             </td>
           </tr>
           <tr class="citas-collapse collapse" id="{{ cid }}">
@@ -562,6 +566,17 @@
 
   // Confirmaciones destructivas
   document.addEventListener("DOMContentLoaded", function () {
+    // Confirmar eliminación de horario (botón dentro de form)
+    document.querySelectorAll(".eliminar-horario-btn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (!confirm("¿Deseas eliminar este horario permanentemente?")) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // Confirmar resto de acciones destructivas (links)
     document.querySelectorAll(
       "a.btn-pastel-danger, a.btn-outline-danger, a.cancelar-visita-btn, a.eliminar-visita-btn"
     ).forEach(function (el) {
