@@ -10,7 +10,16 @@ def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
     # Configuración general
-    app.secret_key = os.environ.get('SECRET_KEY', 'secreto123')
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key:
+        raise RuntimeError("SECRET_KEY no está definido en las variables de entorno.")
+    app.secret_key = secret_key
+
+    # Sesión expira al cerrar el navegador; en producción las cookies son seguras
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    from datetime import timedelta
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 
     # Configuración de base de datos
     uri = os.environ.get('DATABASE_URL')

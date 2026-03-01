@@ -28,11 +28,13 @@ def enviar_correo(destinatario, asunto, cuerpo_html):
     mensaje['Subject'] = asunto
     mensaje.attach(MIMEText(cuerpo_html, 'html'))
 
-    servidor = smtplib.SMTP('smtp.gmail.com', 587)
-    servidor.starttls()
-    servidor.login(GMAIL_USER, GMAIL_PASSWORD)
-    servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
-    servidor.quit()
+    servidor = smtplib.SMTP('smtp.gmail.com', 587, timeout=15)
+    try:
+        servidor.starttls()
+        servidor.login(GMAIL_USER, GMAIL_PASSWORD)
+        servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
+    finally:
+        servidor.quit()
 
 
 def enviar_correo_con_excel(destinatario, asunto, cuerpo_html, nombre_archivo_excel,
@@ -133,11 +135,13 @@ def enviar_correo_con_excel(destinatario, asunto, cuerpo_html, nombre_archivo_ex
     adjunto.add_header('Content-Disposition', f'attachment; filename="{nombre_archivo_excel}"')
     mensaje.attach(adjunto)
 
-    servidor = smtplib.SMTP('smtp.gmail.com', 587)
-    servidor.starttls()
-    servidor.login(GMAIL_USER, GMAIL_PASSWORD)
-    servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
-    servidor.quit()
+    servidor = smtplib.SMTP('smtp.gmail.com', 587, timeout=15)
+    try:
+        servidor.starttls()
+        servidor.login(GMAIL_USER, GMAIL_PASSWORD)
+        servidor.sendmail(GMAIL_USER, destinatario, mensaje.as_string())
+    finally:
+        servidor.quit()
 
 
 def generar_password_segura(longitud=14):
