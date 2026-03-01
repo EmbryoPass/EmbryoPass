@@ -283,7 +283,7 @@
               <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
                     method="POST" enctype="multipart/form-data"
                     class="d-flex flex-column gap-1">
-                <input type="file" name="excel_estudiantes" accept=".xlsx"
+                <input type="file" name="excel_estudiantes" accept=".xlsx,.xls"
                        class="form-control form-control-sm" required>
                 <button type="submit" class="btn btn-sm btn-pastel-primary">
                   📤 Subir lista
@@ -540,7 +540,7 @@
                     <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
                           method="POST" enctype="multipart/form-data"
                           class="d-flex align-items-center gap-2">
-                      <input type="file" name="excel_estudiantes" accept=".xlsx"
+                      <input type="file" name="excel_estudiantes" accept=".xlsx,.xls"
                              class="form-control form-control-sm" style="max-width:260px;" required>
                       <button type="submit" class="btn btn-sm btn-pastel-primary text-nowrap">
                         🔄 Actualizar lista
@@ -557,7 +557,7 @@
                   <form action="{{ url_for('admin.subir_excel_visita', id=visita.id) }}"
                         method="POST" enctype="multipart/form-data"
                         class="d-flex align-items-center gap-2">
-                    <input type="file" name="excel_estudiantes" accept=".xlsx"
+                    <input type="file" name="excel_estudiantes" accept=".xlsx,.xls"
                            class="form-control form-control-sm" style="max-width:260px;" required>
                     <button type="submit" class="btn btn-sm btn-pastel-primary text-nowrap">
                       📤 Subir lista
