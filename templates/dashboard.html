@@ -57,7 +57,10 @@
 <body>
 <div class="container">
 
-  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" class="main-logo">
+  <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mb-1">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" style="height:80px;">
+    <img src="{{ url_for('static', filename='isotipo.png') }}" alt="Isotipo Museo" style="height:80px;">
+  </div>
   <div class="title-text">
     <h1>"Museo de Embriología</h1>
     <small>Dra. Dora Virginia Chávez Corral"</small>
@@ -350,8 +353,13 @@
     </div>
   </form>
 
+  <div class="mb-2">
+    <input type="text" id="busquedaIndividual" class="form-control form-control-sm"
+           placeholder="🔍 Buscar por nombre, correo, institución, ciudad...">
+  </div>
+
   <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:.3rem;">
-    <table class="table table-bordered table-hover shadow-sm" style="background-color:#fdf9f3;">
+    <table id="tablaIndividual" class="table table-bordered table-hover shadow-sm" style="background-color:#fdf9f3;">
       <thead class="table-light">
         <tr>
           <th>Nombre</th><th>Edad</th><th>Sexo</th>
@@ -386,10 +394,15 @@
        HISTORIAL DE VISITAS GRUPALES
        ══════════════════════════════════════════════════════ -->
   <h2 class="section-title mt-5">Historial de Visitas Grupales</h2>
-  <p class="text-muted small mb-3">Período aplicado: igual que el filtro de arriba.</p>
+  <p class="text-muted small mb-2">Período aplicado: igual que el filtro de arriba.</p>
+
+  <div class="mb-2">
+    <input type="text" id="busquedaGrupal" class="form-control form-control-sm"
+           placeholder="🔍 Buscar por institución, encargado, correo, ciudad...">
+  </div>
 
   <div class="table-responsive" style="background-color:#fdf9f3;padding:1rem;border-radius:.3rem;">
-    <table class="table table-bordered table-hover shadow-sm align-middle"
+    <table id="tablaGrupal" class="table table-bordered table-hover shadow-sm align-middle"
            style="background-color:#fdf9f3;">
       <thead class="table-light">
         <tr>
@@ -606,6 +619,24 @@
       catch(e){ alert('No se pudo copiar.'); }
     });
   })();
+
+  // Búsqueda en tiempo real — historial individual
+  document.getElementById('busquedaIndividual').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#tablaIndividual tbody tr').forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // Búsqueda en tiempo real — historial grupal
+  document.getElementById('busquedaGrupal').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#tablaGrupal tbody tr').forEach(function (tr) {
+      // Las filas de collapse (detalle de alumnos) no las ocultamos
+      if (tr.classList.contains('citas-collapse')) return;
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
 </script>
 </body>
 </html>

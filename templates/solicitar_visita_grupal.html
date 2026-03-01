@@ -43,7 +43,10 @@
   {% include "_menu_btn.html" %}
 
   <div class="container text-center pb-5">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Facultad" class="main-logo">
+    <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mb-1">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Museo" style="height:60px;">
+      <img src="{{ url_for('static', filename='isotipo.png') }}" alt="Isotipo Museo" style="height:60px;">
+    </div>
     <div class="title-text">
       <h1>"Museo de Embriología</h1>
       <small>Dra. Dora Virginia Chávez Corral"</small>
