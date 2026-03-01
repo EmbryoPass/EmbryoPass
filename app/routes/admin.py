@@ -379,8 +379,20 @@ def asignar_fecha_visita(id):
 
     try:
         nombre_excel = f"Lista_estudiantes_{visita.institucion.replace(' ','_')}_{fecha.replace('/','-').replace(' ','_')}.xlsx"
+        
+        # Preparamos los datos del grupo para que aparezcan en el Excel en ambos casos
+        datos_grupo = {
+            'institucion':    visita.institucion,
+            'nivel':          _nivel_str(visita),
+            'ciudad':         visita.ciudad or '—',
+            'estado':         visita.estado_republica or '—',
+            'fecha':          fecha,
+            'encargado':      visita.encargado,
+            'numero_alumnos': visita.numero_alumnos,
+        }
 
         if not fecha_anterior:
+            # PRIMERA CONFIRMACIÓN
             cuerpo = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
@@ -415,10 +427,12 @@ def asignar_fecha_visita(id):
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>"""
-            enviar_correo_con_excel(visita.correo, f'Confirmación de visita grupal — {NOMBRE_MUSEO}', cuerpo, nombre_excel)
+            # Se agregó 'datos_grupo=datos_grupo' aquí también
+            enviar_correo_con_excel(visita.correo, f'Confirmación de visita grupal — {NOMBRE_MUSEO}', cuerpo, nombre_excel, datos_grupo=datos_grupo)
             flash('📅 Fecha confirmada y correo con Excel adjunto enviado.', 'success')
 
         elif fecha_anterior != fecha:
+            # ACTUALIZACIÓN / REPROGRAMACIÓN
             cuerpo_reagenda = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;">
   <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:10px;">
@@ -456,16 +470,6 @@ def asignar_fecha_visita(id):
     <p>Gracias por tu interés en el {NOMBRE_MUSEO}.</p>
   </div>
 </body></html>"""
-            # SE CORRIGIERON LAS LLAVES DOBLES AQUÍ
-            datos_grupo = {
-                'institucion':    visita.institucion,
-                'nivel':          _nivel_str(visita),
-                'ciudad':         visita.ciudad or '—',
-                'estado':         visita.estado_republica or '—',
-                'fecha':          fecha,
-                'encargado':      visita.encargado,
-                'numero_alumnos': visita.numero_alumnos,
-            }
             enviar_correo_con_excel(
                 visita.correo,
                 f'Actualización de fecha — {NOMBRE_MUSEO}',
