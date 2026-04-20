@@ -232,6 +232,11 @@ def eliminar_cita(id_cita):
 @login_required
 def agregar_horario():
     fecha_hora = request.form['fecha_hora']
+    
+    if not fecha_hora:
+        flash('⚠️ Debes seleccionar una fecha y hora.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+        
     disponibles = int(request.form['disponibles'])
     if disponibles > 10:
         disponibles = 10
