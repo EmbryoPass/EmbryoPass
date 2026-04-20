@@ -91,11 +91,14 @@ def dashboard():
     # ── Horarios futuros con sus citas activas embebidas ─────────────────────
     horarios = []
     for h in Horario.query.all():
+    try:
+        fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
+    except ValueError:
         try:
-            fecha = datetime.strptime(h.fecha_hora, "%d/%m/%Y %I:%M %p")
-        except ValueError:
             fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
-        fecha = zona.localize(fecha)
+        except ValueError:
+            flash(f'⚠️ El horario con ID {h.id} tiene una fecha inválida o vacía.', 'warning')
+            continue
 
         if fecha >= ahora:
             citas_activas = Cita.query.filter_by(fecha_hora=h.fecha_hora, estado='activa').all()
