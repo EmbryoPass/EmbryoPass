@@ -97,7 +97,7 @@ def dashboard():
             try:
                 fecha = datetime.strptime(h.fecha_hora, "%Y-%m-%d %H:%M")
             except ValueError:
-                flash(f'⚠️ El horario con ID {h.id} tiene una fecha inválida o vacía.', 'warning')
+                print(f'[WARN] Horario ID {h.id} tiene fecha inválida: {h.fecha_hora!r}')
                 continue
         fecha = zona.localize(fecha)
         if fecha >= ahora:
